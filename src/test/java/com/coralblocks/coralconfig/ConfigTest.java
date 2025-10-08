@@ -15,6 +15,8 @@
  */
 package com.coralblocks.coralconfig;
 
+import static org.junit.Assert.*;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,5 +40,23 @@ public class ConfigTest {
 		Assert.assertEquals(2, config1.size());
 		Assert.assertEquals(Base1.TIMEOUT, config1.get("timeout"));
 		Assert.assertEquals(Base1.NO_REWIND, config1.get("noRewind"));
+		
+		@SuppressWarnings("unused")
+		class Base2 {
+			
+			public static final ConfigKey<Integer> TIMEOUT1 = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
+			
+			public static final ConfigKey<Boolean> TIMEOUT2 = ConfigKey.of("timeout", Boolean.class, Kind.PRIMARY, null);
+		}
+		
+		try {
+		
+			Config.of(Base2.class);
+			
+			fail();
+			
+		} catch(IllegalStateException e) {
+			// Must throw exception
+		}
 	}
 }

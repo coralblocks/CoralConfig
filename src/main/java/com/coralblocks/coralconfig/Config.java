@@ -24,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class Config {
+final class Config {
 
     private static final Map<Class<?>, Config> ALL = new HashMap<>();
 
