@@ -15,7 +15,12 @@
  */
 package com.coralblocks.coralconfig;
 
-public final class Config {
+import org.junit.Test;
 
+public class ConfigTest {
 	
+	@Test
+	public void testBasics() {
+		
+	}
 }
