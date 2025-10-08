@@ -15,12 +15,28 @@
  */
 package com.coralblocks.coralconfig;
 
+import org.junit.Assert;
 import org.junit.Test;
+
+import com.coralblocks.coralconfig.ConfigKey.Kind;
+
 
 public class ConfigTest {
 	
 	@Test
 	public void testBasics() {
 		
+		class Base1 {
+			
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
+			
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.of("noRewind", Boolean.class, Kind.PRIMARY, null);
+		}
+		
+		Config config1 = Config.of(Base1.class);
+		
+		Assert.assertEquals(2, config1.size());
+		Assert.assertEquals(Base1.TIMEOUT, config1.get("timeout"));
+		Assert.assertEquals(Base1.NO_REWIND, config1.get("noRewind"));
 	}
 }
