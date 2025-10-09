@@ -15,7 +15,7 @@
  */
 package com.coralblocks.coralconfig;
 
-import java.util.Iterator;
+import java.util.Set;
 
 public interface Configuration {
 	
@@ -27,5 +27,5 @@ public interface Configuration {
 	
 	public boolean has(ConfigKey<?> key);
 	
-	public Iterator<ConfigKey<?>> keys();
+	public Set<ConfigKey<?>> keys();
 }

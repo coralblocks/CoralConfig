@@ -15,14 +15,16 @@
  */
 package com.coralblocks.coralconfig;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class MapConfiguration implements Configuration {
 	
 	private final Config config;
-	private final Map<ConfigKey<?>, Object> values = new HashMap<ConfigKey<?>, Object>();
+	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	
 	public MapConfiguration(Config config) {
 		this.config = config;
@@ -84,7 +86,10 @@ public class MapConfiguration implements Configuration {
 	}
 
 	@Override
-	public Iterator<ConfigKey<?>> keys() {
-		return values.keySet().iterator();
+	public Set<ConfigKey<?>> keys() {
+		// let's be thread-safe here and return a new Set each time...
+		synchronized(values) {
+			return new HashSet<ConfigKey<?>>(values.keySet());
+		}
 	}
 }
