@@ -37,10 +37,10 @@ public class ConfigKeyHelpersTest {
 	@Test
 	public void testBasics1() {
 		
-		Configuration config = new MapConfiguration(ConfigKeyHelpersTest.class, "myEnum=BALL noRewind=false");
+		Configuration config = new MapConfiguration("myEnum=BALL noRewind=false", ConfigKeyHelpersTest.class);
 		
 		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(ConfigKeyHelpersTest.class, config.getHolder());
+		Assert.assertEquals(ConfigKeyHelpersTest.class, config.getHolders()[0]);
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
@@ -63,14 +63,14 @@ public class ConfigKeyHelpersTest {
 	@Test
 	public void testBasics2() {
 		
-		MapConfiguration c = new MapConfiguration(ConfigKeyHelpersTest.class, "myEnum=BALL noRewind=false");
+		MapConfiguration c = new MapConfiguration("myEnum=BALL noRewind=false", ConfigKeyHelpersTest.class);
 		
 		Configuration config = new MapConfiguration(c);
 		
 		c.remove(MY_ENUM); // won't affect the new configuration
 		
 		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(ConfigKeyHelpersTest.class, config.getHolder());
+		Assert.assertEquals(ConfigKeyHelpersTest.class, config.getHolders()[0]);
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
@@ -93,7 +93,7 @@ public class ConfigKeyHelpersTest {
 	@Test
 	public void testBasics3() {
 		
-		MapConfiguration config = new MapConfiguration(ConfigKeyHelpersTest.class, "myEnum=BALL noRewind=false");
+		MapConfiguration config = new MapConfiguration("myEnum=BALL noRewind=false", ConfigKeyHelpersTest.class);
 		
 		TestEnum prevEnum = config.add(MY_ENUM, TestEnum.BILLY);
 		Assert.assertEquals(TestEnum.BALL, prevEnum);
@@ -120,7 +120,7 @@ public class ConfigKeyHelpersTest {
 		Assert.assertEquals(null, prevTimeout);
 		
 		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(ConfigKeyHelpersTest.class, config.getHolder());
+		Assert.assertEquals(ConfigKeyHelpersTest.class, config.getHolders()[0]);
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BILLY, config.get(MY_ENUM));

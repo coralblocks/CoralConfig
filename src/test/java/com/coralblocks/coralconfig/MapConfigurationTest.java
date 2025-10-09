@@ -37,10 +37,10 @@ public class MapConfigurationTest {
 	@Test
 	public void testDefaults() {
 		
-		Configuration config = new MapConfiguration(MapConfigurationTest.class, "myEnum=BALL noRewind=false");
+		Configuration config = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
 		
 		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(MapConfigurationTest.class, config.getHolder());
+		Assert.assertEquals(MapConfigurationTest.class, config.getHolders()[0]);
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
@@ -82,10 +82,10 @@ public class MapConfigurationTest {
 	@Test
 	public void testBasics1() {
 		
-		Configuration config = new MapConfiguration(MapConfigurationTest.class, "myEnum=BALL noRewind=false");
+		Configuration config = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
 		
 		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(MapConfigurationTest.class, config.getHolder());
+		Assert.assertEquals(MapConfigurationTest.class, config.getHolders()[0]);
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
@@ -108,14 +108,14 @@ public class MapConfigurationTest {
 	@Test
 	public void testBasics2() {
 		
-		MapConfiguration c = new MapConfiguration(MapConfigurationTest.class, "myEnum=BALL noRewind=false");
+		MapConfiguration c = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
 		
 		Configuration config = new MapConfiguration(c);
 		
 		c.remove(MY_ENUM); // won't affect the new configuration
 		
 		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(MapConfigurationTest.class, config.getHolder());
+		Assert.assertEquals(MapConfigurationTest.class, config.getHolders()[0]);
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
@@ -138,7 +138,7 @@ public class MapConfigurationTest {
 	@Test
 	public void testBasics3() {
 		
-		MapConfiguration config = new MapConfiguration(MapConfigurationTest.class, "myEnum=BALL noRewind=false");
+		MapConfiguration config = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
 		
 		try {
 			config.add(TIMEOUT, null); // null values are not allowed
@@ -172,7 +172,7 @@ public class MapConfigurationTest {
 		Assert.assertEquals(null, prevTimeout);
 		
 		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(MapConfigurationTest.class, config.getHolder());
+		Assert.assertEquals(MapConfigurationTest.class, config.getHolders()[0]);
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BILLY, config.get(MY_ENUM));

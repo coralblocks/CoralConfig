@@ -24,16 +24,26 @@ import java.util.Set;
 
 public class MapConfiguration implements Configuration {
 	
-	private final ConfigContainer configContainer;
+	private final ConfigContainer[] configContainers;
+	private final Class<?>[] holders;
 	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	private final Map<ConfigKey<?>, Object> overwrittenDefaults = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	
-	public MapConfiguration(Class<?> holder) {
-		this(holder, null);
+	public MapConfiguration(Class<?> ... holders) {
+		this(null, holders);
 	}
 	
-	public MapConfiguration(Class<?> holder, String params) {
-		this.configContainer = ConfigContainer.of(holder);
+	public MapConfiguration(String params, Class<?> ... holders) {
+		
+		this.holders = holders;
+		
+		this.configContainers = new ConfigContainer[holders.length];
+		for(int i = 0; i < holders.length; i++) {
+			this.configContainers[i] = ConfigContainer.of(holders[i]);
+		}
+		
+		if (configContainers.length > 1) ConfigContainer.enforceNoDuplicates(configContainers); // important!
+		
 		if (params != null) {
 			String[] keyValues = params.split("\\s+");
 			for(String keyValue : keyValues) {
@@ -44,9 +54,9 @@ public class MapConfiguration implements Configuration {
 				String key = temp[0];
 				String value = temp[1];
 				
-				ConfigKey<?> configKey = configContainer.get(key);
+				ConfigKey<?> configKey = getByName(key);
 				if (configKey == null) {
-					throw new IllegalStateException("A key in params does not contain a ConfigKey: " + key);
+					throw new IllegalStateException("A key in params does not map to a ConfigKey: " + key);
 				}
 				Object parsedValue = configKey.parseValue(value);
 				values.put(configKey, parsedValue);
@@ -55,7 +65,16 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	public MapConfiguration(Configuration config) {
-		this.configContainer = ConfigContainer.of(config.getHolder());
+		
+		this.holders = config.getHolders();
+		
+		this.configContainers = new ConfigContainer[holders.length];
+		for(int i = 0; i < holders.length; i++) {
+			this.configContainers[i] = ConfigContainer.of(holders[i]);
+		}
+		
+		if (configContainers.length > 1) ConfigContainer.enforceNoDuplicates(configContainers); // important!
+		
 		Set<ConfigKey<?>> set = config.keys();
 		Iterator<ConfigKey<?>> iter = set.iterator();
 		while(iter.hasNext()) {
@@ -65,10 +84,17 @@ public class MapConfiguration implements Configuration {
 		}
 	}
 	
+	private ConfigKey<?> getByName(String name) {
+		for(ConfigContainer cc : configContainers) {
+			ConfigKey<?> configKey = cc.get(name);
+			if (configKey != null) return configKey;
+		}
+		return null;
+	}
+	
 	private void enforceValue(ConfigKey<?> key, Object value) {
 		if (value == null) {
 			throw new RuntimeException("Null values are not allowed! (You should remove the key from the config instead)" + 
-									   " holder=" + configContainer.getHolder().getName() +  
 									   " key=" + key);
 		}
 	}
@@ -84,8 +110,14 @@ public class MapConfiguration implements Configuration {
 		}
 		
 		throw new RuntimeException("Null default values are only allowed to Strings and Enums!" + 
-				   " holder=" + configContainer.getHolder().getName() +  
 				   " key=" + key);
+	}
+	
+	private boolean checkConfigContainers(ConfigKey<?> key) {
+		for(ConfigContainer cc : configContainers) {
+			if (cc.has(key)) return true;
+		}
+		return false;
 	}
 	
 	private void enforceConfigKey(ConfigKey<?> key) {
@@ -94,9 +126,8 @@ public class MapConfiguration implements Configuration {
 			throw new NullPointerException("The key can never be null!");
 		}
 		
-		if (!configContainer.has(key)) {
+		if (!checkConfigContainers(key)) {
 			throw new IllegalStateException("ConfigKey does not belong to holder class!" +
-											" holder=" + configContainer.getHolder().getName() + 
 											" key=" + key); 
 		}
 	}
@@ -109,8 +140,8 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	@Override
-	public Class<?> getHolder() {
-		return configContainer.getHolder();
+	public Class<?>[] getHolders() {
+		return holders;
 	}
 	
 	public <T> T add(ConfigKey<T> key, T value) {
@@ -132,7 +163,6 @@ public class MapConfiguration implements Configuration {
 		Object val = values.get(key);
 		if (val == null) {
 			throw new RuntimeException("Expected configuration not found!" +
-					" holder=" + configContainer.getHolder().getName() + 
 					" key=" + key);
 		}
 		return key.getType().cast(val);

@@ -29,7 +29,7 @@ public interface Configuration {
 	
 	public int size();
 	
-	public Class<?> getHolder();
+	public Class<?>[] getHolders();
 	
 	public Set<ConfigKey<?>> keys();
 }
