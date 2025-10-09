@@ -19,7 +19,7 @@ import java.util.Set;
 
 public interface Configuration {
 	
-	public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue);
+	public <T> T overwriteDefault(ConfigKey<T> key, T defaultValue);
 	
 	public <T> T get(ConfigKey<T> key);
 	

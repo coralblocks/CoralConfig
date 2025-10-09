@@ -26,6 +26,7 @@ public class MapConfiguration implements Configuration {
 	
 	private final ConfigContainer configContainer;
 	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
+	private final Map<ConfigKey<?>, Object> overwrittenDefaults = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	
 	public MapConfiguration(Class<?> holder) {
 		this(holder, null);
@@ -64,18 +65,48 @@ public class MapConfiguration implements Configuration {
 		}
 	}
 	
+	private void enforceValue(ConfigKey<?> key, Object value) {
+		if (value == null) {
+			throw new RuntimeException("Null values are not allowed! (You should remove the key from the config instead)" + 
+									   " holder=" + configContainer.getHolder().getName() +  
+									   " key=" + key);
+		}
+	}
+	
+	private void enforceDefaultValue(ConfigKey<?> key, Object value) {
+
+		if (value != null) return; // nothing to do
+		
+		Class<?> type = key.getType();
+		
+		if (type == String.class || type.isEnum()) { 
+			return; // allow null for String and Enum
+		}
+		
+		throw new RuntimeException("Null default values are only allowed to Strings and Enums!" + 
+				   " holder=" + configContainer.getHolder().getName() +  
+				   " key=" + key);
+	}
+	
 	private void enforceConfigKey(ConfigKey<?> key) {
+		
+		if (key == null) {
+			throw new NullPointerException("The key can never be null!");
+		}
+		
 		if (!configContainer.has(key)) {
 			throw new IllegalStateException("ConfigKey does not belong to holder class!" +
 											" holder=" + configContainer.getHolder().getName() + 
-											" key=" + key + 
-											" fieldName=" + key.fieldName);
+											" key=" + key); 
 		}
 	}
 
 	@Override
-	public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue) {
-		// TODO:
+	public <T> T overwriteDefault(ConfigKey<T> key, T defaultValue) {
+		enforceConfigKey(key);
+		enforceDefaultValue(key, defaultValue);
+		Object prev = overwrittenDefaults.put(key, defaultValue);
+		return prev != null ? key.getType().cast(prev) : null; 
 	}
 	
 	@Override
@@ -85,6 +116,7 @@ public class MapConfiguration implements Configuration {
 	
 	public <T> T add(ConfigKey<T> key, T value) {
 		enforceConfigKey(key);
+		enforceValue(key, value);
 		Object prev = values.put(key, value);
 		return prev != null ? key.getType().cast(prev) : null;
 	}
@@ -102,8 +134,7 @@ public class MapConfiguration implements Configuration {
 		if (val == null) {
 			throw new RuntimeException("Expected configuration not found!" +
 					" holder=" + configContainer.getHolder().getName() + 
-					" key=" + key + 
-					" fieldName=" + key.fieldName);
+					" key=" + key);
 		}
 		return key.getType().cast(val);
 	}
@@ -111,8 +142,13 @@ public class MapConfiguration implements Configuration {
 	@Override
 	public <T> T get(ConfigKey<T> key, T defaultValue) {
 		enforceConfigKey(key);
+		enforceDefaultValue(key, defaultValue);
 		Object val = values.get(key);
 		if (val == null) {
+			if (overwrittenDefaults.containsKey(key)) {
+				Object newDef = overwrittenDefaults.get(key);
+				return key.getType().cast(newDef);
+			}
 			return defaultValue;
 		}
 		return key.getType().cast(val);
