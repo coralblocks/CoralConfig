@@ -143,6 +143,10 @@ public final class ConfigKey<T> {
     
 	@Override
 	public String toString() {
-		return name;
+		if (fieldName == null) {
+			return name;
+		} else {
+			return fieldName + "(\"" + name + "\")";
+		}
 	}
 }
