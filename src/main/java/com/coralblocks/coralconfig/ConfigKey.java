@@ -53,7 +53,7 @@ public final class ConfigKey<T> {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <K> K parseValue(Class<K> type, String value) {
+	private static <K> K parseValue(Class<K> type, String value) {
 	    if (value == null) return null;
 	    if (type == String.class) {
 	        return (K) value;
@@ -72,8 +72,7 @@ public final class ConfigKey<T> {
 	    } else if (type == Byte.class || type == byte.class) {
 	        return (K) Byte.valueOf(value);
 	    } else if (type == Character.class || type == char.class) {
-	        if (value.length() != 1)
-	            throw new IllegalArgumentException("Invalid char value: " + value);
+	        if (value.length() != 1) throw new IllegalArgumentException("Invalid char value: " + value);
 	        return (K) Character.valueOf(value.charAt(0));
 	    } else if (type.isEnum()) {
 	        return (K) Enum.valueOf((Class<Enum>) type.asSubclass(Enum.class), value.toUpperCase());
@@ -84,6 +83,46 @@ public final class ConfigKey<T> {
 
     public static <K> ConfigKey<K> of(String name, Class<K> type, Kind kind, ConfigKey<K> primary) {
     	return new ConfigKey<K>(name, type, kind, primary);
+    }
+    
+    public static ConfigKey<Integer> intKey(String name) {
+    	return of(name, Integer.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Long> longKey(String name) {
+    	return of(name, Long.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Boolean> boolKey(String name) {
+    	return of(name, Boolean.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Double> doubleKey(String name) {
+    	return of(name, Double.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Float> floatKey(String name) {
+    	return of(name, Float.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Short> shortKey(String name) {
+    	return of(name, Short.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Byte> byteKey(String name) {
+    	return of(name, Byte.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Character> charKey(String name) {
+    	return of(name, Character.class, Kind.PRIMARY, null);
+    }
+    
+    public static <E extends Enum<E>> ConfigKey<E> enumKey(String name, Class<E> enumClass) {
+        return ConfigKey.of(name, enumClass, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<String> stringKey(String name) {
+    	return of(name, String.class, Kind.PRIMARY, null);
     }
 
     public String getName() {
