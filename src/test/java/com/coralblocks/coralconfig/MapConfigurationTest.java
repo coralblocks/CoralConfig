@@ -95,6 +95,13 @@ public class MapConfigurationTest {
 		
 		MapConfiguration config = new MapConfiguration(MapConfigurationTest.class, "myEnum=BALL noRewind=false");
 		
+		try {
+			config.add(TIMEOUT, null); // null values are not allowed
+			fail();
+		} catch(RuntimeException e) {
+			// Good!
+		}
+		
 		TestEnum prevEnum = config.add(MY_ENUM, TestEnum.BILLY);
 		Assert.assertEquals(TestEnum.BALL, prevEnum);
 		
