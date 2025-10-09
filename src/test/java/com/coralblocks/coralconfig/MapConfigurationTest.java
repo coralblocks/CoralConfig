@@ -35,6 +35,52 @@ public class MapConfigurationTest {
 	public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.of("myEnum", TestEnum.class, Kind.PRIMARY, null);
 	
 	@Test
+	public void testDefaults() {
+		
+		Configuration config = new MapConfiguration(MapConfigurationTest.class, "myEnum=BALL noRewind=false");
+		
+		Assert.assertEquals(2, config.size());
+		Assert.assertEquals(MapConfigurationTest.class, config.getHolder());
+		Assert.assertEquals(2, config.keys().size());
+		Assert.assertEquals(true, config.has(MY_ENUM));
+		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
+		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM, TestEnum.BILLY));
+		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM, TestEnum.BALL));
+		Assert.assertEquals(false, config.has(TIMEOUT));
+		Assert.assertEquals(false, config.get(NO_REWIND));
+		Assert.assertEquals(false, config.get(NO_REWIND, true));
+		Assert.assertEquals(false, config.get(NO_REWIND, false));
+		Assert.assertEquals(1, config.get(TIMEOUT, 1).intValue());
+		
+		config.overwriteDefault(TIMEOUT, 2);
+		Assert.assertEquals(2, config.get(TIMEOUT, 1).intValue());
+		
+		config.overwriteDefault(TIMEOUT, 1);
+		Assert.assertEquals(1, config.get(TIMEOUT, 1).intValue());
+		
+		config.overwriteDefault(TIMEOUT, 3);
+		Assert.assertEquals(3, config.get(TIMEOUT, 1).intValue());
+		
+		try {
+			config.overwriteDefault(TIMEOUT, null); // null default value not allowed for Integer
+			fail();
+		} catch(RuntimeException e) {
+			// Good!
+		}
+		
+		config.overwriteDefault(TIMEOUT, 222);
+		Assert.assertEquals(222, config.get(TIMEOUT, -1).intValue());
+		
+		try {
+			Assert.assertEquals(222, config.get(TIMEOUT, null).intValue()); // null default value not allowed for Integer
+			fail();
+		} catch(RuntimeException e) {
+			// Good!
+		}
+		
+	}
+	
+	@Test
 	public void testBasics1() {
 		
 		Configuration config = new MapConfiguration(MapConfigurationTest.class, "myEnum=BALL noRewind=false");
