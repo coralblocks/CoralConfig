@@ -18,6 +18,11 @@ package com.coralblocks.coralconfig;
 import java.util.Set;
 
 public interface Configuration {
+	
+	public void addListener(DeprecatedListener listener);
+	
+	public void removeListener(DeprecatedListener listener);
+	
 
 	public Class<?>[] getHolders();
 	

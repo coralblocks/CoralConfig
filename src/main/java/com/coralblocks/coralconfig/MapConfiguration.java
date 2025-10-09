@@ -15,11 +15,15 @@
  */
 package com.coralblocks.coralconfig;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.coralblocks.coralconfig.ConfigKey.Kind;
 
 public class MapConfiguration implements Configuration {
 	
@@ -27,6 +31,7 @@ public class MapConfiguration implements Configuration {
 	private final Class<?>[] holders;
 	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	private final Map<ConfigKey<?>, Object> overwrittenDefaults = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
+	private final List<DeprecatedListener> listeners = new ArrayList<DeprecatedListener>();
 	
 	public MapConfiguration(Class<?> ... holders) {
 		this(null, holders);
@@ -58,7 +63,7 @@ public class MapConfiguration implements Configuration {
 					throw new IllegalStateException("A key in params does not map to a ConfigKey: " + key);
 				}
 				Object parsedValue = configKey.parseValue(value);
-				values.put(configKey, parsedValue);
+				addParsed(configKey, parsedValue);
 			}
 		}
 	}
@@ -83,6 +88,11 @@ public class MapConfiguration implements Configuration {
 		for(ConfigKey<?> configKey : config.keysWithOverwrittenDefault()) {
 			overwriteDefaultCaptured(configKey, config);
 		}
+	}
+	
+	// // for generics to work, we need a new method to capture the T from the ConfigKey
+	private <T> void addParsed(ConfigKey<T> key, Object parsed) {
+	    add(key, key.getType().cast(parsed));
 	}
 	
 	// for generics to work, we need a new method to capture the T from the ConfigKey
@@ -144,11 +154,28 @@ public class MapConfiguration implements Configuration {
 											" key=" + key); 
 		}
 	}
+	
+	@Override
+	public void addListener(DeprecatedListener listener) {
+		if (!listeners.contains(listener)) listeners.add(listener);
+	}
+	
+	@Override
+	public void removeListener(DeprecatedListener listener) {
+		listeners.remove(listener);
+	}
 
 	@Override
 	public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue) {
 		enforceConfigKey(key);
 		enforceDefaultValue(key, defaultValue);
+		
+		if (key.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(key, key.getPrimary());
+			}
+		}
+		
 		overwrittenDefaults.put(key, defaultValue);
 	}
 	
@@ -160,6 +187,13 @@ public class MapConfiguration implements Configuration {
 	@Override
 	public <T> T getOverwrittenDefault(ConfigKey<T> key) {
 		enforceConfigKey(key);
+		
+		if (key.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(key, key.getPrimary());
+			}
+		}
+		
 		Object val = overwrittenDefaults.get(key);
 		return val != null ? key.getType().cast(val) : null;
 	}
@@ -172,12 +206,26 @@ public class MapConfiguration implements Configuration {
 	public <T> T add(ConfigKey<T> key, T value) {
 		enforceConfigKey(key);
 		enforceValue(key, value);
+		
+		if (key.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(key, key.getPrimary());
+			}
+		}
+		
 		Object prev = values.put(key, value);
 		return prev != null ? key.getType().cast(prev) : null;
 	}
 	
 	public <T> T remove(ConfigKey<T> key) {
 		enforceConfigKey(key);
+		
+		if (key.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(key, key.getPrimary());
+			}
+		}
+		
 		Object prev = values.remove(key);
 		return prev != null ? key.getType().cast(prev) : null;
 	}
@@ -185,6 +233,13 @@ public class MapConfiguration implements Configuration {
 	@Override
 	public <T> T get(ConfigKey<T> key) {
 		enforceConfigKey(key);
+		
+		if (key.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(key, key.getPrimary());
+			}
+		}
+		
 		Object val = values.get(key);
 		if (val == null) {
 			throw new RuntimeException("Expected configuration not found!" +
@@ -197,6 +252,13 @@ public class MapConfiguration implements Configuration {
 	public <T> T get(ConfigKey<T> key, T defaultValue) {
 		enforceConfigKey(key);
 		enforceDefaultValue(key, defaultValue);
+		
+		if (key.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(key, key.getPrimary());
+			}
+		}
+		
 		Object val = values.get(key);
 		if (val == null) {
 			if (overwrittenDefaults.containsKey(key)) {
@@ -211,6 +273,13 @@ public class MapConfiguration implements Configuration {
 	@Override
 	public boolean has(ConfigKey<?> key) {
 		enforceConfigKey(key);
+		
+		if (key.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(key, key.getPrimary());
+			}
+		}
+		
 		return values.containsKey(key);
 	}
 	

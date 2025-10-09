@@ -248,6 +248,14 @@ public final class ConfigKey<T> {
     	return primary;
     }
     
+    public Class<?> getHolder() {
+    	return holder;
+    }
+    
+    public String getFieldName() {
+    	return fieldName;
+    }
+    
 	@Override
 	public String toString() {
 		
