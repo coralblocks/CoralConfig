@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,31 @@ final class ConfigContainer {
     	}
     	return configContainer;
     }
+    
+    public static void enforceNoDuplicates(ConfigContainer ... configContainers) {
+    	if (configContainers.length <= 1) {
+    		throw new IllegalArgumentException("configContainers must be an array of 2 or more elements! length=" + configContainers.length);
+    	}
+	    for(int i = 0; i < configContainers.length; i++) {
+	        for(int j = i + 1; j < configContainers.length; j++) {
+	        	ConfigContainer cc1 = configContainers[i];
+	        	ConfigContainer cc2 = configContainers[j];
+	        	enforceNoDuplicates(cc1, cc2);
+	        }
+    	}
+    }
+    
+    private static void enforceNoDuplicates(ConfigContainer cc1, ConfigContainer cc2) {
+    	Iterator<ConfigKey<?>> iter = cc1.configKeys.iterator();
+    	while(iter.hasNext()) {
+    		ConfigKey<?> configKey = iter.next();
+    		ConfigKey<?> duplicate = cc2.getIgnoreCase(configKey.getName());
+    		if (duplicate != null) {
+    			throw new IllegalStateException("Found two keys with the same name! " +
+    									"key1=" + configKey + " key2=" + duplicate);
+    		}
+    	}
+    }
 
     public int size() {
     	return configKeys.size();
@@ -111,6 +137,17 @@ final class ConfigContainer {
 
     public ConfigKey<?> get(String name) {
         return configKeysByName.get(name);
+    }
+    
+    private ConfigKey<?> getIgnoreCase(String name) {
+    	Iterator<ConfigKey<?>> iter = configKeys.iterator();
+    	while(iter.hasNext()) {
+    		ConfigKey<?> configKey = iter.next();
+    		if (configKey.getName().equalsIgnoreCase(name)) {
+    			return configKey;
+    		}
+    	}
+    	return null;
     }
     
     public Class<?> getHolder() {
