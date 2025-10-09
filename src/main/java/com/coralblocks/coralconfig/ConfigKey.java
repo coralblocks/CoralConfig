@@ -24,11 +24,11 @@ public final class ConfigKey<T> {
 	private final String name;
 	private final Class<T> type;
 	private final Kind kind;
-	private final ConfigKey<T> primary;
+	private final ConfigKey<?> primary;
 	String fieldName;
 	Class<?> holder;
 	
-	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
+	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<?> primary) {
 		enforceType(type);
 		enforceRelationship(name, type, kind, primary);
         this.name = name;
@@ -37,7 +37,7 @@ public final class ConfigKey<T> {
         this.primary = primary;
     }
 	
-	private void enforceRelationship(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
+	private void enforceRelationship(String name, Class<T> type, Kind kind, ConfigKey<?> primary) {
 		if (kind == Kind.PRIMARY) {
 			if (primary != null) {
 				throw new IllegalStateException("When defining a primary config, it must not have have a parent primary!" +
@@ -108,7 +108,7 @@ public final class ConfigKey<T> {
 	    }
 	}
 
-    public static <K> ConfigKey<K> of(String name, Class<K> type, Kind kind, ConfigKey<K> primary) {
+    static <K> ConfigKey<K> of(String name, Class<K> type, Kind kind, ConfigKey<?> primary) {
     	return new ConfigKey<K>(name, type, kind, primary);
     }
     
@@ -116,40 +116,80 @@ public final class ConfigKey<T> {
     	return of(name, Integer.class, Kind.PRIMARY, null);
     }
     
+    public static ConfigKey<Integer> intKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Integer.class, Kind.DEPRECATED, primary);
+    }
+    
     public static ConfigKey<Long> longKey(String name) {
     	return of(name, Long.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Long> longKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Long.class, Kind.DEPRECATED, primary);
     }
     
     public static ConfigKey<Boolean> boolKey(String name) {
     	return of(name, Boolean.class, Kind.PRIMARY, null);
     }
     
+    public static ConfigKey<Boolean> boolKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Boolean.class, Kind.DEPRECATED, primary);
+    }
+    
     public static ConfigKey<Double> doubleKey(String name) {
     	return of(name, Double.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Double> doubleKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Double.class, Kind.DEPRECATED, primary);
     }
     
     public static ConfigKey<Float> floatKey(String name) {
     	return of(name, Float.class, Kind.PRIMARY, null);
     }
     
+    public static ConfigKey<Float> floatKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Float.class, Kind.DEPRECATED, primary);
+    }
+    
     public static ConfigKey<Short> shortKey(String name) {
     	return of(name, Short.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Short> shortKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Short.class, Kind.DEPRECATED, primary);
     }
     
     public static ConfigKey<Byte> byteKey(String name) {
     	return of(name, Byte.class, Kind.PRIMARY, null);
     }
     
+    public static ConfigKey<Byte> byteKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Byte.class, Kind.DEPRECATED, primary);
+    }
+    
     public static ConfigKey<Character> charKey(String name) {
     	return of(name, Character.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<Character> chatKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, Character.class, Kind.DEPRECATED, primary);
     }
     
     public static <E extends Enum<E>> ConfigKey<E> enumKey(String name, Class<E> enumClass) {
         return ConfigKey.of(name, enumClass, Kind.PRIMARY, null);
     }
     
+    public static <E extends Enum<E>> ConfigKey<E> enumKeyDeprecated(String name, Class<E> enumClass ,ConfigKey<?> primary) {
+    	return ConfigKey.of(name, enumClass, Kind.DEPRECATED, primary);
+    }
+    
     public static ConfigKey<String> stringKey(String name) {
     	return of(name, String.class, Kind.PRIMARY, null);
+    }
+    
+    public static ConfigKey<String> stringKeyDeprecated(String name, ConfigKey<?> primary) {
+    	return of(name, String.class, Kind.DEPRECATED, primary);
     }
 
     public String getName() {
@@ -164,7 +204,7 @@ public final class ConfigKey<T> {
     	return kind;
     }
     
-    public ConfigKey<T> getPrimary() {
+    public ConfigKey<?> getPrimary() {
     	return primary;
     }
     

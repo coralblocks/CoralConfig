@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.coralblocks.coralconfig.ConfigKey.Kind;
+
 final class ConfigContainer {
 
     private static final Map<Class<?>, ConfigContainer> ALL = new HashMap<>();
@@ -91,6 +93,20 @@ final class ConfigContainer {
         this.configKeysByName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
         
         this.toString = "Config[" + holder.getName() + ", size=" + configKeys.size() + "]";
+        
+        enforcePrimarySameHolder(configKeys);
+    }
+    
+    private static void enforcePrimarySameHolder(Set<ConfigKey<?>> configKeys) {
+    	for(ConfigKey<?> configKey : configKeys) {
+    		if (configKey.getKind() != Kind.PRIMARY) {
+    			ConfigKey<?> primary = configKey.getPrimary();
+    			if (primary.holder == null || primary.holder != configKey.holder) {
+    				throw new IllegalStateException("The primary key of the config does not contain the same holder!" +
+    									" keyHolder=" + configKey.holder + " primaryHolder=" + primary.holder);
+    			}
+    		}
+    	}
     }
 
     public synchronized static ConfigContainer of(Class<?> holder) {
