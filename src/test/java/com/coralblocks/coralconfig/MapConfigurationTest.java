@@ -77,7 +77,6 @@ public class MapConfigurationTest {
 		} catch(RuntimeException e) {
 			// Good!
 		}
-		
 	}
 	
 	@Test
