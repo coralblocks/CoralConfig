@@ -23,7 +23,7 @@ import org.junit.Test;
 import com.coralblocks.coralconfig.ConfigKey.Kind;
 
 
-public class ConfigTest {
+public class ConfigContainerTest {
 	
 	@Test
 	public void testBasics() {
@@ -40,13 +40,13 @@ public class ConfigTest {
 			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
 		}
 		
-		ConfigContainer config1 = ConfigContainer.of(Base1.class);
+		ConfigContainer cc1 = ConfigContainer.of(Base1.class);
 		
-		Assert.assertEquals(2, config1.size());
-		Assert.assertEquals(Base1.TIMEOUT, config1.get("timeout"));
-		Assert.assertEquals(Base1.NO_REWIND, config1.get("noRewind"));
-		Assert.assertEquals(true, config1.has(Base1.TIMEOUT));
-		Assert.assertEquals(false, config1.has(Blah.TIMEOUT));
+		Assert.assertEquals(2, cc1.size());
+		Assert.assertEquals(Base1.TIMEOUT, cc1.get("timeout"));
+		Assert.assertEquals(Base1.NO_REWIND, cc1.get("noRewind"));
+		Assert.assertEquals(true, cc1.has(Base1.TIMEOUT));
+		Assert.assertEquals(false, cc1.has(Blah.TIMEOUT));
 		Assert.assertEquals("TIMEOUT", Base1.TIMEOUT.fieldName);
 		Assert.assertEquals("NO_REWIND", Base1.NO_REWIND.fieldName);
 		Assert.assertEquals(null, Blah.TIMEOUT.fieldName); // was not added to any Config
