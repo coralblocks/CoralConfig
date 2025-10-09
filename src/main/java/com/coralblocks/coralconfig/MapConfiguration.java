@@ -102,11 +102,10 @@ public class MapConfiguration implements Configuration {
 	}
 
 	@Override
-	public <T> T overwriteDefault(ConfigKey<T> key, T defaultValue) {
+	public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue) {
 		enforceConfigKey(key);
 		enforceDefaultValue(key, defaultValue);
-		Object prev = overwrittenDefaults.put(key, defaultValue);
-		return prev != null ? key.getType().cast(prev) : null; 
+		overwrittenDefaults.put(key, defaultValue);
 	}
 	
 	@Override
