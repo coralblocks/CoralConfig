@@ -59,6 +59,8 @@ final class ConfigContainer {
                 
                 configKey.fieldName = f.getName();
                 
+                configKey.holder = holder;
+                
                 if (val != null) collected.add(configKey);
                 
             } catch (IllegalAccessException e) {

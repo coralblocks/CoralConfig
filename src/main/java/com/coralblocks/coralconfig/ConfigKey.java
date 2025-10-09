@@ -26,6 +26,7 @@ public final class ConfigKey<T> {
 	private final Kind kind;
 	private final ConfigKey<T> primary;
 	String fieldName;
+	Class<?> holder;
 	
 	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
 		enforceType(type);
@@ -143,10 +144,14 @@ public final class ConfigKey<T> {
     
 	@Override
 	public String toString() {
-		if (fieldName == null) {
+		if (fieldName == null && holder == null) {
 			return name;
-		} else {
+		} else if (fieldName != null && holder != null) {
+			return holder.getSimpleName() + "." + fieldName + "(\"" + name + "\")";
+		} else if (fieldName != null) {
 			return fieldName + "(\"" + name + "\")";
+		} else { // => holder != null && fieldName == null
+			return holder.getSimpleName() + "(\"" + name + "\")";
 		}
 	}
 }
