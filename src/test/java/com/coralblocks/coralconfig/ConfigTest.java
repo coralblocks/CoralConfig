@@ -61,7 +61,7 @@ public class ConfigTest {
 		
 		try {
 		
-			Config.of(Base2.class);
+			Config.of(Base2.class); // two ConfigKeys with the same name "timeout"
 			
 			fail();
 			

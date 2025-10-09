@@ -82,6 +82,8 @@ final class Config {
             set.add(key);
         }
         
+        if (set.isEmpty()) throw new IllegalStateException("No ConfigKeys found in holder " + this.holder.getName());
+        
         this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
         this.configKeysByName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
         
