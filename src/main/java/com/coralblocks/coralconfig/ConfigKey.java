@@ -30,13 +30,39 @@ public final class ConfigKey<T> {
 	
 	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
 		enforceType(type);
+		enforceRelationship(name, type, kind, primary);
         this.name = name;
         this.type = type;
         this.kind = kind;
         this.primary = primary;
     }
 	
-	private static void enforceType(Class<?> c) {
+	private void enforceRelationship(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
+		if (kind == Kind.PRIMARY) {
+			if (primary != null) {
+				throw new IllegalStateException("When defining a primary config, it must not have have a parent primary!" +
+									" name=" + name + " type=" + type.getName() + " primary=" + primary);
+			}
+		} else if (kind == Kind.ALIAS) {
+			if (primary == null) {
+				throw new IllegalStateException("When defining an alias config, it must specify its parent primary!" +
+						" name=" + name + " type=" + type.getName());
+			} else if (primary.getKind() != Kind.PRIMARY) {
+				throw new IllegalStateException("The parent config of an alias config must not be an alias or a deprecated type!" +
+						" name=" + name + " type=" + type.getName() + " primary=" + primary + " primaryKind=" + primary.getKind());
+			}
+		} else if (kind == Kind.DEPRECATED) {
+			if (primary == null) {
+				throw new IllegalStateException("When defining a deprecated config, it must specify its parent primary!" +
+						" name=" + name + " type=" + type.getName());
+			} else if (primary.getKind() != Kind.PRIMARY) {
+				throw new IllegalStateException("The parent config of a deprecated config must not be an alias or a deprecated type!" +
+						" name=" + name + " type=" + type.getName() + " primary=" + primary + " primaryKind=" + primary.getKind());
+			}
+		}
+	}
+	
+	private void enforceType(Class<T> c) {
         if (c == String.class
         		|| c == Integer.class || c == Long.class || c == Boolean.class
 	            || c == Double.class  || c == Float.class || c == Short.class
@@ -45,7 +71,7 @@ public final class ConfigKey<T> {
         	// We are good!
         	return;
         }
-        throw new RuntimeException("Type can only be a Java primitive (Integer, Boolean, etc.), Enum or String!" +
+        throw new IllegalStateException("Type can only be a Java primitive (Integer, Boolean, etc.), Enum or String!" +
 				" type=" + c.getName());
 	}
 	
@@ -144,14 +170,19 @@ public final class ConfigKey<T> {
     
 	@Override
 	public String toString() {
+		
+		String suffix = "p";
+		if (kind == Kind.ALIAS) suffix = "a";
+		if (kind == Kind.DEPRECATED) suffix = "d";
+		
 		if (fieldName == null && holder == null) {
-			return name;
+			return "(\"" + name + "\"" + suffix + ")";
 		} else if (fieldName != null && holder != null) {
-			return holder.getSimpleName() + "." + fieldName + "(\"" + name + "\")";
+			return holder.getSimpleName() + "." + fieldName + "(\"" + name + "\"" + suffix + ")";
 		} else if (fieldName != null) {
-			return fieldName + "(\"" + name + "\")";
+			return fieldName + "(\"" + name + "\"" + suffix + ")";
 		} else { // => holder != null && fieldName == null
-			return holder.getSimpleName() + "(\"" + name + "\")";
+			return holder.getSimpleName() + "(\"" + name + "\"" + suffix + ")";
 		}
 	}
 }

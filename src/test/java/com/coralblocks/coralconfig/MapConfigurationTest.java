@@ -37,46 +37,53 @@ public class MapConfigurationTest {
 	@Test
 	public void testDefaults() {
 		
-		Configuration config = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
+		MapConfiguration mapConfig = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
 		
-		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(MapConfigurationTest.class, config.getHolders()[0]);
-		Assert.assertEquals(2, config.keys().size());
-		Assert.assertEquals(true, config.has(MY_ENUM));
-		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
-		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM, TestEnum.BILLY));
-		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM, TestEnum.BALL));
-		Assert.assertEquals(false, config.has(TIMEOUT));
-		Assert.assertEquals(false, config.get(NO_REWIND));
-		Assert.assertEquals(false, config.get(NO_REWIND, true));
-		Assert.assertEquals(false, config.get(NO_REWIND, false));
-		Assert.assertEquals(1, config.get(TIMEOUT, 1).intValue());
+		Assert.assertEquals(2, mapConfig.size());
+		Assert.assertEquals(MapConfigurationTest.class, mapConfig.getHolders()[0]);
+		Assert.assertEquals(2, mapConfig.keys().size());
+		Assert.assertEquals(true, mapConfig.has(MY_ENUM));
+		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM));
+		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM, TestEnum.BILLY));
+		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM, TestEnum.BALL));
+		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM, null)); // allowed for enum
+		Assert.assertEquals(false, mapConfig.has(TIMEOUT));
+		Assert.assertEquals(false, mapConfig.get(NO_REWIND));
+		Assert.assertEquals(false, mapConfig.get(NO_REWIND, true));
+		Assert.assertEquals(false, mapConfig.get(NO_REWIND, false));
+		Assert.assertEquals(1, mapConfig.get(TIMEOUT, 1).intValue());
 		
-		config.overwriteDefault(TIMEOUT, 2);
-		Assert.assertEquals(2, config.get(TIMEOUT, 1).intValue());
+		mapConfig.overwriteDefault(TIMEOUT, 2);
+		Assert.assertEquals(2, mapConfig.get(TIMEOUT, 1).intValue());
 		
-		config.overwriteDefault(TIMEOUT, 1);
-		Assert.assertEquals(1, config.get(TIMEOUT, 1).intValue());
+		mapConfig.overwriteDefault(TIMEOUT, 1);
+		Assert.assertEquals(1, mapConfig.get(TIMEOUT, 1).intValue());
 		
-		config.overwriteDefault(TIMEOUT, 3);
-		Assert.assertEquals(3, config.get(TIMEOUT, 1).intValue());
+		mapConfig.overwriteDefault(TIMEOUT, 3);
+		Assert.assertEquals(3, mapConfig.get(TIMEOUT, 1).intValue());
 		
 		try {
-			config.overwriteDefault(TIMEOUT, null); // null default value not allowed for Integer
+			mapConfig.overwriteDefault(TIMEOUT, null); // null default value not allowed for Integer
 			fail();
 		} catch(RuntimeException e) {
 			// Good!
 		}
 		
-		config.overwriteDefault(TIMEOUT, 222);
-		Assert.assertEquals(222, config.get(TIMEOUT, -1).intValue());
+		mapConfig.overwriteDefault(TIMEOUT, 222);
+		Assert.assertEquals(222, mapConfig.get(TIMEOUT, -1).intValue());
 		
 		try {
-			Assert.assertEquals(222, config.get(TIMEOUT, null).intValue()); // null default value not allowed for Integer
+			Assert.assertEquals(222, mapConfig.get(TIMEOUT, null).intValue()); // null default value not allowed for Integer
 			fail();
 		} catch(RuntimeException e) {
 			// Good!
 		}
+		
+		mapConfig.overwriteDefault(MY_ENUM, null);
+		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM, TestEnum.BILLY)); // still has it!
+		
+		mapConfig.remove(MY_ENUM);
+		Assert.assertEquals(null, mapConfig.get(MY_ENUM, TestEnum.BILLY)); // don't have it anymore!
 	}
 	
 	@Test
@@ -108,11 +115,11 @@ public class MapConfigurationTest {
 	@Test
 	public void testBasics2() {
 		
-		MapConfiguration c = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
+		MapConfiguration mc = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
 		
-		Configuration config = new MapConfiguration(c);
+		Configuration config = new MapConfiguration(mc);
 		
-		c.remove(MY_ENUM); // won't affect the new configuration
+		mc.remove(MY_ENUM); // won't affect the new configuration
 		
 		Assert.assertEquals(2, config.size());
 		Assert.assertEquals(MapConfigurationTest.class, config.getHolders()[0]);
@@ -138,55 +145,55 @@ public class MapConfigurationTest {
 	@Test
 	public void testBasics3() {
 		
-		MapConfiguration config = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
+		MapConfiguration mapConfig = new MapConfiguration("myEnum=BALL noRewind=false", MapConfigurationTest.class);
 		
 		try {
-			config.add(TIMEOUT, null); // null values are not allowed
+			mapConfig.add(TIMEOUT, null); // null values are not allowed
 			fail();
 		} catch(RuntimeException e) {
 			// Good!
 		}
 		
-		TestEnum prevEnum = config.add(MY_ENUM, TestEnum.BILLY);
+		TestEnum prevEnum = mapConfig.add(MY_ENUM, TestEnum.BILLY);
 		Assert.assertEquals(TestEnum.BALL, prevEnum);
 		
-		boolean prevNoRewind = config.remove(NO_REWIND);
+		boolean prevNoRewind = mapConfig.remove(NO_REWIND);
 		Assert.assertEquals(false, prevNoRewind);
-		Assert.assertEquals(1, config.size());
+		Assert.assertEquals(1, mapConfig.size());
 		
 		try {
 			@SuppressWarnings("unused")
-			int timeout = config.remove(TIMEOUT); // autoboxing NPE
+			int timeout = mapConfig.remove(TIMEOUT); // autoboxing NPE
 			fail();
 		} catch(NullPointerException e) {
 			// Good
 		}
 		
 		try {
-			config.remove(TIMEOUT); // NO autoboxing NPE
+			mapConfig.remove(TIMEOUT); // NO autoboxing NPE
 		} catch(NullPointerException e) {
 			fail();
 		}
 		
-		Object prevTimeout = config.add(TIMEOUT, 33);
+		Object prevTimeout = mapConfig.add(TIMEOUT, 33);
 		Assert.assertEquals(null, prevTimeout);
 		
-		Assert.assertEquals(2, config.size());
-		Assert.assertEquals(MapConfigurationTest.class, config.getHolders()[0]);
-		Assert.assertEquals(2, config.keys().size());
-		Assert.assertEquals(true, config.has(MY_ENUM));
-		Assert.assertEquals(TestEnum.BILLY, config.get(MY_ENUM));
-		Assert.assertEquals(TestEnum.BILLY, config.get(MY_ENUM, TestEnum.BILLY));
-		Assert.assertEquals(TestEnum.BILLY, config.get(MY_ENUM, TestEnum.BALL));
-		Assert.assertEquals(false, config.has(NO_REWIND));
-		Assert.assertEquals(true, config.has(TIMEOUT));
-		Assert.assertEquals(33, config.get(TIMEOUT).intValue());
-		Assert.assertEquals(33, config.get(TIMEOUT, 77).intValue());
-		Assert.assertEquals(33, config.get(TIMEOUT, 33).intValue());
-		Assert.assertEquals(true, config.get(NO_REWIND, true));
+		Assert.assertEquals(2, mapConfig.size());
+		Assert.assertEquals(MapConfigurationTest.class, mapConfig.getHolders()[0]);
+		Assert.assertEquals(2, mapConfig.keys().size());
+		Assert.assertEquals(true, mapConfig.has(MY_ENUM));
+		Assert.assertEquals(TestEnum.BILLY, mapConfig.get(MY_ENUM));
+		Assert.assertEquals(TestEnum.BILLY, mapConfig.get(MY_ENUM, TestEnum.BILLY));
+		Assert.assertEquals(TestEnum.BILLY, mapConfig.get(MY_ENUM, TestEnum.BALL));
+		Assert.assertEquals(false, mapConfig.has(NO_REWIND));
+		Assert.assertEquals(true, mapConfig.has(TIMEOUT));
+		Assert.assertEquals(33, mapConfig.get(TIMEOUT).intValue());
+		Assert.assertEquals(33, mapConfig.get(TIMEOUT, 77).intValue());
+		Assert.assertEquals(33, mapConfig.get(TIMEOUT, 33).intValue());
+		Assert.assertEquals(true, mapConfig.get(NO_REWIND, true));
 		
 		try {
-			config.get(NO_REWIND);
+			mapConfig.get(NO_REWIND);
 			fail();
 		} catch(RuntimeException e) {
 			// Good!
