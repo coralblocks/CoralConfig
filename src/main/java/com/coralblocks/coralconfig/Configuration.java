@@ -27,5 +27,9 @@ public interface Configuration {
 	
 	public boolean has(ConfigKey<?> key);
 	
+	public int size();
+	
+	public Class<?> getHolder();
+	
 	public Set<ConfigKey<?>> keys();
 }

@@ -18,6 +18,7 @@ package com.coralblocks.coralconfig;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,8 +27,41 @@ public class MapConfiguration implements Configuration {
 	private final Config config;
 	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	
-	public MapConfiguration(Config config) {
-		this.config = config;
+	public MapConfiguration(Class<?> holder) {
+		this(holder, null);
+	}
+	
+	public MapConfiguration(Class<?> holder, String params) {
+		this.config = Config.of(holder);
+		if (params != null) {
+			String[] keyValues = params.split("\\s+");
+			for(String keyValue : keyValues) {
+				String[] temp = keyValue.split("=");
+				if (temp.length != 2) {
+					throw new IllegalArgumentException("The params argument is invalid: " + params + " (" + keyValue + ")");
+				}
+				String key = temp[0];
+				String value = temp[1];
+				
+				ConfigKey<?> configKey = config.get(key);
+				if (configKey == null) {
+					throw new IllegalStateException("A key in params does not contain a ConfigKey: " + key);
+				}
+				Object parsedValue = configKey.parseValue(value);
+				values.put(configKey, parsedValue);
+			}
+		}
+	}
+	
+	public MapConfiguration(Configuration config) {
+		this.config = Config.of(config.getHolder());
+		Set<ConfigKey<?>> set = config.keys();
+		Iterator<ConfigKey<?>> iter = set.iterator();
+		while(iter.hasNext()) {
+			ConfigKey<?> configKey = iter.next();
+			Object value = config.get(configKey);
+			values.put(configKey, value);
+		}
 	}
 	
 	private void enforceConfigKey(ConfigKey<?> key) {
@@ -42,6 +76,11 @@ public class MapConfiguration implements Configuration {
 	@Override
 	public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue) {
 		// TODO:
+	}
+	
+	@Override
+	public Class<?> getHolder() {
+		return config.getHolder();
 	}
 	
 	public <T> T add(ConfigKey<T> key, T value) {
@@ -68,7 +107,7 @@ public class MapConfiguration implements Configuration {
 		}
 		return key.getType().cast(val);
 	}
-
+	
 	@Override
 	public <T> T get(ConfigKey<T> key, T defaultValue) {
 		enforceConfigKey(key);
@@ -83,6 +122,11 @@ public class MapConfiguration implements Configuration {
 	public boolean has(ConfigKey<?> key) {
 		enforceConfigKey(key);
 		return values.containsKey(key);
+	}
+	
+	@Override
+	public int size() {
+		return values.size();
 	}
 
 	@Override

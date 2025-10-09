@@ -47,9 +47,43 @@ public final class ConfigKey<T> {
         throw new RuntimeException("Type can only be a Java primitive (Integer, Boolean, etc.), Enum or String!" +
 				" type=" + c.getName());
 	}
+	
+	public T parseValue(String value) {
+		return parseValue(type, value);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <K> K parseValue(Class<K> type, String value) {
+	    if (value == null) return null;
+	    if (type == String.class) {
+	        return (K) value;
+	    } else if (type == Integer.class || type == int.class) {
+	        return (K) Integer.valueOf(value);
+	    } else if (type == Long.class || type == long.class) {
+	        return (K) Long.valueOf(value);
+	    } else if (type == Boolean.class || type == boolean.class) {
+	        return (K) Boolean.valueOf(value);
+	    } else if (type == Double.class || type == double.class) {
+	        return (K) Double.valueOf(value);
+	    } else if (type == Float.class || type == float.class) {
+	        return (K) Float.valueOf(value);
+	    } else if (type == Short.class || type == short.class) {
+	        return (K) Short.valueOf(value);
+	    } else if (type == Byte.class || type == byte.class) {
+	        return (K) Byte.valueOf(value);
+	    } else if (type == Character.class || type == char.class) {
+	        if (value.length() != 1)
+	            throw new IllegalArgumentException("Invalid char value: " + value);
+	        return (K) Character.valueOf(value.charAt(0));
+	    } else if (type.isEnum()) {
+	        return (K) Enum.valueOf((Class<Enum>) type.asSubclass(Enum.class), value);
+	    } else {
+	    	throw new IllegalStateException("This type is not valid/expected: " + type);
+	    }
+	}
 
-    public static <T> ConfigKey<T> of(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
-    	return new ConfigKey<T>(name, type, kind, primary);
+    public static <K> ConfigKey<K> of(String name, Class<K> type, Kind kind, ConfigKey<K> primary) {
+    	return new ConfigKey<K>(name, type, kind, primary);
     }
 
     public String getName() {
