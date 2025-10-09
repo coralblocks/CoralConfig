@@ -28,11 +28,25 @@ public final class ConfigKey<T> {
 	String fieldName;
 	
 	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
+		enforceType(type);
         this.name = name;
         this.type = type;
         this.kind = kind;
         this.primary = primary;
     }
+	
+	private static void enforceType(Class<?> c) {
+        if (c == String.class
+        		|| c == Integer.class || c == Long.class || c == Boolean.class
+	            || c == Double.class  || c == Float.class || c == Short.class
+	            || c == Byte.class    || c == Character.class
+	            || c.isEnum()) {
+        	// We are good!
+        	return;
+        }
+        throw new RuntimeException("Type can only be a Java primitive (Integer, Boolean, etc.), Enum or String!" +
+				" type=" + c.getName());
+	}
 
     public static <T> ConfigKey<T> of(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
     	return new ConfigKey<T>(name, type, kind, primary);
