@@ -82,6 +82,16 @@ public class MapConfiguration implements Configuration {
 			Object value = config.get(configKey);
 			values.put(configKey, value);
 		}
+		
+		// Copy overwritten defaults too
+		
+		Map<ConfigKey<?>, Object> map = config.getOverwrittenDefaults();
+		iter = map.keySet().iterator();
+		while(iter.hasNext()) {
+			ConfigKey<?> configKey = iter.next();
+			Object value = config.get(configKey);
+			overwrittenDefaults.put(configKey, value);
+		}
 	}
 	
 	private ConfigKey<?> getByName(String name) {
@@ -137,6 +147,11 @@ public class MapConfiguration implements Configuration {
 		enforceConfigKey(key);
 		enforceDefaultValue(key, defaultValue);
 		overwrittenDefaults.put(key, defaultValue);
+	}
+	
+	@Override
+	public Map<ConfigKey<?>, Object> getOverwrittenDefaults() {
+		return Collections.unmodifiableMap(overwrittenDefaults);
 	}
 	
 	@Override

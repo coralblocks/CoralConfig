@@ -15,11 +15,14 @@
  */
 package com.coralblocks.coralconfig;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface Configuration {
 	
 	public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue);
+	
+	public Map<ConfigKey<?>, Object> getOverwrittenDefaults();
 	
 	public <T> T get(ConfigKey<T> key);
 	
