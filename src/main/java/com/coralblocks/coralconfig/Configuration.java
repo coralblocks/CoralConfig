@@ -15,14 +15,14 @@
  */
 package com.coralblocks.coralconfig;
 
-import java.util.Map;
 import java.util.Set;
 
 public interface Configuration {
+
+	public Class<?>[] getHolders();
 	
-	public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue);
+	public int size();
 	
-	public Map<ConfigKey<?>, Object> getOverwrittenDefaults();
 	
 	public <T> T get(ConfigKey<T> key);
 	
@@ -30,9 +30,18 @@ public interface Configuration {
 	
 	public boolean has(ConfigKey<?> key);
 	
-	public int size();
-	
-	public Class<?>[] getHolders();
-	
 	public Set<ConfigKey<?>> keys();
+
+	
+	default public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue) {
+		throw new UnsupportedOperationException();
+	}
+	
+	default public <T> T getOverwrittenDefault(ConfigKey<T> key) {
+		throw new UnsupportedOperationException();
+	}
+	
+	default public Set<ConfigKey<?>> keysWithOverwrittenDefault() {
+		throw new UnsupportedOperationException();
+	}
 }

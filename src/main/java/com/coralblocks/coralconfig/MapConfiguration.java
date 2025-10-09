@@ -18,7 +18,6 @@ package com.coralblocks.coralconfig;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -75,23 +74,27 @@ public class MapConfiguration implements Configuration {
 		
 		if (configContainers.length > 1) ConfigContainer.enforceNoDuplicates(configContainers); // important!
 		
-		Set<ConfigKey<?>> set = config.keys();
-		Iterator<ConfigKey<?>> iter = set.iterator();
-		while(iter.hasNext()) {
-			ConfigKey<?> configKey = iter.next();
-			Object value = config.get(configKey);
-			values.put(configKey, value);
+		for(ConfigKey<?> configKey : config.keys()) {
+			addCaptured(configKey, config);
 		}
 		
 		// Copy overwritten defaults too
 		
-		Map<ConfigKey<?>, Object> map = config.getOverwrittenDefaults();
-		iter = map.keySet().iterator();
-		while(iter.hasNext()) {
-			ConfigKey<?> configKey = iter.next();
-			Object value = config.get(configKey);
-			overwrittenDefaults.put(configKey, value);
+		for(ConfigKey<?> configKey : config.keysWithOverwrittenDefault()) {
+			overwriteDefaultCaptured(configKey, config);
 		}
+	}
+	
+	// for generics to work, we need a new method to capture the T from the ConfigKey
+	private <T> void addCaptured(ConfigKey<T> key, Configuration config) {
+	    T value = config.get(key);
+	    add(key, value);
+	}
+	
+	// for generics to work, we need a new method to capture the T from the ConfigKey
+	private <T> void overwriteDefaultCaptured(ConfigKey<T> key, Configuration config) {
+	    T value = config.getOverwrittenDefault(key);
+	    overwriteDefault(key, value);
 	}
 	
 	private ConfigKey<?> getByName(String name) {
@@ -150,8 +153,15 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	@Override
-	public Map<ConfigKey<?>, Object> getOverwrittenDefaults() {
-		return Collections.unmodifiableMap(overwrittenDefaults);
+	public Set<ConfigKey<?>> keysWithOverwrittenDefault() {
+		return Collections.unmodifiableSet(overwrittenDefaults.keySet());
+	}
+
+	@Override
+	public <T> T getOverwrittenDefault(ConfigKey<T> key) {
+		enforceConfigKey(key);
+		Object val = overwrittenDefaults.get(key);
+		return val != null ? key.getType().cast(val) : null;
 	}
 	
 	@Override
