@@ -40,7 +40,7 @@ public class ConfigTest {
 			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
 		}
 		
-		Config config1 = Config.of(Base1.class);
+		ConfigContainer config1 = ConfigContainer.of(Base1.class);
 		
 		Assert.assertEquals(2, config1.size());
 		Assert.assertEquals(Base1.TIMEOUT, config1.get("timeout"));
@@ -61,7 +61,7 @@ public class ConfigTest {
 		
 		try {
 		
-			Config.of(Base2.class); // two ConfigKeys with the same name "timeout"
+			ConfigContainer.of(Base2.class); // two ConfigKeys with the same name "timeout"
 			
 			fail();
 			

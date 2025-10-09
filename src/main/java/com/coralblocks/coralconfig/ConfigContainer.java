@@ -26,16 +26,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-final class Config {
+final class ConfigContainer {
 
-    private static final Map<Class<?>, Config> ALL = new HashMap<>();
+    private static final Map<Class<?>, ConfigContainer> ALL = new HashMap<>();
 
     private final Class<?> holder;
     private final Set<ConfigKey<?>> configKeys;
     private final Map<String, ConfigKey<?>> configKeysByName;
     private final String toString;
 
-    private Config(Class<?> holder) {
+    private ConfigContainer(Class<?> holder) {
     	
         this.holder = holder;
         
@@ -90,13 +90,13 @@ final class Config {
         this.toString = "Config[" + holder.getName() + ", size=" + configKeys.size() + "]";
     }
 
-    public synchronized static Config of(Class<?> holder) {
-    	Config config = ALL.get(holder);
-    	if (config == null) {
-    		config = new Config(holder);
-    		ALL.put(holder, config);
+    public synchronized static ConfigContainer of(Class<?> holder) {
+    	ConfigContainer configContainer = ALL.get(holder);
+    	if (configContainer == null) {
+    		configContainer = new ConfigContainer(holder);
+    		ALL.put(holder, configContainer);
     	}
-    	return config;
+    	return configContainer;
     }
 
     public int size() {

@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class MapConfiguration implements Configuration {
 	
-	private final Config config;
+	private final ConfigContainer configContainer;
 	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	
 	public MapConfiguration(Class<?> holder) {
@@ -32,7 +32,7 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	public MapConfiguration(Class<?> holder, String params) {
-		this.config = Config.of(holder);
+		this.configContainer = ConfigContainer.of(holder);
 		if (params != null) {
 			String[] keyValues = params.split("\\s+");
 			for(String keyValue : keyValues) {
@@ -43,7 +43,7 @@ public class MapConfiguration implements Configuration {
 				String key = temp[0];
 				String value = temp[1];
 				
-				ConfigKey<?> configKey = config.get(key);
+				ConfigKey<?> configKey = configContainer.get(key);
 				if (configKey == null) {
 					throw new IllegalStateException("A key in params does not contain a ConfigKey: " + key);
 				}
@@ -54,7 +54,7 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	public MapConfiguration(Configuration config) {
-		this.config = Config.of(config.getHolder());
+		this.configContainer = ConfigContainer.of(config.getHolder());
 		Set<ConfigKey<?>> set = config.keys();
 		Iterator<ConfigKey<?>> iter = set.iterator();
 		while(iter.hasNext()) {
@@ -65,9 +65,9 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	private void enforceConfigKey(ConfigKey<?> key) {
-		if (!config.has(key)) {
+		if (!configContainer.has(key)) {
 			throw new IllegalStateException("ConfigKey does not belong to holder class!" +
-											" holder=" + config.getHolder().getName() + 
+											" holder=" + configContainer.getHolder().getName() + 
 											" key=" + key + 
 											" fieldName=" + key.fieldName);
 		}
@@ -80,7 +80,7 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public Class<?> getHolder() {
-		return config.getHolder();
+		return configContainer.getHolder();
 	}
 	
 	public <T> T add(ConfigKey<T> key, T value) {
@@ -101,7 +101,7 @@ public class MapConfiguration implements Configuration {
 		Object val = values.get(key);
 		if (val == null) {
 			throw new RuntimeException("Expected configuration not found!" +
-					" holder=" + config.getHolder().getName() + 
+					" holder=" + configContainer.getHolder().getName() + 
 					" key=" + key + 
 					" fieldName=" + key.fieldName);
 		}
