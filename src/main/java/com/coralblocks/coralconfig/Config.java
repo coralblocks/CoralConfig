@@ -20,16 +20,18 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class Config {
 
     private static final Map<Class<?>, Config> ALL = new HashMap<>();
 
     private final Class<?> holder;
-    private final List<ConfigKey<?>> configKeys;
+    private final Set<ConfigKey<?>> configKeys;
     private final Map<String, ConfigKey<?>> configKeysByName;
     private final String toString;
 
@@ -53,7 +55,11 @@ final class Config {
                 
                 Object val = f.get(null);
                 
-                if (val != null) collected.add((ConfigKey<?>) val);
+                ConfigKey<?> configKey = (ConfigKey<?>) val;
+                
+                configKey.fieldName = f.getName();
+                
+                if (val != null) collected.add(configKey);
                 
             } catch (IllegalAccessException e) {
             	
@@ -61,7 +67,8 @@ final class Config {
             }
         }
         
-        Map<String, ConfigKey<?>> map = new LinkedHashMap<>();
+        Map<String, ConfigKey<?>> map = new LinkedHashMap<String, ConfigKey<?>>();
+        Set<ConfigKey<?>> set = new HashSet<ConfigKey<?>>();
         
         for(ConfigKey<?> key : collected) {
         	
@@ -71,9 +78,11 @@ final class Config {
             if (prev != null) {
                 throw new IllegalStateException("Duplicate ConfigKey name: " + name + " in holder " + this.holder.getName());
             }
+            
+            set.add(key);
         }
         
-        this.configKeys = Collections.synchronizedList(Collections.unmodifiableList(collected));
+        this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
         this.configKeysByName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
         
         this.toString = "Config[" + holder.getName() + ", size=" + configKeys.size() + "]";
@@ -88,16 +97,20 @@ final class Config {
     	return config;
     }
 
-    public List<ConfigKey<?>> getConfigKeys() {
-        return configKeys;
-    }
-    
     public int size() {
     	return configKeys.size();
+    }
+    
+    public boolean has(ConfigKey<?> key) {
+    	return configKeys.contains(key);
     }
 
     public ConfigKey<?> get(String name) {
         return configKeysByName.get(name);
+    }
+    
+    public Class<?> getHolder() {
+    	return holder;
     }
     
     @Override

@@ -25,6 +25,7 @@ public final class ConfigKey<T> {
 	private final Class<T> type;
 	private final Kind kind;
 	private final ConfigKey<T> primary;
+	String fieldName;
 	
 	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<T> primary) {
         this.name = name;

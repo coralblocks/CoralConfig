@@ -35,11 +35,21 @@ public class ConfigTest {
 			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.of("noRewind", Boolean.class, Kind.PRIMARY, null);
 		}
 		
+		class Blah {
+		
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
+		}
+		
 		Config config1 = Config.of(Base1.class);
 		
 		Assert.assertEquals(2, config1.size());
 		Assert.assertEquals(Base1.TIMEOUT, config1.get("timeout"));
 		Assert.assertEquals(Base1.NO_REWIND, config1.get("noRewind"));
+		Assert.assertEquals(true, config1.has(Base1.TIMEOUT));
+		Assert.assertEquals(false, config1.has(Blah.TIMEOUT));
+		Assert.assertEquals("TIMEOUT", Base1.TIMEOUT.fieldName);
+		Assert.assertEquals("NO_REWIND", Base1.NO_REWIND.fieldName);
+		Assert.assertEquals(null, Blah.TIMEOUT.fieldName); // was not added to any Config
 		
 		@SuppressWarnings("unused")
 		class Base2 {
