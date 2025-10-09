@@ -76,7 +76,7 @@ public final class ConfigKey<T> {
 	            throw new IllegalArgumentException("Invalid char value: " + value);
 	        return (K) Character.valueOf(value.charAt(0));
 	    } else if (type.isEnum()) {
-	        return (K) Enum.valueOf((Class<Enum>) type.asSubclass(Enum.class), value);
+	        return (K) Enum.valueOf((Class<Enum>) type.asSubclass(Enum.class), value.toUpperCase());
 	    } else {
 	    	throw new IllegalStateException("This type is not valid/expected: " + type);
 	    }
