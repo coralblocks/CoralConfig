@@ -41,23 +41,23 @@ public final class ConfigKey<T> {
 		if (kind == Kind.PRIMARY) {
 			if (primary != null) {
 				throw new IllegalStateException("When defining a primary config, it must not have have a parent primary!" +
-									" name=" + name + " type=" + type.getName() + " primary=" + primary);
+									" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary);
 			}
 		} else if (kind == Kind.ALIAS) {
 			if (primary == null) {
 				throw new IllegalStateException("When defining an alias config, it must specify its parent primary!" +
-						" name=" + name + " type=" + type.getName());
+						" name=" + name + " type=" + type.getSimpleName());
 			} else if (primary.getKind() != Kind.PRIMARY) {
 				throw new IllegalStateException("The parent config of an alias config must not be an alias or a deprecated type!" +
-						" name=" + name + " type=" + type.getName() + " primary=" + primary + " primaryKind=" + primary.getKind());
+						" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
 			}
 		} else if (kind == Kind.DEPRECATED) {
 			if (primary == null) {
 				throw new IllegalStateException("When defining a deprecated config, it must specify its parent primary!" +
-						" name=" + name + " type=" + type.getName());
+						" name=" + name + " type=" + type.getSimpleName());
 			} else if (primary.getKind() != Kind.PRIMARY) {
 				throw new IllegalStateException("The parent config of a deprecated config must not be an alias or a deprecated type!" +
-						" name=" + name + " type=" + type.getName() + " primary=" + primary + " primaryKind=" + primary.getKind());
+						" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
 			}
 		}
 	}
@@ -120,12 +120,20 @@ public final class ConfigKey<T> {
     	return of(name, Integer.class, Kind.DEPRECATED, primary);
     }
     
+    public static ConfigKey<Integer> intKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Integer.class, Kind.ALIAS, primary);
+    }
+    
     public static ConfigKey<Long> longKey(String name) {
     	return of(name, Long.class, Kind.PRIMARY, null);
     }
     
     public static ConfigKey<Long> longKeyDeprecated(String name, ConfigKey<?> primary) {
     	return of(name, Long.class, Kind.DEPRECATED, primary);
+    }
+    
+    public static ConfigKey<Long> longKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Long.class, Kind.ALIAS, primary);
     }
     
     public static ConfigKey<Boolean> boolKey(String name) {
@@ -136,12 +144,20 @@ public final class ConfigKey<T> {
     	return of(name, Boolean.class, Kind.DEPRECATED, primary);
     }
     
+    public static ConfigKey<Boolean> boolKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Boolean.class, Kind.ALIAS, primary);
+    }
+    
     public static ConfigKey<Double> doubleKey(String name) {
     	return of(name, Double.class, Kind.PRIMARY, null);
     }
     
     public static ConfigKey<Double> doubleKeyDeprecated(String name, ConfigKey<?> primary) {
     	return of(name, Double.class, Kind.DEPRECATED, primary);
+    }
+    
+    public static ConfigKey<Double> doubleKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Double.class, Kind.ALIAS, primary);
     }
     
     public static ConfigKey<Float> floatKey(String name) {
@@ -152,12 +168,20 @@ public final class ConfigKey<T> {
     	return of(name, Float.class, Kind.DEPRECATED, primary);
     }
     
+    public static ConfigKey<Float> floatKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Float.class, Kind.ALIAS, primary);
+    }
+    
     public static ConfigKey<Short> shortKey(String name) {
     	return of(name, Short.class, Kind.PRIMARY, null);
     }
     
     public static ConfigKey<Short> shortKeyDeprecated(String name, ConfigKey<?> primary) {
     	return of(name, Short.class, Kind.DEPRECATED, primary);
+    }
+    
+    public static ConfigKey<Short> shortKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Short.class, Kind.ALIAS, primary);
     }
     
     public static ConfigKey<Byte> byteKey(String name) {
@@ -168,12 +192,20 @@ public final class ConfigKey<T> {
     	return of(name, Byte.class, Kind.DEPRECATED, primary);
     }
     
+    public static ConfigKey<Byte> byteKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Byte.class, Kind.ALIAS, primary);
+    }
+    
     public static ConfigKey<Character> charKey(String name) {
     	return of(name, Character.class, Kind.PRIMARY, null);
     }
     
     public static ConfigKey<Character> chatKeyDeprecated(String name, ConfigKey<?> primary) {
     	return of(name, Character.class, Kind.DEPRECATED, primary);
+    }
+    
+    public static ConfigKey<Character> charKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, Character.class, Kind.ALIAS, primary);
     }
     
     public static <E extends Enum<E>> ConfigKey<E> enumKey(String name, Class<E> enumClass) {
@@ -184,12 +216,20 @@ public final class ConfigKey<T> {
     	return ConfigKey.of(name, enumClass, Kind.DEPRECATED, primary);
     }
     
+    public static <E extends Enum<E>> ConfigKey<E> enumKeyAlias(String name, Class<E> enumClass ,ConfigKey<?> primary) {
+    	return ConfigKey.of(name, enumClass, Kind.ALIAS, primary);
+    }
+    
     public static ConfigKey<String> stringKey(String name) {
     	return of(name, String.class, Kind.PRIMARY, null);
     }
     
     public static ConfigKey<String> stringKeyDeprecated(String name, ConfigKey<?> primary) {
     	return of(name, String.class, Kind.DEPRECATED, primary);
+    }
+    
+    public static ConfigKey<String> stringKeyAlias(String name, ConfigKey<?> primary) {
+    	return of(name, String.class, Kind.ALIAS, primary);
     }
 
     public String getName() {
@@ -211,18 +251,21 @@ public final class ConfigKey<T> {
 	@Override
 	public String toString() {
 		
-		String suffix = "p";
-		if (kind == Kind.ALIAS) suffix = "a";
-		if (kind == Kind.DEPRECATED) suffix = "d";
+		String suffix = "";
+		if (kind == Kind.ALIAS) {
+			suffix = "_aliasOf[" + primary + "]";
+		} else if (kind == Kind.DEPRECATED) {
+			suffix = "_deprecatedInFavorOf[" + primary + "]";
+		}
 		
 		if (fieldName == null && holder == null) {
-			return "(\"" + name + "\"" + suffix + ")";
+			return "(\"" + name + "\")" + suffix;
 		} else if (fieldName != null && holder != null) {
-			return holder.getSimpleName() + "." + fieldName + "(\"" + name + "\"" + suffix + ")";
+			return holder.getSimpleName() + "." + fieldName + "(\"" + name + "\")" + suffix;
 		} else if (fieldName != null) {
-			return fieldName + "(\"" + name + "\"" + suffix + ")";
+			return fieldName + "(\"" + name + "\")" + suffix;
 		} else { // => holder != null && fieldName == null
-			return holder.getSimpleName() + "(\"" + name + "\"" + suffix + ")";
+			return holder.getSimpleName() + "(\"" + name + "\")" + suffix;
 		}
 	}
 }

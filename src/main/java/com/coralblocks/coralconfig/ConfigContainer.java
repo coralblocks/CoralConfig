@@ -166,6 +166,10 @@ final class ConfigContainer {
     	return null;
     }
     
+    public Set<ConfigKey<?>> configKeys() {
+    	return configKeys;
+    }
+    
     public Class<?> getHolder() {
     	return holder;
     }
