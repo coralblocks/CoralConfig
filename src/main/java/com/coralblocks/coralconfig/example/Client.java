@@ -64,6 +64,12 @@ public class Client implements MoreConfigs {
 		mapConfig.add(SERVER_HOST, "192.168.1.1");
 		
 		new Client(mapConfig);
+		
+		System.out.println();
+		
+		for(ConfigKey<?> configKey : mapConfig.allConfigKeys()) {
+			System.out.println(configKey);
+		}
 	}
 	
 }

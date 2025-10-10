@@ -296,9 +296,9 @@ public final class ConfigKey<T> {
 		
 		String suffix = "";
 		if (kind == Kind.ALIAS) {
-			suffix = "_aliasOf[" + primary + "]";
+			suffix = "_aliasOf_[" + primary + "]";
 		} else if (kind == Kind.DEPRECATED) {
-			suffix = "_deprecatedInFavorOf[" + primary + "]";
+			suffix = "_deprecatedInFavorOf_[" + primary + "]";
 		}
 		
 		if (fieldName == null && holder == null) {
