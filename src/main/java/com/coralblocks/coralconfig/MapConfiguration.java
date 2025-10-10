@@ -282,6 +282,37 @@ public class MapConfiguration implements Configuration {
 		return prev != null ? config.getType().cast(prev) : null;
 	}
 	
+	private <T> Object getImpl(ConfigKey<T> config) {
+		
+		if (config.getKind() != Kind.PRIMARY) {
+			
+			Object val = values.get(config);
+			if (val != null) return val;
+			
+			val = values.get(config.getPrimary());
+			if (val != null) return val;
+
+			return null;
+			
+		} else {
+			
+			Object val = values.get(config);
+			if (val != null) return val;
+			
+			for(ConfigKey<?> configKey : config.getAliases()) {
+				val = values.get(configKey);
+				if (val != null) return val;
+			}
+			
+			for(ConfigKey<?> configKey : config.getDeprecated()) {
+				val = values.get(configKey);
+				if (val != null) return val;
+			}
+			
+			return null;
+		}
+	}
+	
 	@Override
 	public <T> T get(ConfigKey<T> config) {
 		
@@ -293,34 +324,11 @@ public class MapConfiguration implements Configuration {
 			}
 		}
 		
-		if (config.getKind() != Kind.PRIMARY) {
+		Object val = getImpl(config);
+		if (val != null) return coerceNumber(val, config.getType());
 		
-			Object val = values.get(config);
-			if (val == null) {
-				throw new RuntimeException("Expected configuration not found!" +
-						" key=" + config);
-			}
-			
-			return config.getType().cast(val);
-			
-		} else {
-			
-			Object val = values.get(config);
-			if (val != null) return config.getType().cast(val);
-			
-			for(ConfigKey<?> configKey : config.getAliases()) {
-				val = values.get(configKey);
-				if (val != null) return coerceNumber(val, config.getType());
-			}
-			
-			for(ConfigKey<?> configKey : config.getDeprecated()) {
-				val = values.get(configKey);
-				if (val != null) return coerceNumber(val, config.getType());
-			}
-			
-			throw new RuntimeException("Expected configuration not found!" +
-					" key=" + config);
-		}
+		throw new RuntimeException("Expected configuration not found!" +
+									" key=" + config);
 	}
 	
 	@Override
@@ -334,32 +342,15 @@ public class MapConfiguration implements Configuration {
 			}
 		}
 		
-		if (config.getKind() != Kind.PRIMARY) {
-			
-			return values.containsKey(config);
-			
-		} else {
-			
-			boolean has = values.containsKey(config);
-			if (has) return true;
-			
-			for(ConfigKey<?> configKey : config.getAliases()) {
-				has = values.containsKey(configKey);
-				if (has) return true;
-			}
-			
-			for(ConfigKey<?> configKey : config.getDeprecated()) {
-				has = values.containsKey(configKey);
-				if (has) return true;
-			}
-			
-			return false;
-		}
+		Object val = getImpl(config);
+		return val != null;
 	}
 	
 	@Override
 	public <T> T get(ConfigKey<T> config, T defaultValue) {
+		
 		enforceConfigKey(config);
+		
 		enforceDefaultValue(config, defaultValue);
 		
 		if (config.getKind() == Kind.DEPRECATED) {
@@ -368,32 +359,15 @@ public class MapConfiguration implements Configuration {
 			}
 		}
 		
-		Object val = values.get(config);
+		Object val = getImpl(config);
+		if (val != null) return coerceNumber(val, config.getType());
 		
-		if (val == null) {
-			
-			if (config.getKind() == Kind.PRIMARY) {
-			
-				for(ConfigKey<?> configKey : config.getAliases()) {
-					val = values.get(configKey);
-					if (val != null) return coerceNumber(val, config.getType());
-				}
-				
-				for(ConfigKey<?> configKey : config.getDeprecated()) {
-					val = values.get(configKey);
-					if (val != null) return coerceNumber(val, config.getType());
-				}
-			}
-			
-			if (overwrittenDefaults.containsKey(config)) {
-				Object newDef = overwrittenDefaults.get(config);
-				return config.getType().cast(newDef);
-			}
-			
-			return defaultValue;
+		if (overwrittenDefaults.containsKey(config)) {
+			Object newDef = overwrittenDefaults.get(config);
+			return coerceNumber(newDef, config.getType());
 		}
 		
-		return config.getType().cast(val);
+		return defaultValue;
 	}
 
 	@Override
