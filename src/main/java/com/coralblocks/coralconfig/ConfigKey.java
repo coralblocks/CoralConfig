@@ -158,12 +158,24 @@ public final class ConfigKey<T> {
     	return of(Integer.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    public ConfigKey<T> def(T defaultValue) {
+    	return of(getType(), getKind(), false, defaultValue, getPrimary());
+    }
+    
     public static ConfigKey<Integer> intKeyDeprecated(Integer defaultValue, ConfigKey<?> primary) {
     	return of(Integer.class, Kind.DEPRECATED, false, defaultValue, primary);
     }
     
+    public ConfigKey<T> deprecated(ConfigKey<T> primary) {
+    	return of(getType(), Kind.DEPRECATED, isRequired(), getDefaultValue(), primary);
+    }
+    
     public static ConfigKey<Integer> intKeyAlias(Integer defaultValue, ConfigKey<?> primary) {
     	return of(Integer.class, Kind.ALIAS, false, defaultValue, primary);
+    }
+    
+    public ConfigKey<T> alias(ConfigKey<T> primary) {
+    	return of(getType(), Kind.ALIAS, isRequired(), getDefaultValue(), primary);
     }
     
     public static ConfigKey<Long> longKey() {

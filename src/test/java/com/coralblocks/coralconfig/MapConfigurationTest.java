@@ -26,11 +26,13 @@ public class MapConfigurationTest {
 		BALL, BOB, BILLY
 	}
 	
-	public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey(1);
+	public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey().def(1);
+	public static final ConfigKey<Integer> TIMEOUT_222 = ConfigKey.intKey().deprecated(TIMEOUT).def(22);
+	public static final ConfigKey<Integer> TIMEOUT_333 = ConfigKey.intKey().def(22).alias(TIMEOUT);
 	
 	public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey();
 	
-	public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.enumKey(TestEnum.BILLY, TestEnum.class);
+	public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.enumKey(TestEnum.class).def(TestEnum.BILLY);
 	
 	@Test
 	public void testDefaults() {

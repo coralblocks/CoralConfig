@@ -34,16 +34,14 @@ public class PrimaryConfigTest {
 			
 			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey();
 			
-			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey();
-			
 			public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.enumKey(TestEnum.class);
-			
-			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias(NO_REWIND);
-			
-			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKeyAlias(NO_REWIND);
+
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey();
+			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKey().alias(NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKey().alias(NO_REWIND);
 
 			public static final ConfigKey<Float> NEW_FLOAT = ConfigKey.floatKey();
-			public static final ConfigKey<Float> INITIAL_FLOAT = ConfigKey.floatKeyDeprecated(NEW_FLOAT);
+			public static final ConfigKey<Float> INITIAL_FLOAT = ConfigKey.floatKey().deprecated(NEW_FLOAT);
 		}
 		
 		ConfigContainer cc = ConfigContainer.of(Base1.class);
