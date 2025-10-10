@@ -95,6 +95,14 @@ final class ConfigContainer {
         this.toString = "Config[" + holder.getName() + ", size=" + configKeys.size() + "]";
         
         enforcePrimarySameHolder(configKeys);
+        adjustLists(configKeys);
+    }
+    
+    private static void adjustLists(Set<ConfigKey<?>> configKeys) {
+    	for(ConfigKey<?> configKey : configKeys) {
+    		configKey.aliases = Collections.unmodifiableList(configKey.aliases);
+    		configKey.deprecated = Collections.unmodifiableList(configKey.deprecated);
+    	}
     }
     
     private static void enforcePrimarySameHolder(Set<ConfigKey<?>> configKeys) {

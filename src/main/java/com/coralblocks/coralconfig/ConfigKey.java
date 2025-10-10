@@ -15,6 +15,9 @@
  */
 package com.coralblocks.coralconfig;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class ConfigKey<T> {
 	
 	static enum Kind {
@@ -25,6 +28,8 @@ public final class ConfigKey<T> {
 	private final Class<T> type;
 	private final Kind kind;
 	private final ConfigKey<?> primary;
+	List<ConfigKey<?>> aliases = new ArrayList<ConfigKey<?>>();
+	List<ConfigKey<?>> deprecated = new ArrayList<ConfigKey<?>>();
 	String fieldName;
 	Class<?> holder;
 	
@@ -35,7 +40,28 @@ public final class ConfigKey<T> {
         this.type = type;
         this.kind = kind;
         this.primary = primary;
+
+        if (primary != null && (primary.aliases.getClass().getName().startsWith("java.util.Collections$Unmodifiable") ||
+        		primary.deprecated.getClass().getName().startsWith("java.util.Collections$Unmodifiable"))) return;
+        
+        if (kind == Kind.ALIAS) {
+        	primary.aliases.add(this);
+        } else if (kind == Kind.DEPRECATED) {
+        	primary.deprecated.add(this);
+        }
+        if (kind != Kind.PRIMARY) enforceCompatibleType(primary, this, kind);
     }
+	
+	private static void enforceCompatibleType(ConfigKey<?> primary, ConfigKey<?> other, Kind kind) {
+		if (primary.getType() == other.getType()) {
+			// good
+		} else if (Number.class.isAssignableFrom(primary.getType()) && Number.class.isAssignableFrom(other.getType())) {
+			// good
+		} else {
+			throw new IllegalStateException("The types are incompatible for " + (kind == Kind.ALIAS ? "an alias" : "deprecation") + "!" +
+									" primary=" + primary + " other=" + other);
+		}
+	}
 	
 	private void enforceRelationship(String name, Class<T> type, Kind kind, ConfigKey<?> primary) {
 		if (kind == Kind.PRIMARY) {
@@ -254,6 +280,14 @@ public final class ConfigKey<T> {
     
     public String getFieldName() {
     	return fieldName;
+    }
+    
+    public List<ConfigKey<?>> getAliases() {
+    	return aliases;
+    }
+    
+    public List<ConfigKey<?>> getDeprecated() {
+    	return deprecated;
     }
     
 	@Override

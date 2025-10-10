@@ -199,4 +199,67 @@ public class MapConfigurationTest {
 			// Good!
 		}
 	}
+	
+	@Test
+	public void testGetAliasesAndDeprecated() {
+		
+		@SuppressWarnings("unused")
+		class Base1 {
+			
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey("noRewind");
+			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias("noRewind1", NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKeyAlias("noRewind2", NO_REWIND);
+			public static final ConfigKey<Boolean> IS_NO_REWIND = ConfigKey.boolKeyDeprecated("isNoRewind", NO_REWIND);
+
+			public static final ConfigKey<Integer> TIME_INTEGER = ConfigKey.intKey("timeInteger");
+			public static final ConfigKey<Float> TIME_FLOAT = ConfigKey.floatKeyDeprecated("timeFloat", TIME_INTEGER);
+			
+			public static final ConfigKey<Double> PRICE_DOUBLE = ConfigKey.doubleKey("priceDouble");
+			public static final ConfigKey<Integer> PRICE_INT = ConfigKey.intKeyDeprecated("priceInteger", PRICE_DOUBLE);
+		}
+		
+		MapConfiguration config = new MapConfiguration(Base1.class);
+		
+		config.add(Base1.PRICE_INT, 2);
+		Assert.assertTrue(2d == config.get(Base1.PRICE_DOUBLE));
+		Assert.assertEquals(2, config.get(Base1.PRICE_INT, 1).intValue());
+		
+		config.add(Base1.PRICE_DOUBLE, 2.3423d);
+		Assert.assertTrue(2.3423d == config.get(Base1.PRICE_DOUBLE, 1.1111d));
+		Assert.assertEquals(2, config.get(Base1.PRICE_INT, 1).intValue());
+		
+		config.remove(Base1.PRICE_DOUBLE);
+		Assert.assertTrue(2d == config.get(Base1.PRICE_DOUBLE, 1.1111d));
+		Assert.assertEquals(2, config.get(Base1.PRICE_INT, 111).intValue());
+		
+		config.remove(Base1.PRICE_INT);
+		Assert.assertTrue(1.1111d == config.get(Base1.PRICE_DOUBLE, 1.1111d));
+		Assert.assertEquals(123, config.get(Base1.PRICE_INT, 123).intValue());
+		
+		config.add(Base1.IS_NO_REWIND, true);
+		Assert.assertEquals(true, config.get(Base1.NO_REWIND, false));
+		
+		config.add(Base1.NO_REWIND1, false);
+		Assert.assertEquals(false, config.get(Base1.NO_REWIND));
+		
+		config.add(Base1.NO_REWIND2, true);
+		Assert.assertEquals(false, config.get(Base1.NO_REWIND));
+		
+		config.remove(Base1.NO_REWIND1);
+		Assert.assertEquals(true, config.get(Base1.NO_REWIND));
+		
+		config.remove(Base1.NO_REWIND2);
+		Assert.assertEquals(true, config.get(Base1.NO_REWIND));
+		
+		config.add(Base1.IS_NO_REWIND, false);
+		Assert.assertEquals(false, config.get(Base1.NO_REWIND));
+	
+		config.add(Base1.TIME_FLOAT, 2.84234f);
+		Assert.assertEquals(2, config.get(Base1.TIME_INTEGER, 0).intValue());
+		Assert.assertTrue(2.84234f == config.get(Base1.TIME_FLOAT).floatValue());
+		
+		config.add(Base1.TIME_INTEGER, 3);
+		Assert.assertEquals(3, config.get(Base1.TIME_INTEGER, -1).intValue());
+		Assert.assertTrue(2.84234f == config.get(Base1.TIME_FLOAT).floatValue());
+	}
 }

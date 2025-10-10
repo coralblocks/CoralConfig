@@ -155,6 +155,38 @@ public class MapConfiguration implements Configuration {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private static <T> T coerceNumber(Object value, Class<T> targetType) {
+		
+	    if (value == null) return null;
+
+	    if (targetType.isInstance(value)) {
+	        return (T) value;
+	    }
+
+	    if (!(value instanceof Number))
+	        throw new IllegalArgumentException("Cannot convert a type that is not a number!" + 
+	        			" valueType=" + value.getClass().getSimpleName() +
+	        			" targetType=" + targetType.getSimpleName());
+
+	    Number n = (Number) value;
+
+	    if (targetType == Integer.class)
+	        return (T) Integer.valueOf(n.intValue());
+	    if (targetType == Long.class)
+	        return (T) Long.valueOf(n.longValue());
+	    if (targetType == Float.class)
+	        return (T) Float.valueOf(n.floatValue());
+	    if (targetType == Double.class)
+	        return (T) Double.valueOf(n.doubleValue());
+	    if (targetType == Short.class)
+	        return (T) Short.valueOf(n.shortValue());
+	    if (targetType == Byte.class)
+	        return (T) Byte.valueOf(n.byteValue());
+
+	    throw new IllegalArgumentException("Unsupported numeric type: " + targetType);
+	}
+	
 	@Override
 	public void addListener(DeprecatedListener listener) {
 		if (!listeners.contains(listener)) listeners.add(listener);
@@ -232,6 +264,7 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public <T> T get(ConfigKey<T> key) {
+		
 		enforceConfigKey(key);
 		
 		if (key.getKind() == Kind.DEPRECATED) {
@@ -240,12 +273,34 @@ public class MapConfiguration implements Configuration {
 			}
 		}
 		
-		Object val = values.get(key);
-		if (val == null) {
+		if (key.getKind() != Kind.PRIMARY) {
+		
+			Object val = values.get(key);
+			if (val == null) {
+				throw new RuntimeException("Expected configuration not found!" +
+						" key=" + key);
+			}
+			
+			return key.getType().cast(val);
+			
+		} else {
+			
+			Object val = values.get(key);
+			if (val != null) return key.getType().cast(val);
+			
+			for(ConfigKey<?> configKey : key.getAliases()) {
+				val = values.get(configKey);
+				if (val != null) return coerceNumber(val, key.getType());
+			}
+			
+			for(ConfigKey<?> configKey : key.getDeprecated()) {
+				val = values.get(configKey);
+				if (val != null) return coerceNumber(val, key.getType());
+			}
+			
 			throw new RuntimeException("Expected configuration not found!" +
 					" key=" + key);
 		}
-		return key.getType().cast(val);
 	}
 	
 	@Override
@@ -260,13 +315,30 @@ public class MapConfiguration implements Configuration {
 		}
 		
 		Object val = values.get(key);
+		
 		if (val == null) {
+			
+			if (key.getKind() == Kind.PRIMARY) {
+			
+				for(ConfigKey<?> configKey : key.getAliases()) {
+					val = values.get(configKey);
+					if (val != null) return coerceNumber(val, key.getType());
+				}
+				
+				for(ConfigKey<?> configKey : key.getDeprecated()) {
+					val = values.get(configKey);
+					if (val != null) return coerceNumber(val, key.getType());
+				}
+			}
+			
 			if (overwrittenDefaults.containsKey(key)) {
 				Object newDef = overwrittenDefaults.get(key);
 				return key.getType().cast(newDef);
 			}
+			
 			return defaultValue;
 		}
+		
 		return key.getType().cast(val);
 	}
 
