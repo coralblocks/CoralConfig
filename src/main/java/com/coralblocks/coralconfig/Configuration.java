@@ -27,10 +27,10 @@ public interface Configuration {
 
 	public Class<?>[] getHolders();
 	
-	public int size();
-	
 	public List<ConfigKey<?>> allConfigKeys();
+
 	
+	public int size();
 	
 	public <T> T get(ConfigKey<T> config);
 	
