@@ -15,6 +15,7 @@
  */
 package com.coralblocks.coralconfig;
 
+import java.util.List;
 import java.util.Set;
 
 public interface Configuration {
@@ -27,6 +28,8 @@ public interface Configuration {
 	public Class<?>[] getHolders();
 	
 	public int size();
+	
+	public List<ConfigKey<?>> allConfigKeys();
 	
 	
 	public <T> T get(ConfigKey<T> key);

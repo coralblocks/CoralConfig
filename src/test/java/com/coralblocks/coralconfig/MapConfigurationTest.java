@@ -220,6 +220,8 @@ public class MapConfigurationTest {
 		
 		MapConfiguration config = new MapConfiguration(Base1.class);
 		
+		Assert.assertEquals(8, config.allConfigKeys().size());
+		
 		config.add(Base1.PRICE_INT, 2);
 		Assert.assertTrue(2d == config.get(Base1.PRICE_DOUBLE));
 		Assert.assertEquals(2, config.get(Base1.PRICE_INT, 1).intValue());
@@ -261,5 +263,15 @@ public class MapConfigurationTest {
 		config.add(Base1.TIME_INTEGER, 3);
 		Assert.assertEquals(3, config.get(Base1.TIME_INTEGER, -1).intValue());
 		Assert.assertTrue(2.84234f == config.get(Base1.TIME_FLOAT).floatValue());
+		
+		@SuppressWarnings("unused")
+		class Base2 {
+			
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey("no_Rewind");
+			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias("no_Rewind1", NO_REWIND);
+		}
+		
+		MapConfiguration mc = new MapConfiguration(Base1.class, Base2.class);
+		Assert.assertEquals(10, mc.allConfigKeys().size());
 	}
 }

@@ -32,6 +32,7 @@ public class MapConfiguration implements Configuration {
 	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	private final Map<ConfigKey<?>, Object> overwrittenDefaults = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
 	private final List<DeprecatedListener> listeners = new ArrayList<DeprecatedListener>();
+	private final List<ConfigKey<?>> allConfigKeys;
 	
 	public MapConfiguration(Class<?> ... holders) {
 		this(null, holders);
@@ -66,6 +67,8 @@ public class MapConfiguration implements Configuration {
 				addParsed(configKey, parsedValue);
 			}
 		}
+		
+		this.allConfigKeys = gatherAllConfigKeys();
 	}
 	
 	public MapConfiguration(Configuration config) {
@@ -88,6 +91,18 @@ public class MapConfiguration implements Configuration {
 		for(ConfigKey<?> configKey : config.keysWithOverwrittenDefault()) {
 			overwriteDefaultCaptured(configKey, config);
 		}
+		
+		this.allConfigKeys = gatherAllConfigKeys();
+	}
+	
+	private List<ConfigKey<?>> gatherAllConfigKeys() {
+		List<ConfigKey<?>> list = new ArrayList<ConfigKey<?>>();
+		for(ConfigContainer cc : configContainers) {
+			for(ConfigKey<?> configKey : cc.configKeys()) {
+				list.add(configKey);
+			}
+		}
+		return Collections.unmodifiableList(list);
 	}
 	
 	// // for generics to work, we need a new method to capture the T from the ConfigKey
@@ -185,6 +200,11 @@ public class MapConfiguration implements Configuration {
 	        return (T) Byte.valueOf(n.byteValue());
 
 	    throw new IllegalArgumentException("Unsupported numeric type: " + targetType);
+	}
+	
+	@Override
+	public List<ConfigKey<?>> allConfigKeys() {
+		return allConfigKeys;
 	}
 	
 	@Override

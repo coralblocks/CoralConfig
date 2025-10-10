@@ -20,9 +20,9 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +73,7 @@ final class ConfigContainer {
         }
         
         Map<String, ConfigKey<?>> map = new LinkedHashMap<String, ConfigKey<?>>();
-        Set<ConfigKey<?>> set = new HashSet<ConfigKey<?>>();
+        Set<ConfigKey<?>> set = new LinkedHashSet<ConfigKey<?>>();
         
         for(ConfigKey<?> key : collected) {
         	
