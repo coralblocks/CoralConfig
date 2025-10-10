@@ -324,6 +324,40 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	@Override
+	public boolean has(ConfigKey<?> config) {
+		
+		enforceConfigKey(config);
+		
+		if (config.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+			}
+		}
+		
+		if (config.getKind() != Kind.PRIMARY) {
+			
+			return values.containsKey(config);
+			
+		} else {
+			
+			boolean has = values.containsKey(config);
+			if (has) return true;
+			
+			for(ConfigKey<?> configKey : config.getAliases()) {
+				has = values.containsKey(configKey);
+				if (has) return true;
+			}
+			
+			for(ConfigKey<?> configKey : config.getDeprecated()) {
+				has = values.containsKey(configKey);
+				if (has) return true;
+			}
+			
+			return false;
+		}
+	}
+	
+	@Override
 	public <T> T get(ConfigKey<T> config, T defaultValue) {
 		enforceConfigKey(config);
 		enforceDefaultValue(config, defaultValue);
@@ -362,19 +396,6 @@ public class MapConfiguration implements Configuration {
 		return config.getType().cast(val);
 	}
 
-	@Override
-	public boolean has(ConfigKey<?> config) {
-		enforceConfigKey(config);
-		
-		if (config.getKind() == Kind.DEPRECATED) {
-			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
-			}
-		}
-		
-		return values.containsKey(config);
-	}
-	
 	@Override
 	public int size() {
 		return values.size();
