@@ -55,7 +55,7 @@ public final class ConfigKey<T> {
 	private static void enforceCompatibleType(ConfigKey<?> primary, ConfigKey<?> other, Kind kind) {
 		if (primary.getType() == other.getType()) {
 			// good
-		} else if (Number.class.isAssignableFrom(primary.getType()) && Number.class.isAssignableFrom(other.getType())) {
+		} else if (kind == Kind.DEPRECATED && Number.class.isAssignableFrom(primary.getType()) && Number.class.isAssignableFrom(other.getType())) {
 			// good
 		} else {
 			throw new IllegalStateException("The types are incompatible for " + (kind == Kind.ALIAS ? "an alias" : "deprecation") + "!" +
