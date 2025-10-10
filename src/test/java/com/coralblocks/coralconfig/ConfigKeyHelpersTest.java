@@ -44,13 +44,8 @@ public class ConfigKeyHelpersTest {
 		Assert.assertEquals(2, config.keys().size());
 		Assert.assertEquals(true, config.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM));
-		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM, TestEnum.BILLY));
-		Assert.assertEquals(TestEnum.BALL, config.get(MY_ENUM, TestEnum.BALL));
 		Assert.assertEquals(false, config.has(TIMEOUT));
 		Assert.assertEquals(false, config.get(NO_REWIND));
-		Assert.assertEquals(false, config.get(NO_REWIND, true));
-		Assert.assertEquals(false, config.get(NO_REWIND, false));
-		Assert.assertEquals(1, config.get(TIMEOUT, 1).intValue());
 		
 		try {
 			config.get(TIMEOUT);
@@ -77,13 +72,8 @@ public class ConfigKeyHelpersTest {
 		Assert.assertEquals(2, mapConfig.keys().size());
 		Assert.assertEquals(true, mapConfig.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM));
-		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM, TestEnum.BILLY));
-		Assert.assertEquals(TestEnum.BALL, mapConfig.get(MY_ENUM, TestEnum.BALL));
 		Assert.assertEquals(false, mapConfig.has(TIMEOUT));
 		Assert.assertEquals(false, mapConfig.get(NO_REWIND));
-		Assert.assertEquals(false, mapConfig.get(NO_REWIND, true));
-		Assert.assertEquals(false, mapConfig.get(NO_REWIND, false));
-		Assert.assertEquals(10, mapConfig.get(TIMEOUT, 1).intValue());
 		
 		try {
 			mapConfig.get(TIMEOUT);
@@ -93,7 +83,13 @@ public class ConfigKeyHelpersTest {
 		}
 		
 		mapConfig.remove(MY_ENUM);
-		Assert.assertEquals(null, mapConfig.get(MY_ENUM, TestEnum.BALL));
+		
+		try {
+			mapConfig.get(MY_ENUM);
+			fail();
+		} catch(RuntimeException e) {
+			// Good!
+		}
 	}
 	
 	@Test
@@ -130,14 +126,9 @@ public class ConfigKeyHelpersTest {
 		Assert.assertEquals(2, mapConfig.keys().size());
 		Assert.assertEquals(true, mapConfig.has(MY_ENUM));
 		Assert.assertEquals(TestEnum.BILLY, mapConfig.get(MY_ENUM));
-		Assert.assertEquals(TestEnum.BILLY, mapConfig.get(MY_ENUM, TestEnum.BILLY));
-		Assert.assertEquals(TestEnum.BILLY, mapConfig.get(MY_ENUM, TestEnum.BALL));
 		Assert.assertEquals(false, mapConfig.has(NO_REWIND));
 		Assert.assertEquals(true, mapConfig.has(TIMEOUT));
 		Assert.assertEquals(33, mapConfig.get(TIMEOUT).intValue());
-		Assert.assertEquals(33, mapConfig.get(TIMEOUT, 77).intValue());
-		Assert.assertEquals(33, mapConfig.get(TIMEOUT, 33).intValue());
-		Assert.assertEquals(true, mapConfig.get(NO_REWIND, true));
 		
 		try {
 			mapConfig.get(NO_REWIND);

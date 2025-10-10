@@ -34,8 +34,6 @@ public interface Configuration {
 	
 	public <T> T get(ConfigKey<T> configKey);
 	
-	public <T> T get(ConfigKey<T> configKey, T defaultValue);
-	
 	public boolean has(ConfigKey<?> configKey);
 	
 	public Set<ConfigKey<?>> keys();

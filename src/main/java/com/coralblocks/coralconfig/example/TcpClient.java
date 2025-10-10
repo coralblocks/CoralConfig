@@ -27,17 +27,17 @@ public class TcpClient extends Client {
 		REGULAR, THROTTLED
 	}
 	
-	public static final ConfigKey<SendStrategy> CLIENT_SEND_STRATEGY = enumKey(SendStrategy.class);
+	public static final ConfigKey<SendStrategy> CLIENT_SEND_STRATEGY = enumKey(SendStrategy.REGULAR, SendStrategy.class);
 	
-	public static final ConfigKey<Integer> MESSAGES_TO_SEND = intKey();
+	public static final ConfigKey<Integer> MESSAGES_TO_SEND = intKey(10);
 
 	public TcpClient(Configuration config) {
 		
 		super(overwrite(config));
 		
-		SendStrategy sendStrategy = config.get(CLIENT_SEND_STRATEGY, SendStrategy.REGULAR);
+		SendStrategy sendStrategy = config.get(CLIENT_SEND_STRATEGY);
 		
-		int msgsToSend = config.get(MESSAGES_TO_SEND, 10);
+		int msgsToSend = config.get(MESSAGES_TO_SEND);
 		
 		// Print what we got!
 		

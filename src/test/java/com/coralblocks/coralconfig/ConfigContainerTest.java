@@ -20,8 +20,6 @@ import static org.junit.Assert.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.coralblocks.coralconfig.ConfigKey.Kind;
-
 
 public class ConfigContainerTest {
 	
@@ -30,14 +28,14 @@ public class ConfigContainerTest {
 		
 		class Base1 {
 			
-			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey();
 			
-			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.of(Boolean.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey();
 		}
 		
 		class Blah {
 		
-			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey();
 		}
 		
 		ConfigContainer cc1 = ConfigContainer.of(Base1.class);
@@ -54,14 +52,14 @@ public class ConfigContainerTest {
 		@SuppressWarnings("unused")
 		class Base2 {
 			
-			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey();
 			
 		}
 		
 		@SuppressWarnings("unused")
 		class Base3 {
 			
-			public static final ConfigKey<Boolean> TIMEOUT = ConfigKey.of(Boolean.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Boolean> TIMEOUT = ConfigKey.boolKey();
 		}
 		
 		try {

@@ -382,8 +382,47 @@ public class MapConfiguration implements Configuration {
 		Object val = getImpl(configKey, values);
 		if (val != null) return coerceNumber(val, configKey.getType());
 		
-		throw new RuntimeException("Expected configuration not found!" +
+		if (configKey.isRequired()) {
+			
+			// well, see if its primary has a default..
+			if (configKey.getKind() != Kind.PRIMARY) {
+				ConfigKey<?> primaryKey = configKey.getPrimary();
+				if (!primaryKey.isRequired()) {
+					return coerceNumber(primaryKey.getDefaultValue(), configKey.getType());
+				}
+				
+			} else { // PRIMARY KEY
+				
+				Set<Object> collect = new HashSet<Object>();
+				
+				for(ConfigKey<?> ck : configKey.getAliases()) {
+					if (!ck.isRequired()) collect.add(ck.getDefaultValue());
+				}
+				
+				for(ConfigKey<?> ck : configKey.getDeprecated()) {
+					if (!ck.isRequired()) collect.add(ck.getDefaultValue());
+				}
+				
+				if (collect.size() == 1) {
+					val = collect.iterator().next();
+					return coerceNumber(val, configKey.getType());
+				}
+			}
+			
+			throw new RuntimeException("Expected configuration not found!" +
 									" configKey=" + configKey);
+		}
+		
+		if (hasImpl(configKey, overwrittenDefaults)) {
+			val = getImpl(configKey, overwrittenDefaults);
+			if (val != null) {
+				return coerceNumber(val, configKey.getType());
+			} else {
+				return null; // Defaults can contain NULL !!!
+			}
+		}
+		
+		return configKey.getDefaultValue();
 	}
 	
 	@Override
@@ -400,34 +439,6 @@ public class MapConfiguration implements Configuration {
 		return hasImpl(configKey, values);
 	}
 	
-	@Override
-	public <T> T get(ConfigKey<T> configKey, T defaultValue) {
-		
-		enforceConfigKey(configKey);
-		
-		enforceDefaultValue(configKey, defaultValue);
-		
-		if (configKey.getKind() == Kind.DEPRECATED) {
-			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
-			}
-		}
-		
-		Object val = getImpl(configKey, values);
-		if (val != null) return coerceNumber(val, configKey.getType());
-		
-		if (hasImpl(configKey, overwrittenDefaults)) {
-			val = getImpl(configKey, overwrittenDefaults);
-			if (val != null) {
-				return coerceNumber(val, configKey.getType());
-			} else {
-				return null; // Defaults can contain NULL !!!
-			}
-		}
-		
-		return defaultValue;
-	}
-
 	@Override
 	public int size() {
 		return values.size();

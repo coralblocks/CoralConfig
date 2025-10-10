@@ -20,8 +20,6 @@ import static org.junit.Assert.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.coralblocks.coralconfig.ConfigKey.Kind;
-
 public class ConfigKeyTest {
 	
 	static enum TestEnum {
@@ -31,14 +29,14 @@ public class ConfigKeyTest {
 	@Test
 	public void testBasics() {
 		
-		ConfigKey<Integer> intKey = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
+		ConfigKey<Integer> intKey = ConfigKey.intKey();
 		
 		Integer value = intKey.parseValue("3");
 		
 		Assert.assertEquals(3, value.intValue());
 		Assert.assertEquals(null, intKey.getFieldName());
 		
-		ConfigKey<TestEnum> enumKey = ConfigKey.of(TestEnum.class, Kind.PRIMARY, null);
+		ConfigKey<TestEnum> enumKey = ConfigKey.enumKey(TestEnum.class);
 		
 		TestEnum testEnum = enumKey.parseValue("BLAH");
 		Assert.assertEquals(TestEnum.BLAH, testEnum);

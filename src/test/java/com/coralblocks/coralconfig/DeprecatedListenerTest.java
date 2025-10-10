@@ -48,9 +48,9 @@ public class DeprecatedListenerTest {
 	
 		class Base {
 			
-			public static final ConfigKey<Float> ANOTHER_FLOAT1 = floatKey();
-			public static final ConfigKey<Float> ANOTHER_FLOAT2 = floatKeyAlias(ANOTHER_FLOAT1);
-			public static final ConfigKey<Float> ANOTHER_FLOAT3 = floatKeyDeprecated(ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT1 = floatKey(3f);
+			public static final ConfigKey<Float> ANOTHER_FLOAT2 = floatKeyAlias(3f, ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT3 = floatKeyDeprecated(3f, ANOTHER_FLOAT1);
 		}
 		
 		MapConfiguration config = new MapConfiguration(Base.class);
@@ -59,9 +59,9 @@ public class DeprecatedListenerTest {
 		
 		config.addListener(testListener);
 		
-		config.get(Base.ANOTHER_FLOAT1, 3f);
-		config.get(Base.ANOTHER_FLOAT2, 3f);
-		config.get(Base.ANOTHER_FLOAT3, 3f);
+		config.get(Base.ANOTHER_FLOAT1);
+		config.get(Base.ANOTHER_FLOAT2);
+		config.get(Base.ANOTHER_FLOAT3);
 		
 		Assert.assertEquals(1, testListener.calls);
 		Assert.assertEquals(Base.ANOTHER_FLOAT3, testListener.deprecated);

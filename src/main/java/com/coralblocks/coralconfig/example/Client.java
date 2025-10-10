@@ -23,23 +23,25 @@ import com.coralblocks.coralconfig.MapConfiguration;
 
 public class Client implements MoreConfigs {
 
-	public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey();
-	public static final ConfigKey<Float> HEARTBEAT = floatKeyDeprecated(HEARTBEAT_INTERVAL);
+	public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey(5);
+	public static final ConfigKey<Float> HEARTBEAT = floatKeyDeprecated(4.444f, HEARTBEAT_INTERVAL);
 	
-	public static final ConfigKey<String> CLIENT_USERNAME = stringKey();
+	public static final ConfigKey<String> CLIENT_USERNAME = stringKey("testClient");
 	public static final ConfigKey<String> USERNAME = stringKeyAlias(CLIENT_USERNAME);
 	
 	public Client(Configuration config) {
 		
-		int maxRetries = config.get(MAX_RETRIES, 10); // from MoreConfigs
+		int maxRetries = config.get(MAX_RETRIES); // from MoreConfigs
 		
-		int heartbeatInterval = config.get(HEARTBEAT_INTERVAL, 5);
+		int heartbeatInterval = config.get(HEARTBEAT_INTERVAL);
 		
-		float heartbeat = config.get(HEARTBEAT, 4.444f);
+		float heartbeat = config.get(HEARTBEAT);
 		
-		String clientUsername = config.get(CLIENT_USERNAME, "testClient");
+		String clientUsername = config.get(CLIENT_USERNAME);
 		
-		String serverIp = config.get(SERVER_IP, "localhost"); // using alias from MoreConfigs
+		String username = config.get(USERNAME);
+		
+		String serverIp = config.get(SERVER_IP); // using alias from MoreConfigs
 		
 		// Print what we got!
 		
@@ -50,6 +52,8 @@ public class Client implements MoreConfigs {
 		System.out.println("Got => " + HEARTBEAT + " => " + heartbeat);
 		
 		System.out.println("Got => " + CLIENT_USERNAME + " => " + clientUsername);
+		
+		System.out.println("Got => " + USERNAME + " => " + username);
 		
 		System.out.println("Got => " + SERVER_IP + " => " + serverIp);
 	}
