@@ -33,7 +33,7 @@ public class TcpClient extends Client {
 
 	public TcpClient(Configuration config) {
 		
-		super(config);
+		super(overwrite(config));
 		
 		SendStrategy sendStrategy = config.get(CLIENT_SEND_STRATEGY, SendStrategy.REGULAR);
 		
@@ -44,6 +44,12 @@ public class TcpClient extends Client {
 		System.out.println("Got => " + CLIENT_SEND_STRATEGY + " => " + sendStrategy);
 		
 		System.out.println("Got => " + MESSAGES_TO_SEND + " => " + msgsToSend);
+	}
+	
+	private static Configuration overwrite(Configuration config) {
+		config.overwriteDefault(MAX_RETRIES, 22);
+		config.overwriteDefault(HEARTBEAT, 5.555f);
+		return config;
 	}
 	
 	public static void main(String[] args) {
