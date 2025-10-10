@@ -35,6 +35,8 @@ public class Client implements MoreConfigs {
 		
 		int heartbeatInterval = config.get(HEARTBEAT_INTERVAL, 5);
 		
+		float heartbeat = config.get(HEARTBEAT, 4.444f);
+		
 		String clientUsername = config.get(CLIENT_USERNAME, "testClient");
 		
 		String serverIp = config.get(SERVER_IP, "localhost"); // using alias from MoreConfigs
@@ -45,9 +47,13 @@ public class Client implements MoreConfigs {
 		
 		System.out.println("Got => " + HEARTBEAT_INTERVAL + " => " + heartbeatInterval);
 		
+		System.out.println("Got => " + HEARTBEAT + " => " + heartbeat);
+		
 		System.out.println("Got => " + CLIENT_USERNAME + " => " + clientUsername);
 		
 		System.out.println("Got => " + SERVER_IP + " => " + serverIp);
+		
+		System.out.println();
 		
 	}
 	
@@ -55,18 +61,40 @@ public class Client implements MoreConfigs {
 		
 		Configuration config = new MapConfiguration("username=saoj maxRetries=2", MoreConfigs.class, Client.class);
 		
+		System.out.println("-----> 1:");
 		new Client(config);
-		
-		System.out.println();
 		
 		MapConfiguration mapConfig = new MapConfiguration(MoreConfigs.class, Client.class);
 		mapConfig.add(CLIENT_USERNAME, "rpaiva");
 		mapConfig.add(SERVER_HOST, "192.168.1.1");
 		
+		System.out.println("-----> 2:");
 		new Client(mapConfig);
 		
-		System.out.println();
+		MapConfiguration mc1 = new MapConfiguration(MoreConfigs.class, Client.class);
+		mc1.add(HEARTBEAT, 7.9f);
 		
+		System.out.println("-----> 3:");
+		new Client(mc1);
+		
+		mc1.add(HEARTBEAT_INTERVAL, 9);
+		
+		System.out.println("-----> 4:");
+		new Client(mc1);
+		
+		MapConfiguration mc2 = new MapConfiguration(mc1);
+		mc2.remove(HEARTBEAT);
+		
+		System.out.println("-----> 5:");
+		new Client(mc2);
+		
+		MapConfiguration mc3 = new MapConfiguration(mc1);
+		mc3.remove(HEARTBEAT_INTERVAL);
+		
+		System.out.println("-----> 6:");
+		new Client(mc3);
+		
+		System.out.println("-----> all configKeys:");
 		for(ConfigKey<?> configKey : mapConfig.allConfigKeys()) {
 			System.out.println(configKey);
 		}

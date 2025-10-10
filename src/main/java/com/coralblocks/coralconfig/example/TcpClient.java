@@ -15,13 +15,26 @@
  */
 package com.coralblocks.coralconfig.example;
 
+import static com.coralblocks.coralconfig.ConfigKey.*;
+
+import com.coralblocks.coralconfig.ConfigKey;
 import com.coralblocks.coralconfig.Configuration;
 
 public class TcpClient extends Client implements MoreConfigs {
+	
+	static enum Kind {
+		REGULAR, THROTTLED
+	}
+	
+	public static final ConfigKey<Kind> CLIENT_KIND = enumKey("clientKind", Kind.class);
 
 	public TcpClient(Configuration config) {
 		super(config);
+		
+		
 	}
+	
+	
 	
 	
 }
