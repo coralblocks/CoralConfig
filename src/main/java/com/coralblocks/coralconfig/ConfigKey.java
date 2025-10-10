@@ -171,6 +171,11 @@ public final class ConfigKey<T> {
     }
     
     public ConfigKey<T> deprecated(ConfigKey<T> primary) {
+    	if (getKind() == Kind.DEPRECATED) {
+    		throw new IllegalStateException("Tried to call deprecated twice on the same config key!");
+    	} else if (getKind() == Kind.ALIAS) {
+    		throw new IllegalStateException("Tried to call deprecated on a config key that is already an alias!");
+    	}
     	return of(getType(), Kind.DEPRECATED, isRequired(), getDefaultValue(), primary);
     }
     
@@ -179,6 +184,12 @@ public final class ConfigKey<T> {
     }
     
     public ConfigKey<T> alias(ConfigKey<T> primary) {
+    	if (getKind() == Kind.ALIAS) {
+    		throw new IllegalStateException("Tried to call alias twice on the same config key!");
+    	} else if (getKind() == Kind.DEPRECATED) {
+    		throw new IllegalStateException("Tried to call alias on a config key that is already deprecated!");
+    	}
+    	
     	return of(getType(), Kind.ALIAS, isRequired(), getDefaultValue(), primary);
     }
     
