@@ -41,15 +41,9 @@ public interface Configuration {
 	public Set<ConfigKey<?>> keys();
 
 	
-	default public <T> void overwriteDefault(ConfigKey<T> config, T defaultValue) {
-		throw new UnsupportedOperationException();
-	}
+	public <T> void overwriteDefault(ConfigKey<T> config, T defaultValue);
 	
-	default public <T> T getOverwrittenDefault(ConfigKey<T> config) {
-		throw new UnsupportedOperationException();
-	}
+	public <T> T getOverwrittenDefault(ConfigKey<T> config);
 	
-	default public Set<ConfigKey<?>> keysWithOverwrittenDefault() {
-		throw new UnsupportedOperationException();
-	}
+	public Set<ConfigKey<?>> keysWithOverwrittenDefault();
 }
