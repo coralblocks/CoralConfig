@@ -61,7 +61,7 @@ public class MapConfiguration implements Configuration {
 				
 				ConfigKey<?> configKey = getByName(key);
 				if (configKey == null) {
-					throw new IllegalStateException("A key in params does not map to a ConfigKey: " + key);
+					throw new IllegalStateException("A config in params does not belong to this configuration: " + key);
 				}
 				Object parsedValue = configKey.parseValue(value);
 				addParsed(configKey, parsedValue);
@@ -132,7 +132,7 @@ public class MapConfiguration implements Configuration {
 	
 	private void enforceValue(ConfigKey<?> key, Object value) {
 		if (value == null) {
-			throw new RuntimeException("Null values are not allowed! (You should remove the key from the config instead)" + 
+			throw new RuntimeException("Null values are not allowed! (You should remove the config from the configuration instead)" + 
 									   " key=" + key);
 		}
 	}
@@ -161,7 +161,7 @@ public class MapConfiguration implements Configuration {
 	private void enforceConfigKey(ConfigKey<?> key) {
 		
 		if (key == null) {
-			throw new NullPointerException("The key can never be null!");
+			throw new NullPointerException("The config can never be null!");
 		}
 		
 		if (!checkConfigContainers(key)) {

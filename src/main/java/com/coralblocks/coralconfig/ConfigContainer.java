@@ -81,13 +81,13 @@ final class ConfigContainer {
             ConfigKey<?> prev = map.putIfAbsent(name, key);
             
             if (prev != null) {
-                throw new IllegalStateException("Duplicate ConfigKey name: " + name + " in holder " + this.holder.getName());
+                throw new IllegalStateException("Duplicate config name: " + name + " in holder " + this.holder.getName());
             }
             
             set.add(key);
         }
         
-        if (set.isEmpty()) throw new IllegalStateException("No ConfigKeys found in holder " + this.holder.getName());
+        if (set.isEmpty()) throw new IllegalStateException("No configs found in holder " + this.holder.getName());
         
         this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
         this.configKeysByName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
@@ -110,8 +110,8 @@ final class ConfigContainer {
     		if (configKey.getKind() != Kind.PRIMARY) {
     			ConfigKey<?> primary = configKey.getPrimary();
     			if (primary.holder == null || primary.holder != configKey.holder) {
-    				throw new IllegalStateException("The primary key of the config does not contain the same holder!" +
-    									" keyHolder=" + configKey.holder + " primaryHolder=" + primary.holder);
+    				throw new IllegalStateException("The primary config does not contain the same holder!" +
+    									" holder=" + configKey.holder + " primaryHolder=" + primary.holder);
     			}
     		}
     	}
