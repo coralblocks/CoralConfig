@@ -75,16 +75,16 @@ final class ConfigContainer {
         Map<String, ConfigKey<?>> map = new LinkedHashMap<String, ConfigKey<?>>();
         Set<ConfigKey<?>> set = new LinkedHashSet<ConfigKey<?>>();
         
-        for(ConfigKey<?> key : collected) {
+        for(ConfigKey<?> config : collected) {
         	
-            String name = key.getName();
-            ConfigKey<?> prev = map.putIfAbsent(name, key);
+            String name = config.getName();
+            ConfigKey<?> prev = map.putIfAbsent(name, config);
             
             if (prev != null) {
                 throw new IllegalStateException("Duplicate config name: " + name + " in holder " + this.holder.getName());
             }
             
-            set.add(key);
+            set.add(config);
         }
         
         if (set.isEmpty()) throw new IllegalStateException("No configs found in holder " + this.holder.getName());
@@ -155,8 +155,8 @@ final class ConfigContainer {
     	return configKeys.size();
     }
     
-    public boolean has(ConfigKey<?> key) {
-    	return configKeys.contains(key);
+    public boolean has(ConfigKey<?> config) {
+    	return configKeys.contains(config);
     }
 
     public ConfigKey<?> get(String name) {

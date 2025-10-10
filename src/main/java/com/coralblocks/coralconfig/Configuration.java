@@ -32,20 +32,20 @@ public interface Configuration {
 	public List<ConfigKey<?>> allConfigKeys();
 	
 	
-	public <T> T get(ConfigKey<T> key);
+	public <T> T get(ConfigKey<T> config);
 	
-	public <T> T get(ConfigKey<T> key, T defaultValue);
+	public <T> T get(ConfigKey<T> config, T defaultValue);
 	
-	public boolean has(ConfigKey<?> key);
+	public boolean has(ConfigKey<?> config);
 	
 	public Set<ConfigKey<?>> keys();
 
 	
-	default public <T> void overwriteDefault(ConfigKey<T> key, T defaultValue) {
+	default public <T> void overwriteDefault(ConfigKey<T> config, T defaultValue) {
 		throw new UnsupportedOperationException();
 	}
 	
-	default public <T> T getOverwrittenDefault(ConfigKey<T> key) {
+	default public <T> T getOverwrittenDefault(ConfigKey<T> config) {
 		throw new UnsupportedOperationException();
 	}
 	
