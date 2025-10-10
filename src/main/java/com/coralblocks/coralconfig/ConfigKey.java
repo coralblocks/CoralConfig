@@ -59,6 +59,7 @@ public final class ConfigKey<T> {
 			// good
 		} else {
 			throw new IllegalStateException("The types are incompatible for " + (kind == Kind.ALIAS ? "an alias" : "deprecation") + "!" +
+									" primaryType=" + primary.getType().getSimpleName() + " otherType=" + other.getType().getSimpleName() +
 									" primary=" + primary + " other=" + other);
 		}
 	}
