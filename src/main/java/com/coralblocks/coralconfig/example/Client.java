@@ -52,9 +52,6 @@ public class Client implements MoreConfigs {
 		System.out.println("Got => " + CLIENT_USERNAME + " => " + clientUsername);
 		
 		System.out.println("Got => " + SERVER_IP + " => " + serverIp);
-		
-		System.out.println();
-		
 	}
 	
 	public static void main(String[] args) {
@@ -63,6 +60,7 @@ public class Client implements MoreConfigs {
 		
 		System.out.println("-----> 1:");
 		new Client(config);
+		System.out.println();
 		
 		MapConfiguration mapConfig = new MapConfiguration(MoreConfigs.class, Client.class);
 		mapConfig.add(CLIENT_USERNAME, "rpaiva");
@@ -70,34 +68,40 @@ public class Client implements MoreConfigs {
 		
 		System.out.println("-----> 2:");
 		new Client(mapConfig);
+		System.out.println();
 		
 		MapConfiguration mc1 = new MapConfiguration(MoreConfigs.class, Client.class);
 		mc1.add(HEARTBEAT, 7.9f);
 		
 		System.out.println("-----> 3:");
 		new Client(mc1);
+		System.out.println();
 		
 		mc1.add(HEARTBEAT_INTERVAL, 9);
 		
 		System.out.println("-----> 4:");
 		new Client(mc1);
+		System.out.println();
 		
 		MapConfiguration mc2 = new MapConfiguration(mc1);
 		mc2.remove(HEARTBEAT);
 		
 		System.out.println("-----> 5:");
 		new Client(mc2);
+		System.out.println();
 		
 		MapConfiguration mc3 = new MapConfiguration(mc1);
 		mc3.remove(HEARTBEAT_INTERVAL);
 		
 		System.out.println("-----> 6:");
 		new Client(mc3);
+		System.out.println();
 		
 		System.out.println("-----> all configKeys:");
 		for(ConfigKey<?> configKey : mapConfig.allConfigKeys()) {
 			System.out.println(configKey);
 		}
+		
+		System.out.println();
 	}
-	
 }
