@@ -19,7 +19,7 @@ public interface DeprecatedListener {
 	
 	default public void deprecatedConfig(ConfigKey<?> deprecatedKey, ConfigKey<?> primaryKey) {
 		
-		System.out.println("---CoralConfig---> You are using a deprecated config!" +
+		System.out.println("---CoralConfig---> You are using a deprecated config key!" +
 				" holder=" + primaryKey.getHolder().getName() +
 				" deprecatedKey=" + deprecatedKey.getFieldName() + "(\"" + deprecatedKey.getName() + "\")" +
 				" inFavorOf=" + primaryKey.getFieldName() + "(\"" + primaryKey.getName() + "\")");

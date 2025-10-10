@@ -67,23 +67,23 @@ public final class ConfigKey<T> {
 	private void enforceRelationship(String name, Class<T> type, Kind kind, ConfigKey<?> primary) {
 		if (kind == Kind.PRIMARY) {
 			if (primary != null) {
-				throw new IllegalStateException("When defining a primary config, it must not have have a parent primary!" +
+				throw new IllegalStateException("When defining a primary config key, it must not have have a parent primary!" +
 									" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary);
 			}
 		} else if (kind == Kind.ALIAS) {
 			if (primary == null) {
-				throw new IllegalStateException("When defining an alias config, it must specify its parent primary!" +
+				throw new IllegalStateException("When defining an alias config key, it must specify its parent primary!" +
 						" name=" + name + " type=" + type.getSimpleName());
 			} else if (primary.getKind() != Kind.PRIMARY) {
-				throw new IllegalStateException("The parent config of an alias config must not be an alias or a deprecated type!" +
+				throw new IllegalStateException("The parent config key of an alias config key must not be an alias or a deprecated type!" +
 						" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
 			}
 		} else if (kind == Kind.DEPRECATED) {
 			if (primary == null) {
-				throw new IllegalStateException("When defining a deprecated config, it must specify its parent primary!" +
+				throw new IllegalStateException("When defining a deprecated config key, it must specify its parent primary!" +
 						" name=" + name + " type=" + type.getSimpleName());
 			} else if (primary.getKind() != Kind.PRIMARY) {
-				throw new IllegalStateException("The parent config of a deprecated config must not be an alias or a deprecated type!" +
+				throw new IllegalStateException("The parent config key of a deprecated config key must not be an alias or a deprecated type!" +
 						" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
 			}
 		}

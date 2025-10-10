@@ -61,7 +61,7 @@ public class MapConfiguration implements Configuration {
 				
 				ConfigKey<?> configKey = getByName(key);
 				if (configKey == null) {
-					throw new IllegalStateException("A config in params does not belong to this configuration: " + key);
+					throw new IllegalStateException("A config key in params does not belong to this configuration: " + key);
 				}
 				Object parsedValue = configKey.parseValue(value);
 				addParsed(configKey, parsedValue);
@@ -106,20 +106,20 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	// // for generics to work, we need a new method to capture the T from the ConfigKey
-	private <T> void addParsed(ConfigKey<T> config, Object parsed) {
-	    add(config, config.getType().cast(parsed));
+	private <T> void addParsed(ConfigKey<T> configKey, Object parsed) {
+	    add(configKey, configKey.getType().cast(parsed));
 	}
 	
 	// for generics to work, we need a new method to capture the T from the ConfigKey
-	private <T> void addCaptured(ConfigKey<T> config, Configuration configuration) {
-	    T value = configuration.get(config);
-	    add(config, value);
+	private <T> void addCaptured(ConfigKey<T> configKey, Configuration configuration) {
+	    T value = configuration.get(configKey);
+	    add(configKey, value);
 	}
 	
 	// for generics to work, we need a new method to capture the T from the ConfigKey
-	private <T> void overwriteDefaultCaptured(ConfigKey<T> config, Configuration configuration) {
-	    T value = configuration.getOverwrittenDefault(config);
-	    overwriteDefault(config, value);
+	private <T> void overwriteDefaultCaptured(ConfigKey<T> configKey, Configuration configuration) {
+	    T value = configuration.getOverwrittenDefault(configKey);
+	    overwriteDefault(configKey, value);
 	}
 	
 	private ConfigKey<?> getByName(String name) {
@@ -130,43 +130,43 @@ public class MapConfiguration implements Configuration {
 		return null;
 	}
 	
-	private void enforceValue(ConfigKey<?> config, Object value) {
+	private void enforceValue(ConfigKey<?> configKey, Object value) {
 		if (value == null) {
-			throw new RuntimeException("Null values are not allowed! (You should remove the config from the configuration instead)" + 
-									   " config=" + config);
+			throw new RuntimeException("Null values are not allowed! (You should remove the config key from the configuration instead)" + 
+									   " configKey=" + configKey);
 		}
 	}
 	
-	private void enforceDefaultValue(ConfigKey<?> config, Object value) {
+	private void enforceDefaultValue(ConfigKey<?> configKey, Object value) {
 
 		if (value != null) return; // nothing to do
 		
-		Class<?> type = config.getType();
+		Class<?> type = configKey.getType();
 		
 		if (type == String.class || type.isEnum()) { 
 			return; // allow null for String and Enum
 		}
 		
-		throw new RuntimeException("Null default values are only allowed to Strings and Enums!" + 
-				   " config=" + config);
+		throw new RuntimeException("Null default values are only allowed for Strings and Enums!" + 
+				   " configKey=" + configKey);
 	}
 	
-	private boolean checkConfigContainers(ConfigKey<?> config) {
+	private boolean checkConfigContainers(ConfigKey<?> configKey) {
 		for(ConfigContainer cc : configContainers) {
-			if (cc.has(config)) return true;
+			if (cc.has(configKey)) return true;
 		}
 		return false;
 	}
 	
-	private void enforceConfigKey(ConfigKey<?> config) {
+	private void enforceConfigKey(ConfigKey<?> configKey) {
 		
-		if (config == null) {
-			throw new NullPointerException("The config can never be null!");
+		if (configKey == null) {
+			throw new NullPointerException("The config key can never be null!");
 		}
 		
-		if (!checkConfigContainers(config)) {
+		if (!checkConfigContainers(configKey)) {
 			throw new IllegalStateException("ConfigKey does not belong to holder class!" +
-											" config=" + config); 
+											" configKey=" + configKey); 
 		}
 	}
 	
@@ -218,17 +218,17 @@ public class MapConfiguration implements Configuration {
 	}
 
 	@Override
-	public <T> void overwriteDefault(ConfigKey<T> config, T defaultValue) {
-		enforceConfigKey(config);
-		enforceDefaultValue(config, defaultValue);
+	public <T> void overwriteDefault(ConfigKey<T> configKey, T defaultValue) {
+		enforceConfigKey(configKey);
+		enforceDefaultValue(configKey, defaultValue);
 		
-		if (config.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 		
-		overwrittenDefaults.put(config, defaultValue);
+		overwrittenDefaults.put(configKey, defaultValue);
 	}
 	
 	@Override
@@ -237,17 +237,17 @@ public class MapConfiguration implements Configuration {
 	}
 
 	@Override
-	public <T> T getOverwrittenDefault(ConfigKey<T> config) {
-		enforceConfigKey(config);
+	public <T> T getOverwrittenDefault(ConfigKey<T> configKey) {
+		enforceConfigKey(configKey);
 		
-		if (config.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 		
-		Object val = overwrittenDefaults.get(config);
-		return val != null ? config.getType().cast(val) : null;
+		Object val = overwrittenDefaults.get(configKey);
+		return val != null ? configKey.getType().cast(val) : null;
 	}
 	
 	@Override
@@ -255,56 +255,56 @@ public class MapConfiguration implements Configuration {
 		return holders;
 	}
 	
-	public <T> T add(ConfigKey<T> config, T value) {
-		enforceConfigKey(config);
-		enforceValue(config, value);
+	public <T> T add(ConfigKey<T> configKey, T value) {
+		enforceConfigKey(configKey);
+		enforceValue(configKey, value);
 		
-		if (config.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 		
-		Object prev = values.put(config, value);
-		return prev != null ? config.getType().cast(prev) : null;
+		Object prev = values.put(configKey, value);
+		return prev != null ? configKey.getType().cast(prev) : null;
 	}
 	
-	public <T> T remove(ConfigKey<T> config) {
-		enforceConfigKey(config);
+	public <T> T remove(ConfigKey<T> configKey) {
+		enforceConfigKey(configKey);
 		
-		if (config.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 		
-		Object prev = values.remove(config);
-		return prev != null ? config.getType().cast(prev) : null;
+		Object prev = values.remove(configKey);
+		return prev != null ? configKey.getType().cast(prev) : null;
 	}
 	
-	private static <T> Object getImpl(ConfigKey<T> config, Map<ConfigKey<?>, Object> values) {
+	private static <T> Object getImpl(ConfigKey<T> ck, Map<ConfigKey<?>, Object> values) {
 		
-		if (config.getKind() != Kind.PRIMARY) {
+		if (ck.getKind() != Kind.PRIMARY) {
 			
-			Object val = values.get(config);
+			Object val = values.get(ck);
 			if (val != null) return val;
 			
-			val = values.get(config.getPrimary());
+			val = values.get(ck.getPrimary());
 			if (val != null) return val;
 
 			return null;
 			
 		} else {
 			
-			Object val = values.get(config);
+			Object val = values.get(ck);
 			if (val != null) return val;
 			
-			for(ConfigKey<?> configKey : config.getAliases()) {
+			for(ConfigKey<?> configKey : ck.getAliases()) {
 				val = values.get(configKey);
 				if (val != null) return val;
 			}
 			
-			for(ConfigKey<?> configKey : config.getDeprecated()) {
+			for(ConfigKey<?> configKey : ck.getDeprecated()) {
 				val = values.get(configKey);
 				if (val != null) return val;
 			}
@@ -313,29 +313,29 @@ public class MapConfiguration implements Configuration {
 		}
 	}
 	
-	private static <T> boolean hasImpl(ConfigKey<T> config, Map<ConfigKey<?>, Object> values) {
+	private static <T> boolean hasImpl(ConfigKey<T> ck, Map<ConfigKey<?>, Object> values) {
 		
-		if (config.getKind() != Kind.PRIMARY) {
+		if (ck.getKind() != Kind.PRIMARY) {
 			
-			boolean has = values.containsKey(config);
+			boolean has = values.containsKey(ck);
 			if (has) return true;
 			
-			has = values.containsKey(config.getPrimary());
+			has = values.containsKey(ck.getPrimary());
 			if (has) return true;
 
 			return false;
 			
 		} else {
 			
-			boolean has = values.containsKey(config);
+			boolean has = values.containsKey(ck);
 			if (has) return true;
 			
-			for(ConfigKey<?> configKey : config.getAliases()) {
+			for(ConfigKey<?> configKey : ck.getAliases()) {
 				has = values.containsKey(configKey);
 				if (has) return true;
 			}
 			
-			for(ConfigKey<?> configKey : config.getDeprecated()) {
+			for(ConfigKey<?> configKey : ck.getDeprecated()) {
 				has = values.containsKey(configKey);
 				if (has) return true;
 			}
@@ -345,57 +345,57 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	@Override
-	public <T> T get(ConfigKey<T> config) {
+	public <T> T get(ConfigKey<T> configKey) {
 		
-		enforceConfigKey(config);
+		enforceConfigKey(configKey);
 		
-		if (config.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 		
-		Object val = getImpl(config, values);
-		if (val != null) return coerceNumber(val, config.getType());
+		Object val = getImpl(configKey, values);
+		if (val != null) return coerceNumber(val, configKey.getType());
 		
 		throw new RuntimeException("Expected configuration not found!" +
-									" key=" + config);
+									" configKey=" + configKey);
 	}
 	
 	@Override
-	public boolean has(ConfigKey<?> config) {
+	public boolean has(ConfigKey<?> configKey) {
 		
-		enforceConfigKey(config);
+		enforceConfigKey(configKey);
 		
-		if (config.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 		
-		return hasImpl(config, values);
+		return hasImpl(configKey, values);
 	}
 	
 	@Override
-	public <T> T get(ConfigKey<T> config, T defaultValue) {
+	public <T> T get(ConfigKey<T> configKey, T defaultValue) {
 		
-		enforceConfigKey(config);
+		enforceConfigKey(configKey);
 		
-		enforceDefaultValue(config, defaultValue);
+		enforceDefaultValue(configKey, defaultValue);
 		
-		if (config.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(config, config.getPrimary());
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 		
-		Object val = getImpl(config, values);
-		if (val != null) return coerceNumber(val, config.getType());
+		Object val = getImpl(configKey, values);
+		if (val != null) return coerceNumber(val, configKey.getType());
 		
-		if (hasImpl(config, overwrittenDefaults)) {
-			val = getImpl(config, overwrittenDefaults);
+		if (hasImpl(configKey, overwrittenDefaults)) {
+			val = getImpl(configKey, overwrittenDefaults);
 			if (val != null) {
-				return coerceNumber(val, config.getType());
+				return coerceNumber(val, configKey.getType());
 			} else {
 				return null; // Defaults can contain NULL !!!
 			}

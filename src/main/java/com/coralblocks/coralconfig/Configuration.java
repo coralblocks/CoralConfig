@@ -32,18 +32,18 @@ public interface Configuration {
 	
 	public int size();
 	
-	public <T> T get(ConfigKey<T> config);
+	public <T> T get(ConfigKey<T> configKey);
 	
-	public <T> T get(ConfigKey<T> config, T defaultValue);
+	public <T> T get(ConfigKey<T> configKey, T defaultValue);
 	
-	public boolean has(ConfigKey<?> config);
+	public boolean has(ConfigKey<?> configKey);
 	
 	public Set<ConfigKey<?>> keys();
 
 	
-	public <T> void overwriteDefault(ConfigKey<T> config, T defaultValue);
+	public <T> void overwriteDefault(ConfigKey<T> configKey, T defaultValue);
 	
-	public <T> T getOverwrittenDefault(ConfigKey<T> config);
+	public <T> T getOverwrittenDefault(ConfigKey<T> configKey);
 	
 	public Set<ConfigKey<?>> keysWithOverwrittenDefault();
 }

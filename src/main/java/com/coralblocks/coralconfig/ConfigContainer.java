@@ -75,19 +75,19 @@ final class ConfigContainer {
         Map<String, ConfigKey<?>> map = new LinkedHashMap<String, ConfigKey<?>>();
         Set<ConfigKey<?>> set = new LinkedHashSet<ConfigKey<?>>();
         
-        for(ConfigKey<?> config : collected) {
+        for(ConfigKey<?> configKey : collected) {
         	
-            String name = config.getName();
-            ConfigKey<?> prev = map.putIfAbsent(name, config);
+            String name = configKey.getName();
+            ConfigKey<?> prev = map.putIfAbsent(name, configKey);
             
             if (prev != null) {
-                throw new IllegalStateException("Duplicate config name: " + name + " in holder " + this.holder.getName());
+                throw new IllegalStateException("Duplicate config key name: " + name + " in holder " + this.holder.getName());
             }
             
-            set.add(config);
+            set.add(configKey);
         }
         
-        if (set.isEmpty()) throw new IllegalStateException("No configs found in holder " + this.holder.getName());
+        if (set.isEmpty()) throw new IllegalStateException("No config keys found in holder " + this.holder.getName());
         
         this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
         this.configKeysByName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
@@ -110,7 +110,7 @@ final class ConfigContainer {
     		if (configKey.getKind() != Kind.PRIMARY) {
     			ConfigKey<?> primary = configKey.getPrimary();
     			if (primary.holder == null || primary.holder != configKey.holder) {
-    				throw new IllegalStateException("The primary config does not contain the same holder!" +
+    				throw new IllegalStateException("The primary config key does not contain the same holder!" +
     									" holder=" + configKey.holder + " primaryHolder=" + primary.holder);
     			}
     		}
@@ -155,8 +155,8 @@ final class ConfigContainer {
     	return configKeys.size();
     }
     
-    public boolean has(ConfigKey<?> config) {
-    	return configKeys.contains(config);
+    public boolean has(ConfigKey<?> configKey) {
+    	return configKeys.contains(configKey);
     }
 
     public ConfigKey<?> get(String name) {
