@@ -218,7 +218,7 @@ public class MapConfiguration implements Configuration {
 	}
 
 	@Override
-	public <T> void overwriteDefault(ConfigKey<T> configKey, T defaultValue) {
+	public <T> boolean overwriteDefault(ConfigKey<T> configKey, T defaultValue) {
 		enforceConfigKey(configKey);
 		enforceDefaultValue(configKey, defaultValue);
 		
@@ -228,7 +228,11 @@ public class MapConfiguration implements Configuration {
 			}
 		}
 		
+		boolean hadAlready = overwrittenDefaults.containsKey(configKey);
+			
 		overwrittenDefaults.put(configKey, defaultValue);
+		
+		return hadAlready;
 	}
 	
 	@Override
@@ -270,6 +274,7 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	public <T> T remove(ConfigKey<T> configKey) {
+		
 		enforceConfigKey(configKey);
 		
 		if (configKey.getKind() == Kind.DEPRECATED) {
@@ -280,6 +285,25 @@ public class MapConfiguration implements Configuration {
 		
 		Object prev = values.remove(configKey);
 		return prev != null ? configKey.getType().cast(prev) : null;
+	}
+	
+	@Override
+	public <T> boolean removeOverwrittenDefault(ConfigKey<T> configKey) {
+		
+		enforceConfigKey(configKey);
+		
+		if (configKey.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
+			}
+		}
+		
+		if (overwrittenDefaults.containsKey(configKey)) { // it can have NULLs...
+			overwrittenDefaults.remove(configKey);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	private static <T> Object getImpl(ConfigKey<T> ck, Map<ConfigKey<?>, Object> values) {

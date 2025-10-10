@@ -41,9 +41,11 @@ public interface Configuration {
 	public Set<ConfigKey<?>> keys();
 
 	
-	public <T> void overwriteDefault(ConfigKey<T> configKey, T defaultValue);
+	public <T> boolean overwriteDefault(ConfigKey<T> configKey, T defaultValue);
 	
 	public <T> T getOverwrittenDefault(ConfigKey<T> configKey);
+	
+	public <T> boolean removeOverwrittenDefault(ConfigKey<T> configKey);
 	
 	public Set<ConfigKey<?>> keysWithOverwrittenDefault();
 }
