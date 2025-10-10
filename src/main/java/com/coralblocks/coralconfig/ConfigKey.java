@@ -159,6 +159,10 @@ public final class ConfigKey<T> {
     }
     
     public ConfigKey<T> def(T defaultValue) {
+    	if (!isRequired()) {
+    		throw new IllegalStateException("Trying to set up a default value twice! " +
+    										"previousDefault=" + getDefaultValue() + " newDefault=" + defaultValue);
+    	}
     	return of(getType(), getKind(), false, defaultValue, getPrimary());
     }
     
