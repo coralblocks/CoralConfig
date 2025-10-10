@@ -36,7 +36,7 @@ public class ConfigKeyTest {
 		Integer value = intKey.parseValue("3");
 		
 		Assert.assertEquals(3, value.intValue());
-		Assert.assertEquals(null, intKey.fieldName);
+		Assert.assertEquals(null, intKey.getFieldName());
 		
 		ConfigKey<TestEnum> enumKey = ConfigKey.of("enumKey", TestEnum.class, Kind.PRIMARY, null);
 		

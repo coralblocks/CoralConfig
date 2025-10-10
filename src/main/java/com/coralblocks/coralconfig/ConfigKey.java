@@ -30,7 +30,7 @@ public final class ConfigKey<T> {
 	private final ConfigKey<?> primary;
 	List<ConfigKey<?>> aliases = new ArrayList<ConfigKey<?>>();
 	List<ConfigKey<?>> deprecated = new ArrayList<ConfigKey<?>>();
-	String fieldName;
+	private String fieldName;
 	Class<?> holder;
 	
 	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<?> primary) {
@@ -281,6 +281,10 @@ public final class ConfigKey<T> {
     
     public String getFieldName() {
     	return fieldName;
+    }
+    
+    void setFieldName(String fieldName) {
+    	this.fieldName = fieldName;
     }
     
     public List<ConfigKey<?>> getAliases() {

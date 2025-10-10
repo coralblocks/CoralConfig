@@ -47,9 +47,9 @@ public class ConfigContainerTest {
 		Assert.assertEquals(Base1.NO_REWIND, cc1.get("noRewind"));
 		Assert.assertEquals(true, cc1.has(Base1.TIMEOUT));
 		Assert.assertEquals(false, cc1.has(Blah.TIMEOUT));
-		Assert.assertEquals("TIMEOUT", Base1.TIMEOUT.fieldName);
-		Assert.assertEquals("NO_REWIND", Base1.NO_REWIND.fieldName);
-		Assert.assertEquals(null, Blah.TIMEOUT.fieldName); // was not added to any Config
+		Assert.assertEquals("TIMEOUT", Base1.TIMEOUT.getFieldName());
+		Assert.assertEquals("NO_REWIND", Base1.NO_REWIND.getFieldName());
+		Assert.assertEquals(null, Blah.TIMEOUT.getFieldName()); // was not added to any Config
 		
 		@SuppressWarnings("unused")
 		class Base2 {

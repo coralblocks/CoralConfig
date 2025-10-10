@@ -60,7 +60,7 @@ final class ConfigContainer {
                 
                 ConfigKey<?> configKey = (ConfigKey<?>) val;
                 
-                configKey.fieldName = f.getName();
+                configKey.setFieldName(f.getName());
                 
                 configKey.holder = holder;
                 
