@@ -32,25 +32,25 @@ public class PrimaryConfigTest {
 				BALL, BOB, BILLY
 			}
 			
-			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey("timeout");
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.intKey();
 			
-			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey("noRewind");
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey();
 			
-			public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.enumKey("myEnum", TestEnum.class);
+			public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.enumKey(TestEnum.class);
 			
-			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias("noRewind1", NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias(NO_REWIND);
 			
-			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKeyAlias("noRewind2", NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKeyAlias(NO_REWIND);
 
-			public static final ConfigKey<Float> NEW_FLOAT = ConfigKey.floatKey("newFloat");
-			public static final ConfigKey<Float> INITIAL_FLOAT = ConfigKey.floatKeyDeprecated("initialFloat", NEW_FLOAT);
+			public static final ConfigKey<Float> NEW_FLOAT = ConfigKey.floatKey();
+			public static final ConfigKey<Float> INITIAL_FLOAT = ConfigKey.floatKeyDeprecated(NEW_FLOAT);
 		}
 		
 		ConfigContainer cc = ConfigContainer.of(Base1.class);
 		Assert.assertEquals(7, cc.size());
 		
 		try {
-			ConfigKey.floatKeyDeprecated("aFloat", null);
+			ConfigKey.floatKeyDeprecated(null);
 			fail();
 		} catch(IllegalStateException e) {
 			// Good!
@@ -58,9 +58,9 @@ public class PrimaryConfigTest {
 		
 		@SuppressWarnings("unused")
 		class Base2 {
-			public static final ConfigKey<Float> ANOTHER_FLOAT1 = ConfigKey.floatKey("anotherFloat1");
-			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKeyAlias("anotherFloat2", ANOTHER_FLOAT1);
-			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKeyAlias("anotherFloat3", Base1.NEW_FLOAT);
+			public static final ConfigKey<Float> ANOTHER_FLOAT1 = ConfigKey.floatKey();
+			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKeyAlias(ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKeyAlias(Base1.NEW_FLOAT);
 		}
 		
 		try {
@@ -72,9 +72,9 @@ public class PrimaryConfigTest {
 		
 		@SuppressWarnings("unused")
 		class Base3 {
-			public static final ConfigKey<Float> ANOTHER_FLOAT1 = ConfigKey.floatKey("anotherFloat1");
-			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKeyAlias("anotherFloat2", ANOTHER_FLOAT1);
-			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKeyAlias("anotherFloat3", ConfigKey.floatKey("blah"));
+			public static final ConfigKey<Float> ANOTHER_FLOAT1 = ConfigKey.floatKey();
+			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKeyAlias(ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKeyAlias(Base2.ANOTHER_FLOAT1);
 		}
 		
 		try {

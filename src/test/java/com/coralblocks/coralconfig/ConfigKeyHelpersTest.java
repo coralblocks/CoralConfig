@@ -28,11 +28,11 @@ public class ConfigKeyHelpersTest {
 		BALL, BOB, BILLY
 	}
 	
-	public static final ConfigKey<Integer> TIMEOUT = intKey("timeout");
+	public static final ConfigKey<Integer> TIMEOUT = intKey();
 	
-	public static final ConfigKey<Boolean> NO_REWIND = boolKey("noRewind");
+	public static final ConfigKey<Boolean> NO_REWIND = boolKey();
 	
-	public static final ConfigKey<TestEnum> MY_ENUM = enumKey("myEnum", TestEnum.class);
+	public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class);
 	
 	@Test
 	public void testBasics1() {

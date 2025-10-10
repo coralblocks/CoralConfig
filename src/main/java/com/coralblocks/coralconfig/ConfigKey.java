@@ -24,7 +24,7 @@ public final class ConfigKey<T> {
 		PRIMARY, ALIAS, DEPRECATED
 	}
 	
-	private final String name;
+	private String name;
 	private final Class<T> type;
 	private final Kind kind;
 	private final ConfigKey<?> primary;
@@ -33,10 +33,9 @@ public final class ConfigKey<T> {
 	private String fieldName;
 	Class<?> holder;
 	
-	private ConfigKey(String name, Class<T> type, Kind kind, ConfigKey<?> primary) {
+	private ConfigKey(Class<T> type, Kind kind, ConfigKey<?> primary) {
 		enforceType(type);
-		enforceRelationship(name, type, kind, primary);
-        this.name = name;
+		enforceRelationship(type, kind, primary);
         this.type = type;
         this.kind = kind;
         this.primary = primary;
@@ -64,27 +63,27 @@ public final class ConfigKey<T> {
 		}
 	}
 	
-	private void enforceRelationship(String name, Class<T> type, Kind kind, ConfigKey<?> primary) {
+	private void enforceRelationship(Class<T> type, Kind kind, ConfigKey<?> primary) {
 		if (kind == Kind.PRIMARY) {
 			if (primary != null) {
 				throw new IllegalStateException("When defining a primary config key, it must not have have a parent primary!" +
-									" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary);
+									" type=" + type.getSimpleName() + " primary=" + primary);
 			}
 		} else if (kind == Kind.ALIAS) {
 			if (primary == null) {
 				throw new IllegalStateException("When defining an alias config key, it must specify its parent primary!" +
-						" name=" + name + " type=" + type.getSimpleName());
+						" type=" + type.getSimpleName());
 			} else if (primary.getKind() != Kind.PRIMARY) {
 				throw new IllegalStateException("The parent config key of an alias config key must not be an alias or a deprecated type!" +
-						" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
+						" type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
 			}
 		} else if (kind == Kind.DEPRECATED) {
 			if (primary == null) {
 				throw new IllegalStateException("When defining a deprecated config key, it must specify its parent primary!" +
-						" name=" + name + " type=" + type.getSimpleName());
+						" type=" + type.getSimpleName());
 			} else if (primary.getKind() != Kind.PRIMARY) {
 				throw new IllegalStateException("The parent config key of a deprecated config key must not be an alias or a deprecated type!" +
-						" name=" + name + " type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
+						" type=" + type.getSimpleName() + " primary=" + primary + " primaryKind=" + primary.getKind());
 			}
 		}
 	}
@@ -135,128 +134,128 @@ public final class ConfigKey<T> {
 	    }
 	}
 
-    static <K> ConfigKey<K> of(String name, Class<K> type, Kind kind, ConfigKey<?> primary) {
-    	return new ConfigKey<K>(name, type, kind, primary);
+    static <K> ConfigKey<K> of(Class<K> type, Kind kind, ConfigKey<?> primary) {
+    	return new ConfigKey<K>(type, kind, primary);
     }
     
-    public static ConfigKey<Integer> intKey(String name) {
-    	return of(name, Integer.class, Kind.PRIMARY, null);
+    public static ConfigKey<Integer> intKey() {
+    	return of(Integer.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Integer> intKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Integer.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Integer> intKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Integer.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Integer> intKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Integer.class, Kind.ALIAS, primary);
+    public static ConfigKey<Integer> intKeyAlias(ConfigKey<?> primary) {
+    	return of(Integer.class, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<Long> longKey(String name) {
-    	return of(name, Long.class, Kind.PRIMARY, null);
+    public static ConfigKey<Long> longKey() {
+    	return of(Long.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Long> longKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Long.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Long> longKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Long.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Long> longKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Long.class, Kind.ALIAS, primary);
+    public static ConfigKey<Long> longKeyAlias(ConfigKey<?> primary) {
+    	return of(Long.class, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<Boolean> boolKey(String name) {
-    	return of(name, Boolean.class, Kind.PRIMARY, null);
+    public static ConfigKey<Boolean> boolKey() {
+    	return of(Boolean.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Boolean> boolKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Boolean.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Boolean> boolKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Boolean.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Boolean> boolKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Boolean.class, Kind.ALIAS, primary);
+    public static ConfigKey<Boolean> boolKeyAlias(ConfigKey<?> primary) {
+    	return of(Boolean.class, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<Double> doubleKey(String name) {
-    	return of(name, Double.class, Kind.PRIMARY, null);
+    public static ConfigKey<Double> doubleKey() {
+    	return of(Double.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Double> doubleKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Double.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Double> doubleKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Double.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Double> doubleKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Double.class, Kind.ALIAS, primary);
+    public static ConfigKey<Double> doubleKeyAlias(ConfigKey<?> primary) {
+    	return of(Double.class, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<Float> floatKey(String name) {
-    	return of(name, Float.class, Kind.PRIMARY, null);
+    public static ConfigKey<Float> floatKey() {
+    	return of(Float.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Float> floatKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Float.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Float> floatKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Float.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Float> floatKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Float.class, Kind.ALIAS, primary);
+    public static ConfigKey<Float> floatKeyAlias(ConfigKey<?> primary) {
+    	return of(Float.class, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<Short> shortKey(String name) {
-    	return of(name, Short.class, Kind.PRIMARY, null);
+    public static ConfigKey<Short> shortKey() {
+    	return of(Short.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Short> shortKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Short.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Short> shortKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Short.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Short> shortKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Short.class, Kind.ALIAS, primary);
+    public static ConfigKey<Short> shortKeyAlias(ConfigKey<?> primary) {
+    	return of(Short.class, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<Byte> byteKey(String name) {
-    	return of(name, Byte.class, Kind.PRIMARY, null);
+    public static ConfigKey<Byte> byteKey() {
+    	return of(Byte.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Byte> byteKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Byte.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Byte> byteKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Byte.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Byte> byteKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Byte.class, Kind.ALIAS, primary);
+    public static ConfigKey<Byte> byteKeyAlias(ConfigKey<?> primary) {
+    	return of(Byte.class, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<Character> charKey(String name) {
-    	return of(name, Character.class, Kind.PRIMARY, null);
+    public static ConfigKey<Character> charKey() {
+    	return of(Character.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<Character> chatKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, Character.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<Character> chatKeyDeprecated(ConfigKey<?> primary) {
+    	return of(Character.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<Character> charKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, Character.class, Kind.ALIAS, primary);
+    public static ConfigKey<Character> charKeyAlias(ConfigKey<?> primary) {
+    	return of(Character.class, Kind.ALIAS, primary);
     }
     
-    public static <E extends Enum<E>> ConfigKey<E> enumKey(String name, Class<E> enumClass) {
-        return ConfigKey.of(name, enumClass, Kind.PRIMARY, null);
+    public static <E extends Enum<E>> ConfigKey<E> enumKey(Class<E> enumClass) {
+        return of(enumClass, Kind.PRIMARY, null);
     }
     
-    public static <E extends Enum<E>> ConfigKey<E> enumKeyDeprecated(String name, Class<E> enumClass ,ConfigKey<?> primary) {
-    	return ConfigKey.of(name, enumClass, Kind.DEPRECATED, primary);
+    public static <E extends Enum<E>> ConfigKey<E> enumKeyDeprecated(Class<E> enumClass ,ConfigKey<?> primary) {
+    	return of(enumClass, Kind.DEPRECATED, primary);
     }
     
-    public static <E extends Enum<E>> ConfigKey<E> enumKeyAlias(String name, Class<E> enumClass ,ConfigKey<?> primary) {
-    	return ConfigKey.of(name, enumClass, Kind.ALIAS, primary);
+    public static <E extends Enum<E>> ConfigKey<E> enumKeyAlias(Class<E> enumClass ,ConfigKey<?> primary) {
+    	return of(enumClass, Kind.ALIAS, primary);
     }
     
-    public static ConfigKey<String> stringKey(String name) {
-    	return of(name, String.class, Kind.PRIMARY, null);
+    public static ConfigKey<String> stringKey() {
+    	return of(String.class, Kind.PRIMARY, null);
     }
     
-    public static ConfigKey<String> stringKeyDeprecated(String name, ConfigKey<?> primary) {
-    	return of(name, String.class, Kind.DEPRECATED, primary);
+    public static ConfigKey<String> stringKeyDeprecated(ConfigKey<?> primary) {
+    	return of(String.class, Kind.DEPRECATED, primary);
     }
     
-    public static ConfigKey<String> stringKeyAlias(String name, ConfigKey<?> primary) {
-    	return of(name, String.class, Kind.ALIAS, primary);
+    public static ConfigKey<String> stringKeyAlias(ConfigKey<?> primary) {
+    	return of(String.class, Kind.ALIAS, primary);
     }
 
     public String getName() {
@@ -285,6 +284,31 @@ public final class ConfigKey<T> {
     
     void setFieldName(String fieldName) {
     	this.fieldName = fieldName;
+    	this.name = toCamelCase(fieldName);
+    }
+    
+    private static String toCamelCase(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        StringBuilder sb = new StringBuilder();
+        boolean nextUpper = false;
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (c == '_') {
+                nextUpper = true;
+            } else {
+                if (sb.length() == 0) {
+                    sb.append(Character.toLowerCase(c));
+                } else if (nextUpper) {
+                    sb.append(Character.toUpperCase(c));
+                    nextUpper = false;
+                } else {
+                    sb.append(Character.toLowerCase(c));
+                }
+            }
+        }
+        return sb.toString();
     }
     
     public List<ConfigKey<?>> getAliases() {
@@ -304,6 +328,8 @@ public final class ConfigKey<T> {
 		} else if (kind == Kind.DEPRECATED) {
 			suffix = "_deprecatedInFavorOf_[" + primary + "]";
 		}
+		
+		String name = this.name == null ? "Not_Defined_Yet" : this.name;
 		
 		if (fieldName == null && holder == null) {
 			return "(\"" + name + "\")" + suffix;

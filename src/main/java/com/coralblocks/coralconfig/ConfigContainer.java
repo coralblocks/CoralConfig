@@ -139,14 +139,14 @@ final class ConfigContainer {
     	}
     }
     
-    private static void enforceNoDuplicates(ConfigContainer cc1, ConfigContainer cc2) {
+    static void enforceNoDuplicates(ConfigContainer cc1, ConfigContainer cc2) {
     	Iterator<ConfigKey<?>> iter = cc1.configKeys.iterator();
     	while(iter.hasNext()) {
     		ConfigKey<?> configKey = iter.next();
     		ConfigKey<?> duplicate = cc2.getIgnoreCase(configKey.getName());
     		if (duplicate != null) {
     			throw new IllegalStateException("Found two keys with the same name! " +
-    									"key1=" + configKey + " key2=" + duplicate);
+    									"configKey1=" + configKey + " configKey2=" + duplicate);
     		}
     	}
     }

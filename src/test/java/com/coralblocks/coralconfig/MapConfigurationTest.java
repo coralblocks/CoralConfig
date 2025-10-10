@@ -28,11 +28,11 @@ public class MapConfigurationTest {
 		BALL, BOB, BILLY
 	}
 	
-	public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
+	public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
 	
-	public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.of("noRewind", Boolean.class, Kind.PRIMARY, null);
+	public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.of(Boolean.class, Kind.PRIMARY, null);
 	
-	public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.of("myEnum", TestEnum.class, Kind.PRIMARY, null);
+	public static final ConfigKey<TestEnum> MY_ENUM = ConfigKey.of(TestEnum.class, Kind.PRIMARY, null);
 	
 	@Test
 	public void testDefaults() {
@@ -206,16 +206,16 @@ public class MapConfigurationTest {
 		@SuppressWarnings("unused")
 		class Base1 {
 			
-			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey("noRewind");
-			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias("noRewind1", NO_REWIND);
-			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKeyAlias("noRewind2", NO_REWIND);
-			public static final ConfigKey<Boolean> IS_NO_REWIND = ConfigKey.boolKeyDeprecated("isNoRewind", NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey();
+			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias(NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKeyAlias(NO_REWIND);
+			public static final ConfigKey<Boolean> IS_NO_REWIND = ConfigKey.boolKeyDeprecated(NO_REWIND);
 
-			public static final ConfigKey<Integer> TIME_INTEGER = ConfigKey.intKey("timeInteger");
-			public static final ConfigKey<Float> TIME_FLOAT = ConfigKey.floatKeyDeprecated("timeFloat", TIME_INTEGER);
+			public static final ConfigKey<Integer> TIME_INTEGER = ConfigKey.intKey();
+			public static final ConfigKey<Float> TIME_FLOAT = ConfigKey.floatKeyDeprecated(TIME_INTEGER);
 			
-			public static final ConfigKey<Double> PRICE_DOUBLE = ConfigKey.doubleKey("priceDouble");
-			public static final ConfigKey<Integer> PRICE_INT = ConfigKey.intKeyDeprecated("priceInteger", PRICE_DOUBLE);
+			public static final ConfigKey<Double> PRICE_DOUBLE = ConfigKey.doubleKey();
+			public static final ConfigKey<Integer> PRICE_INT = ConfigKey.intKeyDeprecated(PRICE_DOUBLE);
 		}
 		
 		MapConfiguration config = new MapConfiguration(Base1.class);
@@ -267,8 +267,8 @@ public class MapConfigurationTest {
 		@SuppressWarnings("unused")
 		class Base2 {
 			
-			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey("no_Rewind");
-			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias("no_Rewind1", NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND22 = ConfigKey.boolKey();
+			public static final ConfigKey<Boolean> NO_REWIND33 = ConfigKey.boolKeyAlias(NO_REWIND22);
 		}
 		
 		MapConfiguration mc = new MapConfiguration(Base1.class, Base2.class);

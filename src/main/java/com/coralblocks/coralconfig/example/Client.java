@@ -23,11 +23,11 @@ import com.coralblocks.coralconfig.MapConfiguration;
 
 public class Client implements MoreConfigs {
 
-	public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey("heartbeatInterval");
-	public static final ConfigKey<Float> HEARTBEAT = floatKeyDeprecated("heartbeat", HEARTBEAT_INTERVAL);
+	public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey();
+	public static final ConfigKey<Float> HEARTBEAT = floatKeyDeprecated(HEARTBEAT_INTERVAL);
 	
-	public static final ConfigKey<String> CLIENT_USERNAME = stringKey("clientUsername");
-	public static final ConfigKey<String> USERNAME = stringKeyAlias("username", CLIENT_USERNAME);
+	public static final ConfigKey<String> CLIENT_USERNAME = stringKey();
+	public static final ConfigKey<String> USERNAME = stringKeyAlias(CLIENT_USERNAME);
 	
 	public Client(Configuration config) {
 		

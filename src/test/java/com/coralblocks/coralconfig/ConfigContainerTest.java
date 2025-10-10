@@ -30,14 +30,14 @@ public class ConfigContainerTest {
 		
 		class Base1 {
 			
-			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
 			
-			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.of("noRewind", Boolean.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.of(Boolean.class, Kind.PRIMARY, null);
 		}
 		
 		class Blah {
 		
-			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
 		}
 		
 		ConfigContainer cc1 = ConfigContainer.of(Base1.class);
@@ -54,19 +54,27 @@ public class ConfigContainerTest {
 		@SuppressWarnings("unused")
 		class Base2 {
 			
-			public static final ConfigKey<Integer> TIMEOUT1 = ConfigKey.of("timeout", Integer.class, Kind.PRIMARY, null);
+			public static final ConfigKey<Integer> TIMEOUT = ConfigKey.of(Integer.class, Kind.PRIMARY, null);
 			
-			public static final ConfigKey<Boolean> TIMEOUT2 = ConfigKey.of("timeout", Boolean.class, Kind.PRIMARY, null);
+		}
+		
+		@SuppressWarnings("unused")
+		class Base3 {
+			
+			public static final ConfigKey<Boolean> TIMEOUT = ConfigKey.of(Boolean.class, Kind.PRIMARY, null);
 		}
 		
 		try {
 		
-			ConfigContainer.of(Base2.class); // two ConfigKeys with the same name "timeout"
+			ConfigContainer configContainer1 = ConfigContainer.of(Base2.class);
+			ConfigContainer configContainer2 = ConfigContainer.of(Base3.class);
+			
+			ConfigContainer.enforceNoDuplicates(configContainer1, configContainer2);
 			
 			fail();
 			
 		} catch(IllegalStateException e) {
-			// Must throw exception
+			// Good!
 		}
 	}
 }
