@@ -92,7 +92,7 @@ final class ConfigContainer {
         this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
         this.configKeysByName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
         
-        this.toString = "Config[" + holder.getName() + ", size=" + configKeys.size() + "]";
+        this.toString = "ConfigContainer[" + holder.getName() + ", size=" + configKeys.size() + "]";
         
         enforcePrimarySameHolder(configKeys);
         adjustLists(configKeys);
