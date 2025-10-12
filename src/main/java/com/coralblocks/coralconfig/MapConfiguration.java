@@ -40,6 +40,8 @@ public class MapConfiguration implements Configuration {
 	
 	public MapConfiguration(String params, Class<?> ... holders) {
 		
+		if (holders == null || holders.length == 0) throw new IllegalArgumentException("Must pass a holder!");
+		
 		this.holders = holders;
 		
 		this.configContainers = new ConfigContainer[holders.length];
@@ -315,6 +317,9 @@ public class MapConfiguration implements Configuration {
 			
 			val = values.get(ck.getPrimary());
 			if (val != null) return val;
+			
+			val = getImpl(ck.getPrimary(), values); // recursive call
+			if (val != null) return val;
 
 			return null;
 			
@@ -345,6 +350,9 @@ public class MapConfiguration implements Configuration {
 			if (has) return true;
 			
 			has = values.containsKey(ck.getPrimary());
+			if (has) return true;
+			
+			has = hasImpl(ck.getPrimary(), values); // recursive call
 			if (has) return true;
 
 			return false;
