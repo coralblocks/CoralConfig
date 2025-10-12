@@ -49,8 +49,8 @@ public class DeprecatedListenerTest {
 		class Base {
 			
 			public static final ConfigKey<Float> ANOTHER_FLOAT1 = floatKey(3f);
-			public static final ConfigKey<Float> ANOTHER_FLOAT2 = floatKeyAlias(3f, ANOTHER_FLOAT1);
-			public static final ConfigKey<Float> ANOTHER_FLOAT3 = floatKeyDeprecated(3f, ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT2 = floatKey(3f).alias(ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT3 = floatKey().def(3f).deprecated(ANOTHER_FLOAT1);
 		}
 		
 		MapConfiguration config = new MapConfiguration(Base.class);

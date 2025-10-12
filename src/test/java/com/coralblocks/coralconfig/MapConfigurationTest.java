@@ -185,15 +185,15 @@ public class MapConfigurationTest {
 		class Base1 {
 			
 			public static final ConfigKey<Boolean> NO_REWIND = ConfigKey.boolKey();
-			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKeyAlias(NO_REWIND);
-			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKeyAlias(NO_REWIND);
-			public static final ConfigKey<Boolean> IS_NO_REWIND = ConfigKey.boolKeyDeprecated(NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND1 = ConfigKey.boolKey().alias(NO_REWIND);
+			public static final ConfigKey<Boolean> NO_REWIND2 = ConfigKey.boolKey().alias(NO_REWIND);
+			public static final ConfigKey<Boolean> IS_NO_REWIND = ConfigKey.boolKey().deprecated(NO_REWIND);
 
 			public static final ConfigKey<Integer> TIME_INTEGER = ConfigKey.intKey();
-			public static final ConfigKey<Float> TIME_FLOAT = ConfigKey.floatKeyDeprecated(TIME_INTEGER);
+			public static final ConfigKey<Float> TIME_FLOAT = ConfigKey.floatKey().deprecated(TIME_INTEGER);
 			
 			public static final ConfigKey<Double> PRICE_DOUBLE = ConfigKey.doubleKey(1.1111d);
-			public static final ConfigKey<Integer> PRICE_INT = ConfigKey.intKeyDeprecated(123, PRICE_DOUBLE);
+			public static final ConfigKey<Integer> PRICE_INT = ConfigKey.intKey().def(123).deprecated(PRICE_DOUBLE);
 		}
 		
 		MapConfiguration config = new MapConfiguration(Base1.class);
@@ -246,7 +246,7 @@ public class MapConfigurationTest {
 		class Base2 {
 			
 			public static final ConfigKey<Boolean> NO_REWIND22 = ConfigKey.boolKey();
-			public static final ConfigKey<Boolean> NO_REWIND33 = ConfigKey.boolKeyAlias(NO_REWIND22);
+			public static final ConfigKey<Boolean> NO_REWIND33 = ConfigKey.boolKey().alias(NO_REWIND22);
 		}
 		
 		MapConfiguration mc = new MapConfiguration(Base1.class, Base2.class);

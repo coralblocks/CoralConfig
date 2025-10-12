@@ -48,7 +48,7 @@ public class PrimaryConfigTest {
 		Assert.assertEquals(7, cc.size());
 		
 		try {
-			ConfigKey.floatKeyDeprecated(null);
+			ConfigKey.floatKey().deprecated(null);
 			fail();
 		} catch(IllegalStateException e) {
 			// Good!
@@ -57,8 +57,8 @@ public class PrimaryConfigTest {
 		@SuppressWarnings("unused")
 		class Base2 {
 			public static final ConfigKey<Float> ANOTHER_FLOAT1 = ConfigKey.floatKey();
-			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKeyAlias(ANOTHER_FLOAT1);
-			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKeyAlias(Base1.NEW_FLOAT);
+			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKey().alias(ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKey().alias(Base1.NEW_FLOAT);
 		}
 		
 		try {
@@ -71,8 +71,8 @@ public class PrimaryConfigTest {
 		@SuppressWarnings("unused")
 		class Base3 {
 			public static final ConfigKey<Float> ANOTHER_FLOAT1 = ConfigKey.floatKey();
-			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKeyAlias(ANOTHER_FLOAT1);
-			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKeyAlias(Base2.ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT2 = ConfigKey.floatKey().alias(ANOTHER_FLOAT1);
+			public static final ConfigKey<Float> ANOTHER_FLOAT3 = ConfigKey.floatKey().alias(Base2.ANOTHER_FLOAT1);
 		}
 		
 		try {

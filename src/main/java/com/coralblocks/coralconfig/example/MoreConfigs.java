@@ -21,10 +21,10 @@ import com.coralblocks.coralconfig.ConfigKey;
 
 public interface MoreConfigs {
 	
-	public static final ConfigKey<Integer> MAX_RETRIES = intKey(10);
+	public static final ConfigKey<Integer> MAX_RETRIES = intKey().def(10);
 
 	public static final ConfigKey<String> SERVER_HOST = stringKey();
-	public static final ConfigKey<String> SERVER_IP = stringKeyAlias("localhost", SERVER_HOST);
-	public static final ConfigKey<String> SERVER_HOSTNAME = stringKeyAlias(SERVER_HOST);
+	public static final ConfigKey<String> SERVER_IP = stringKey().def("localhost").alias(SERVER_HOST);
+	public static final ConfigKey<String> SERVER_HOSTNAME = stringKey().alias(SERVER_HOST);
 	
 }

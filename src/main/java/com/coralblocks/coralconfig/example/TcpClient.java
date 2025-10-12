@@ -27,7 +27,7 @@ public class TcpClient extends Client {
 		REGULAR, THROTTLED
 	}
 	
-	public static final ConfigKey<SendStrategy> CLIENT_SEND_STRATEGY = enumKey(SendStrategy.REGULAR, SendStrategy.class);
+	public static final ConfigKey<SendStrategy> CLIENT_SEND_STRATEGY = enumKey(SendStrategy.class).def(SendStrategy.REGULAR);
 	
 	public static final ConfigKey<Integer> MESSAGES_TO_SEND = intKey(10);
 

@@ -142,22 +142,6 @@ public final class ConfigKey<T> {
     	return new ConfigKey<K>(type, kind, isRequired, defaultValue, primary);
     }
     
-    public static ConfigKey<Integer> intKey() {
-    	return of(Integer.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Integer> intKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Integer.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Integer> intKeyAlias(ConfigKey<?> primary) {
-    	return of(Integer.class, Kind.ALIAS, true, null, primary);
-    }
-    
-    public static ConfigKey<Integer> intKey(Integer defaultValue) {
-    	return of(Integer.class, Kind.PRIMARY, false, defaultValue, null);
-    }
-    
     public ConfigKey<T> def(T defaultValue) {
     	if (!isRequired()) {
     		throw new IllegalStateException("Trying to set up a default value twice! " +
@@ -166,21 +150,13 @@ public final class ConfigKey<T> {
     	return of(getType(), getKind(), false, defaultValue, getPrimary());
     }
     
-    public static ConfigKey<Integer> intKeyDeprecated(Integer defaultValue, ConfigKey<?> primary) {
-    	return of(Integer.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public ConfigKey<T> deprecated(ConfigKey<T> primary) {
+    public ConfigKey<T> deprecated(ConfigKey<?> primary) {
     	if (getKind() == Kind.DEPRECATED) {
     		throw new IllegalStateException("Tried to call deprecated twice on the same config key!");
     	} else if (getKind() == Kind.ALIAS) {
     		throw new IllegalStateException("Tried to call deprecated on a config key that is already an alias!");
     	}
     	return of(getType(), Kind.DEPRECATED, isRequired(), getDefaultValue(), primary);
-    }
-    
-    public static ConfigKey<Integer> intKeyAlias(Integer defaultValue, ConfigKey<?> primary) {
-    	return of(Integer.class, Kind.ALIAS, false, defaultValue, primary);
     }
     
     public ConfigKey<T> alias(ConfigKey<T> primary) {
@@ -193,222 +169,86 @@ public final class ConfigKey<T> {
     	return of(getType(), Kind.ALIAS, isRequired(), getDefaultValue(), primary);
     }
     
+    public static ConfigKey<Integer> intKey() {
+    	return of(Integer.class, Kind.PRIMARY, true, null, null);
+    }
+    
+    public static ConfigKey<Integer> intKey(Integer defeaultValue) {
+    	return of(Integer.class, Kind.PRIMARY, false, defeaultValue, null);
+    }
+    
     public static ConfigKey<Long> longKey() {
     	return of(Long.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Long> longKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Long.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Long> longKeyAlias(ConfigKey<?> primary) {
-    	return of(Long.class, Kind.ALIAS, true, null, primary);
     }
     
     public static ConfigKey<Long> longKey(Long defaultValue) {
     	return of(Long.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<Long> longKeyDeprecated(Long defaultValue, ConfigKey<?> primary) {
-    	return of(Long.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<Long> longKeyAlias(Long defaultValue, ConfigKey<?> primary) {
-    	return of(Long.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-    
     public static ConfigKey<Boolean> boolKey() {
     	return of(Boolean.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Boolean> boolKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Boolean.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Boolean> boolKeyAlias(ConfigKey<?> primary) {
-    	return of(Boolean.class, Kind.ALIAS, true, null, primary);
     }
     
     public static ConfigKey<Boolean> boolKey(Boolean defaultValue) {
     	return of(Boolean.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<Boolean> boolKeyDeprecated(Boolean defaultValue, ConfigKey<?> primary) {
-    	return of(Boolean.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<Boolean> boolKeyAlias(Boolean defaultValue, ConfigKey<?> primary) {
-    	return of(Boolean.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-    
     public static ConfigKey<Double> doubleKey() {
     	return of(Double.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Double> doubleKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Double.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Double> doubleKeyAlias(ConfigKey<?> primary) {
-    	return of(Double.class, Kind.ALIAS, true, null, primary);
     }
     
     public static ConfigKey<Double> doubleKey(Double defaultValue) {
     	return of(Double.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<Double> doubleKeyDeprecated(Double defaultValue, ConfigKey<?> primary) {
-    	return of(Double.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<Double> doubleKeyAlias(Double defaultValue, ConfigKey<?> primary) {
-    	return of(Double.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-    
     public static ConfigKey<Float> floatKey() {
     	return of(Float.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Float> floatKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Float.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Float> floatKeyAlias(ConfigKey<?> primary) {
-    	return of(Float.class, Kind.ALIAS, true, null, primary);
     }
     
     public static ConfigKey<Float> floatKey(Float defaultValue) {
     	return of(Float.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<Float> floatKeyDeprecated(Float defaultValue, ConfigKey<?> primary) {
-    	return of(Float.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<Float> floatKeyAlias(Float defaultValue, ConfigKey<?> primary) {
-    	return of(Float.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-    
     public static ConfigKey<Short> shortKey() {
     	return of(Short.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Short> shortKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Short.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Short> shortKeyAlias(ConfigKey<?> primary) {
-    	return of(Short.class, Kind.ALIAS, true, null, primary);
     }
     
     public static ConfigKey<Short> shortKey(Short defaultValue) {
     	return of(Short.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<Short> shortKeyDeprecated(Short defaultValue, ConfigKey<?> primary) {
-    	return of(Short.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<Short> shortKeyAlias(Short defaultValue, ConfigKey<?> primary) {
-    	return of(Short.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-    
     public static ConfigKey<Byte> byteKey() {
     	return of(Byte.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Byte> byteKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Byte.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Byte> byteKeyAlias(ConfigKey<?> primary) {
-    	return of(Byte.class, Kind.ALIAS, true, null, primary);
     }
     
     public static ConfigKey<Byte> byteKey(Byte defaultValue) {
     	return of(Byte.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<Byte> byteKeyDeprecated(Byte defaultValue, ConfigKey<?> primary) {
-    	return of(Byte.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<Byte> byteKeyAlias(Byte defaultValue, ConfigKey<?> primary) {
-    	return of(Byte.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-    
     public static ConfigKey<Character> charKey() {
     	return of(Character.class, Kind.PRIMARY, true, null, null);
-    }
-    
-    public static ConfigKey<Character> chatKeyDeprecated(ConfigKey<?> primary) {
-    	return of(Character.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<Character> charKeyAlias(ConfigKey<?> primary) {
-    	return of(Character.class, Kind.ALIAS, true, null, primary);
     }
     
     public static ConfigKey<Character> charKey(Character defaultValue) {
     	return of(Character.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<Character> chatKeyDeprecated(Character defaultValue, ConfigKey<?> primary) {
-    	return of(Character.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<Character> charKeyAlias(Character defaultValue, ConfigKey<?> primary) {
-    	return of(Character.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-    
     public static <E extends Enum<E>> ConfigKey<E> enumKey(Class<E> enumClass) {
         return of(enumClass, Kind.PRIMARY, true, null, null);
     }
     
-    public static <E extends Enum<E>> ConfigKey<E> enumKeyDeprecated(Class<E> enumClass ,ConfigKey<?> primary) {
-    	return of(enumClass, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static <E extends Enum<E>> ConfigKey<E> enumKeyAlias(Class<E> enumClass ,ConfigKey<?> primary) {
-    	return of(enumClass, Kind.ALIAS, true, null, primary);
-    }
-    
-    public static <E extends Enum<E>> ConfigKey<E> enumKey(E defaultValue, Class<E> enumClass) {
+    public static <E extends Enum<E>> ConfigKey<E> enumKey(Class<E> enumClass, E defaultValue) {
         return of(enumClass, Kind.PRIMARY, false, defaultValue, null);
-    }
-    
-    public static <E extends Enum<E>> ConfigKey<E> enumKeyDeprecated(E defaultValue, Class<E> enumClass ,ConfigKey<?> primary) {
-    	return of(enumClass, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static <E extends Enum<E>> ConfigKey<E> enumKeyAlias(E defaultValue, Class<E> enumClass ,ConfigKey<?> primary) {
-    	return of(enumClass, Kind.ALIAS, false, defaultValue, primary);
     }
     
     public static ConfigKey<String> stringKey() {
     	return of(String.class, Kind.PRIMARY, true, null, null);
     }
     
-    public static ConfigKey<String> stringKeyDeprecated(ConfigKey<?> primary) {
-    	return of(String.class, Kind.DEPRECATED, true, null, primary);
-    }
-    
-    public static ConfigKey<String> stringKeyAlias(ConfigKey<?> primary) {
-    	return of(String.class, Kind.ALIAS, true, null, primary);
-    }
-    
     public static ConfigKey<String> stringKey(String defaultValue) {
     	return of(String.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
-    public static ConfigKey<String> stringKeyDeprecated(String defaultValue, ConfigKey<?> primary) {
-    	return of(String.class, Kind.DEPRECATED, false, defaultValue, primary);
-    }
-    
-    public static ConfigKey<String> stringKeyAlias(String defaultValue, ConfigKey<?> primary) {
-    	return of(String.class, Kind.ALIAS, false, defaultValue, primary);
-    }
-
     public String getName() {
     	return name;
     }
