@@ -180,3 +180,40 @@ When you run the program above you see in the stdout:
 	deprecatedKey=MAX_RETRIES("maxRetries") 
 	inFavorOf=MAX_NUMBER_OF_RETRIES("maxNumberOfRetries")
 </pre>
+
+### Supports Enums:
+```java
+@Test
+public void testEnum() {
+	
+	enum TestEnum { BALL, BOB, BILL }
+	
+	class Base {
+		public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class).def(TestEnum.BOB);
+	}
+	
+	MapConfiguration mc = new MapConfiguration(Base.class);
+	
+	assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM)); // test default
+	
+	mc.overwriteDefault(Base.MY_ENUM, TestEnum.BILL);
+	
+	assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
+	
+	mc.add(Base.MY_ENUM, TestEnum.BALL);
+	
+	assertEquals(TestEnum.BALL, mc.get(Base.MY_ENUM)); // test configured
+	
+	mc.remove(Base.MY_ENUM);
+	
+	assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
+	
+	mc.overwriteDefault(Base.MY_ENUM, null); // String and Enum support NULL !!!
+	
+	assertEquals(null, mc.get(Base.MY_ENUM)); // test overwritten default
+	
+	mc.removeOverwrittenDefault(Base.MY_ENUM);
+	
+	assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM)); // test default
+}
+```
