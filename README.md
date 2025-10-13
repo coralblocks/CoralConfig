@@ -155,8 +155,6 @@ public class DeprecationBasics {
 		this.maxRetries = config.get(MAX_RETRIES); // using deprecated key!
 	}
 	
-	public int getMaxRetries() { return maxRetries; }
-	
 	public static void main(String[] args) {
 		
 		MapConfiguration config = new MapConfiguration(DeprecationBasics.class);
@@ -178,6 +176,7 @@ public class DeprecationBasics {
 When you run the program above you see in the stdout:
 <pre>
 ---CoralConfig---> You are using a deprecated config key!
-	holder=com.coralblocks.coralconfig.example.DeprecationBasics deprecatedKey=MAX_RETRIES("maxRetries") 
+	holder=com.coralblocks.coralconfig.example.DeprecationBasics
+	deprecatedKey=MAX_RETRIES("maxRetries") 
 	inFavorOf=MAX_NUMBER_OF_RETRIES("maxNumberOfRetries")
 </pre>
