@@ -46,6 +46,74 @@ public class DefaultsTest {
 	}
 	
 	@Test
+	public void testEnum() {
+		
+		enum TestEnum { BALL, BOB, BILL }
+		
+		class Base {
+		    public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class, TestEnum.BOB);
+		}
+		
+		MapConfiguration mc = new MapConfiguration(Base.class);
+		
+		Assert.assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM)); // test default
+		
+		mc.overwriteDefault(Base.MY_ENUM, TestEnum.BILL);
+		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
+		
+		mc.add(Base.MY_ENUM, TestEnum.BALL);
+		
+		Assert.assertEquals(TestEnum.BALL, mc.get(Base.MY_ENUM)); // test configured
+		
+		mc.remove(Base.MY_ENUM);
+		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
+		
+		mc.overwriteDefault(Base.MY_ENUM, null); // String and Enum support NULL !!!
+		
+		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test overwritten default
+		
+		mc.removeOverwrittenDefault(Base.MY_ENUM);
+		
+		Assert.assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM)); // test default
+	}
+	
+	@Test
+	public void testEnumNullDefault() {
+		
+		enum TestEnum { BALL, BOB, BILL }
+		
+		class Base {
+		    public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class).def(null);
+		}
+		
+		MapConfiguration mc = new MapConfiguration(Base.class);
+		
+		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test default
+		
+		mc.overwriteDefault(Base.MY_ENUM, TestEnum.BILL);
+		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
+		
+		mc.add(Base.MY_ENUM, TestEnum.BALL);
+		
+		Assert.assertEquals(TestEnum.BALL, mc.get(Base.MY_ENUM)); // test configured
+		
+		mc.remove(Base.MY_ENUM);
+		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
+		
+		mc.overwriteDefault(Base.MY_ENUM, null); // String and Enum support NULL !!!
+		
+		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test overwritten default
+		
+		mc.removeOverwrittenDefault(Base.MY_ENUM);
+		
+		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test default
+	}
+	
+	@Test
 	public void testDefaults1() {
 		
 		class Holder {
