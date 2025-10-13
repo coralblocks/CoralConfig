@@ -24,6 +24,28 @@ import org.junit.Test;
 public class DefaultsTest {
 	
 	@Test
+	public void testBasicsOfBasics() {
+		
+		class Base {
+		    public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey().def(5);
+		    public static final ConfigKey<Integer> HEARTBEAT = intKey().alias(HEARTBEAT_INTERVAL);
+		}
+		
+		MapConfiguration mc = new MapConfiguration(Base.class);
+		Assert.assertEquals(5, mc.get(Base.HEARTBEAT_INTERVAL).intValue());
+		Assert.assertEquals(5, mc.get(Base.HEARTBEAT).intValue());
+		
+		mc.add(Base.HEARTBEAT_INTERVAL, 2);
+		Assert.assertEquals(2, mc.get(Base.HEARTBEAT_INTERVAL).intValue());
+		Assert.assertEquals(2, mc.get(Base.HEARTBEAT).intValue());
+		
+		mc.remove(Base.HEARTBEAT_INTERVAL);
+		mc.add(Base.HEARTBEAT, 1);
+		Assert.assertEquals(1, mc.get(Base.HEARTBEAT_INTERVAL).intValue());
+		Assert.assertEquals(1, mc.get(Base.HEARTBEAT).intValue());
+	}
+	
+	@Test
 	public void testDefaults1() {
 		
 		class Holder {
