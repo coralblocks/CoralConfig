@@ -63,7 +63,7 @@ MapConfiguration mc = new MapConfiguration("heartbeat=2 username=rpaiva",
 ### _Strongly typed_ configuration types
 If you get the type of the config key wrong, it won't even compile:
 ```java
- // DON'T COMPILE (wrong type)
+ // DOESN'T COMPILE (wrong type)
 String maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES);
 ```
 
@@ -79,18 +79,21 @@ We did not like the name `heartbeat` so we created `heartbeatInterval` as the pr
 ```java
 MapConfiguration mc = new MapConfiguration(Client.class);
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5
-int heartbeat = mc.get(HEARTBEAT); // => 5 // This also works with the default value of the primary config key!
+// This also works with the default value of the primary config key!
+int heartbeat = mc.get(HEARTBEAT); // => 5
 ```
 And if you declare a value for the new field `heartbeatInterval` then the primary key together with all its aliases will get the declared value:
 ```java
 mc.add(HEARTBEAT_INTERVAL, 2);
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2
-int heartbeat = mc.get(HEARTBEAT); // => 2 // The alias also gets the declared value!
+// The alias also gets the declared value!
+int heartbeat = mc.get(HEARTBEAT); // => 2
 ```
 or if you do this instead:
 ```java
 mc.add(HEARTBEAT, 2);
-int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 // The primary key gets the value declared for its alias!
+// The primary key gets the value declared for its alias!
+int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2
 int heartbeat = mc.get(HEARTBEAT); // => 2
 ```
 You can have as many aliases as you want:
