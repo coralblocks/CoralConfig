@@ -15,8 +15,17 @@
  */
 package com.coralblocks.coralconfig;
 
+/**
+ * A <code>DeprecatedListener</code> can receive callbacks from a <code>Configuration</code> when a deprecated <code>ConfigKey</code> is accessed. 
+ */
 public interface DeprecatedListener {
 	
+	/**
+	 * The given deprecated <code>ConfigKey</code> was accessed. The default implementation of this method simply prints information to stdout.
+	 * 
+	 * @param deprecatedKey the deprecated <code>ConfigKey</code> accessed
+	 * @param primaryKey the primary <code>ConfigKey</code> of the accessed deprecated <code>ConfigKey</code>
+	 */
 	default public void deprecatedConfig(ConfigKey<?> deprecatedKey, ConfigKey<?> primaryKey) {
 		
 		System.out.println("---CoralConfig---> You are using a deprecated config key!" +
