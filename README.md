@@ -29,13 +29,13 @@ mc.overwriteDefault(MAX_NUMBER_OF_RETRIES, 6);
 
 int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 6 (overwritten default)
 ```
-To add a value so it is returned instead of the default or any overwritten default value:
+To configure (add) a value so this value is returned instead of the (overwritten or not) default value:
 ```java
 mc.add(MAX_NUMBER_OF_RETRIES, 2);
 
 int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 2 (configured)
 ```
-To create a configuration with some values you can pass a list of params to the constructor:
+To create a configuration with some values, you can pass a list of params to the constructor:
 ```java
 MapConfiguration mc = new MapConfiguration("maxNumberOfRetries=1 username=saoj heartbeat=30",
 													Basics.class);
@@ -44,7 +44,7 @@ int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 1 (configured)
 ```
 
 ### Supports more than one _holder_ class
-The configuration can handle multiple _holder_ classes with distinct configuration keys. It enforces that there are no duplicate keys.
+The configuration can handle multiple _holder_ classes with distinct configuration keys. The configuration enforces that there are no duplicate keys in each _holder_ class as well as across all _holder_ classes.
 ```java
 public class Client {
     public static final ConfigKey<Integer> HEARTBEAT = intKey(5);
@@ -181,7 +181,7 @@ When you run the program above you see in the stdout:
 	inFavorOf=MAX_NUMBER_OF_RETRIES("maxNumberOfRetries")
 </pre>
 
-### Supports Enums:
+### Supports _Enums_:
 ```java
 @Test
 public void testEnum() {
