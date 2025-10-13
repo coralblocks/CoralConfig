@@ -414,6 +414,9 @@ public class MapConfiguration implements Configuration {
 				if (collect.size() == 1) {
 					val = collect.iterator().next();
 					return coerceNumber(val, configKey.getType());
+				} else if (collect.size() > 1) {
+					throw new RuntimeException("More than one default value found!" +
+							" configKey=" + configKey + " numberOfDefaults=" + collect.size());
 				}
 			}
 			
