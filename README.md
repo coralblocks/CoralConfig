@@ -173,7 +173,7 @@ public class DeprecationBasics {
 	}
 }
 ```
-When you run the program above you see in the stdout:
+When you run the program above you see in the _stdout_:
 <pre>
 ---CoralConfig---> You are using a deprecated config key!
 	holder=com.coralblocks.coralconfig.example.DeprecationBasics
@@ -181,7 +181,7 @@ When you run the program above you see in the stdout:
 	inFavorOf=MAX_NUMBER_OF_RETRIES("maxNumberOfRetries")
 </pre>
 
-### Supports _Enums_:
+### Supports _Enums_
 ```java
 @Test
 public void testEnum() {
