@@ -221,13 +221,20 @@ public class MapConfiguration implements Configuration {
 
 	@Override
 	public <T> boolean overwriteDefault(ConfigKey<T> configKey, T defaultValue) {
+		
 		enforceConfigKey(configKey);
+		
 		enforceDefaultValue(configKey, defaultValue);
 		
 		if (configKey.getKind() == Kind.DEPRECATED) {
 			for(int i = 0; i < listeners.size(); i++) {
 				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
 			}
+		}
+
+		if (!collectAndCheckIfDefaultExists(configKey)) {
+			throw new IllegalStateException("The configKey will not (or cannot) return a default value, so it cannot be overwritten! " +
+											" configKey=" + configKey + " defaultValue=" + defaultValue);
 		}
 		
 		boolean hadAlready = overwrittenDefaults.containsKey(configKey);
@@ -376,6 +383,35 @@ public class MapConfiguration implements Configuration {
 		}
 	}
 	
+	private static boolean collectAndCheckIfDefaultExists(ConfigKey<?> configKey) {
+
+		if (!configKey.isRequired()) return true; // it has a default!
+		
+		// well, see if its primary has a default..
+		if (configKey.getKind() != Kind.PRIMARY) {
+			ConfigKey<?> primaryKey = configKey.getPrimary();
+			if (!primaryKey.isRequired()) {
+				return true;
+			}
+			
+		} else { // PRIMARY KEY
+			
+			Set<Object> collect = new HashSet<Object>();
+			
+			for(ConfigKey<?> ck : configKey.getAliases()) {
+				if (!ck.isRequired()) collect.add(ck.getDefaultValue());
+			}
+			
+			for(ConfigKey<?> ck : configKey.getDeprecated()) {
+				if (!ck.isRequired()) collect.add(ck.getDefaultValue());
+			}
+			
+			if (collect.size() == 1) return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public <T> T get(ConfigKey<T> configKey) {
 		
@@ -389,6 +425,17 @@ public class MapConfiguration implements Configuration {
 		
 		Object val = getImpl(configKey, values);
 		if (val != null) return coerceNumber(val, configKey.getType());
+		
+		// check if it will return a default:
+		boolean willReturnDefault = collectAndCheckIfDefaultExists(configKey);
+		if (willReturnDefault) {
+			if (hasImpl(configKey, overwrittenDefaults)) {
+				val = getImpl(configKey, overwrittenDefaults);
+				return coerceNumber(val, configKey.getType());
+			}
+		} else {
+			// let it roll (there is some redundant logic ahead, but for simplicity let it roll
+		}
 		
 		if (configKey.isRequired()) {
 			
@@ -420,7 +467,7 @@ public class MapConfiguration implements Configuration {
 				}
 			}
 			
-			throw new RuntimeException("Expected configuration not found!" +
+			throw new RuntimeException("Expected config key not found!" +
 									" configKey=" + configKey);
 		}
 		
