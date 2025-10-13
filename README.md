@@ -82,7 +82,7 @@ int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5 (default)
 // This also works with the default value of the primary config key!
 int heartbeat = mc.get(HEARTBEAT); // => 5 (default)
 ```
-And if you declare a value for the new field `heartbeatInterval` then the primary key together with all its aliases will get the declared value:
+And if you declare a value for the new config key `heartbeatInterval` then the primary key together with all its aliases will get the declared value:
 ```java
 mc.add(HEARTBEAT_INTERVAL, 2);
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
@@ -120,7 +120,7 @@ int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5 (default)
 // This also works with the default value of the primary config key!
 int heartbeat = mc.get(HEARTBEAT); // => 5 (default)
 ```
-And if you declare a value for the new field `heartbeatInterval` then the primary key together with all its deprecated keys will get the declared value:
+And if you declare a value for the new config key `heartbeatInterval` then the primary key together with all its deprecated keys will get the declared value:
 ```java
 mc.add(HEARTBEAT_INTERVAL, 2);
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
