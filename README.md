@@ -51,7 +51,7 @@ public class Client {
 }
 
 public class TcpClient extends Client {
-    public static final ConfigKey<String> LOGIN = stringKey().def("saoj");
+    public static final ConfigKey<String> USERNAME = stringKey().def("saoj");
 }
 ```
 Simply pass a list of _holder_ classes:
