@@ -40,14 +40,14 @@ To create a configuration with some values you can pass a list of params to the 
 MapConfiguration mc = new MapConfiguration("maxNumberOfRetries=1 username=saoj heartbeat=30",
 													Basics.class);
 
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 1
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 1 (configured)
 ```
 
 ### Supports more than one _holder_ class
 The configuration can handle multiple _holder_ classes with distinct configuration keys. It enforces that there are no duplicate keys.
 ```java
 public class Client {
-    public static final ConfigKey<Integer> HEARTBEAT = intKey().def(5);
+    public static final ConfigKey<Integer> HEARTBEAT = intKey(5);
 }
 
 public class TcpClient extends Client {
@@ -78,23 +78,23 @@ public class Client {
 We did not like the name `heartbeat` so we created `heartbeatInterval` as the primary config key and added `heartbeat` as an alias for backwards compatibility. Now we can do:
 ```java
 MapConfiguration mc = new MapConfiguration(Client.class);
-int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5
+int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5 (default)
 // This also works with the default value of the primary config key!
-int heartbeat = mc.get(HEARTBEAT); // => 5
+int heartbeat = mc.get(HEARTBEAT); // => 5 (default)
 ```
 And if you declare a value for the new field `heartbeatInterval` then the primary key together with all its aliases will get the declared value:
 ```java
 mc.add(HEARTBEAT_INTERVAL, 2);
-int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2
+int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
 // The alias also gets the declared value!
-int heartbeat = mc.get(HEARTBEAT); // => 2
+int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
 ```
 or if you do this instead:
 ```java
 mc.add(HEARTBEAT, 2);
 // The primary key gets the value declared for its alias!
-int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2
-int heartbeat = mc.get(HEARTBEAT); // => 2
+int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
+int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
 ```
 You can have as many aliases as you want:
 ```java
