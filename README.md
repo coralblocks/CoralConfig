@@ -96,7 +96,7 @@ mc.add(HEARTBEAT, 2);
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
 int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
 ```
-You can have as many aliases as you want:
+You can have as many _aliases_ as you want:
 ```java
 public class Client {
     public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey().def(5);
@@ -104,3 +104,80 @@ public class Client {
     public static final ConfigKey<Integer> HEARTBEAT_TIME = intKey().alias(HEARTBEAT_INTERVAL);
 }
 ```
+
+### Supports _deprecation_
+Chose a bad name for a configuration? Simply deprecate it:
+```java
+public class Client {
+    public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey().def(5);
+    public static final ConfigKey<Integer> HEARTBEAT = intKey().deprecated(HEARTBEAT_INTERVAL);
+}
+```
+We chose a bad name by mistake (`heartbeat`) so we created `heartbeatInterval` as the primary config key and added `heartbeat` as deprecated for backwards compatibility. Now we can do:
+```java
+MapConfiguration mc = new MapConfiguration(Client.class);
+int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5 (default)
+// This also works with the default value of the primary config key!
+int heartbeat = mc.get(HEARTBEAT); // => 5 (default)
+```
+And if you declare a value for the new field `heartbeatInterval` then the primary key together with all its deprecated keys will get the declared value:
+```java
+mc.add(HEARTBEAT_INTERVAL, 2);
+int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
+// The deprecated key also gets the declared value!
+int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
+```
+or if you do this instead:
+```java
+mc.add(HEARTBEAT, 2);
+// The primary key gets the value declared for its deprecated keys!
+int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
+int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
+```
+You can have as many _deprecated_ configuration keys as you want:
+```java
+public class Client {
+    public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey().def(5);
+    public static final ConfigKey<Integer> HEARTBEAT = intKey().deprecated(HEARTBEAT_INTERVAL);
+    public static final ConfigKey<Integer> HEARTBEAT_TIME = intKey().deprecated(HEARTBEAT_INTERVAL);
+}
+```
+And finally, if you want to know the _deprecated_ configuration keys that you are still using, you can add a `DeprecatedListener` to your configuration. Below a full example:
+```java
+public class DeprecationBasics {
+	
+	public static final ConfigKey<Integer> MAX_NUMBER_OF_RETRIES = intKey().def(4);
+	public static final ConfigKey<Integer> MAX_RETRIES = intKey().deprecated(MAX_NUMBER_OF_RETRIES);
+	
+	private final int maxRetries;
+	
+	public DeprecationBasics(Configuration config) {
+		this.maxRetries = config.get(MAX_RETRIES); // using deprecated key!
+	}
+	
+	public int getMaxRetries() { return maxRetries; }
+	
+	public static void main(String[] args) {
+		
+		MapConfiguration config = new MapConfiguration(DeprecationBasics.class);
+
+		DeprecatedListener listener = new DeprecatedListener() {
+			
+			@Override
+			public void deprecatedConfig(ConfigKey<?> deprecatedKey, ConfigKey<?> primaryKey) {
+				DeprecatedListener.super.deprecatedConfig(deprecatedKey, primaryKey);
+			}
+		};
+		
+		config.addListener(listener);
+		
+		new DeprecationBasics(config);
+	}
+}
+```
+When you run the program above you see in the stdout:
+<pre>
+---CoralConfig---> You are using a deprecated config key!
+	holder=com.coralblocks.coralconfig.example.DeprecationBasics deprecatedKey=MAX_RETRIES("maxRetries") 
+	inFavorOf=MAX_NUMBER_OF_RETRIES("maxNumberOfRetries")
+</pre>
