@@ -189,7 +189,7 @@ public void testEnum() {
 	enum TestEnum { BALL, BOB, BILL }
 	
 	class Base {
-		public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class).def(TestEnum.BOB);
+		public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class, TestEnum.BOB);
 	}
 	
 	MapConfiguration mc = new MapConfiguration(Base.class);
