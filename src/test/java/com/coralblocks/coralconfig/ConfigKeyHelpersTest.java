@@ -60,9 +60,6 @@ public class ConfigKeyHelpersTest {
 		
 		MapConfiguration mc = new MapConfiguration("myEnum=BALL noRewind=false", ConfigKeyHelpersTest.class);
 		
-		mc.overwriteDefault(MY_ENUM, null);
-		mc.overwriteDefault(TIMEOUT, 10);
-		
 		MapConfiguration mapConfig = new MapConfiguration(mc);
 		
 		mc.remove(MY_ENUM); // won't affect the new configuration
