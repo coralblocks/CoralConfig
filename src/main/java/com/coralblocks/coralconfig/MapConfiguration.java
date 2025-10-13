@@ -25,6 +25,9 @@ import java.util.Set;
 
 import com.coralblocks.coralconfig.ConfigKey.Kind;
 
+/**
+ * The main implementation of the <code>Configuration</code> interface. It performs a bunch of checks to enforce uniqueness of <code>ConfigKey</code>s and much more.
+ */
 public class MapConfiguration implements Configuration {
 	
 	private final ConfigContainer[] configContainers;
@@ -34,10 +37,23 @@ public class MapConfiguration implements Configuration {
 	private final List<DeprecatedListener> listeners = new ArrayList<DeprecatedListener>();
 	private final List<ConfigKey<?>> allConfigKeys;
 	
+	/**
+	 * Creates a new <code>MapConfiguration</code> with the <code>ConfigKey</code>s present in the given list of holder classes.
+	 * 
+	 * @param holders the holder classes from where to get the <code>ConfigKey</code>s
+	 */
 	public MapConfiguration(Class<?> ... holders) {
 		this(null, holders);
 	}
 	
+	/**
+	 * Creates a new <code>MapConfiguration</code> with the <code>ConfigKey</code>s present in the given list of holder classes.
+	 * You can pass a list of parameters to be configured, for example:
+	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>"myInteger1=2 myString=blah myEnum=BALL myFloat3=3.12"</code>
+	 * 
+	 * @param params some initial values for some of the <code>ConfigKey</code>s of this configuration
+	 * @param holders the holder classes from where to get the <code>ConfigKey</code>s
+	 */
 	public MapConfiguration(String params, Class<?> ... holders) {
 		
 		if (holders == null || holders.length == 0) throw new IllegalArgumentException("Must pass a holder!");
@@ -73,6 +89,11 @@ public class MapConfiguration implements Configuration {
 		this.allConfigKeys = gatherAllConfigKeys();
 	}
 	
+	/**
+	 * Creates a new <code>MapConfiguration</code> by copying everything from the given configuration.
+	 * 
+	 * @param config the configuration to copy everything from for this new <code>MapConfiguration</code>
+	 */
 	public MapConfiguration(Configuration config) {
 		
 		this.holders = config.getHolders();
@@ -268,6 +289,14 @@ public class MapConfiguration implements Configuration {
 		return holders;
 	}
 	
+	/**
+	 * Adds a given value to the given <code>ConfigKey</code> for this configuration.
+	 * 
+	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
+	 * @param configKey the <code>ConfigKey</code> for which a value will be added to this configuration
+	 * @param value the value to be added for the given <code>ConfigKey</code>
+	 * @return a previous value that was added for the given <code>ConfigKey</code> or null if there was none
+	 */
 	public <T> T add(ConfigKey<T> configKey, T value) {
 		enforceConfigKey(configKey);
 		enforceValue(configKey, value);
@@ -282,6 +311,13 @@ public class MapConfiguration implements Configuration {
 		return prev != null ? configKey.getType().cast(prev) : null;
 	}
 	
+	/**
+	 * Removes the value from the given <code>ConfigKey</code> for this configuration.
+	 * 
+	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
+	 * @param configKey the <code>ConfigKey</code> for which the value will be removed
+	 * @return a previous value that was added for the given <code>ConfigKey</code> or null if there was none
+	 */
 	public <T> T remove(ConfigKey<T> configKey) {
 		
 		enforceConfigKey(configKey);
