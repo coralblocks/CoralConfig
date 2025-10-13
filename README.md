@@ -21,19 +21,19 @@ MapConfiguration mc = new MapConfiguration(Basics.class);
 ```
 To get the default value:
 ```java
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 4
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 4 (the default)
 ```
 To overwrite a default value:
 ```java
 mc.overwriteDefault(MAX_NUMBER_OF_RETRIES, 6);
 
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 6
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 6 (overwritten default)
 ```
 To add a value so it is returned instead of the default or any overwritten default value:
 ```java
 mc.add(MAX_NUMBER_OF_RETRIES, 2);
 
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 2
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 2 (configured)
 ```
 To create a configuration with some values you can pass a list of params to the constructor:
 ```java
