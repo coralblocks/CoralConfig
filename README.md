@@ -17,29 +17,30 @@ public class Basics {
 ```
 To create an empty configuration:
 ```java
-MapConfiguration mapConfig = new MapConfiguration(Basics.class);
+MapConfiguration mc = new MapConfiguration(Basics.class);
 ```
 To get the default value:
 ```java
-int maxNumberOfRetries = mapConfig.get(MAX_NUMBER_OF_RETRIES); // => 4
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 4
 ```
 To overwrite a default value:
 ```java
-mapConfig.overwriteDefault(MAX_NUMBER_OF_RETRIES, 6);
+mc.overwriteDefault(MAX_NUMBER_OF_RETRIES, 6);
 
-int maxNumberOfRetries = mapConfig.get(MAX_NUMBER_OF_RETRIES); // => 6
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 6
 ```
 To add a value so it is returned instead of the default or any overwritten default value:
 ```java
-mapConfig.add(MAX_NUMBER_OF_RETRIES, 2);
+mc.add(MAX_NUMBER_OF_RETRIES, 2);
 
-int maxNumberOfRetries = mapConfig.get(MAX_NUMBER_OF_RETRIES); // => 2
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 2
 ```
 To create a configuration with some values you can pass a list of params to the constructor:
 ```java
-MapConfiguration mapConfig = new MapConfiguration("maxNumberOfRetries=1 username=saoj heartbeat=30", Basics.class);
+MapConfiguration mc = new MapConfiguration("maxNumberOfRetries=1 username=saoj heartbeat=30",
+													Basics.class);
 
-int maxNumberOfRetries = mapConfig.get(MAX_NUMBER_OF_RETRIES); // => 1
+int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 1
 ```
 
 ### Supports more than one _holder_ class
@@ -55,13 +56,15 @@ public class TcpClient extends Client {
 ```
 Simply pass a list of _holder_ classes:
 ```java
-MapConfiguration mapConfig = new MapConfiguration("heartbeat=2 username=rpaiva", Client.class, TcpClient.class);
+MapConfiguration mc = new MapConfiguration("heartbeat=2 username=rpaiva",
+												Client.class, TcpClient.class);
 ```
 
 ### _Strongly typed_ configuration types
 If you get the type of the config key wrong, it won't even compile:
 ```java
-String maxNumberOfRetries = mapConfig.get(MAX_NUMBER_OF_RETRIES); // DON'T COMPILE (wrong type)
+ // DON'T COMPILE (wrong type)
+String maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES);
 ```
 
 ### Supports _aliases_
