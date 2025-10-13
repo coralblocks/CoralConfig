@@ -159,7 +159,8 @@ public class NullTest {
 		Assert.assertEquals(11, mc1.get(Holder1.MY_INTEGER_1).intValue());
 		
 		// Answer: Of course it will honor its own overwritten value!
-		
+
+		@SuppressWarnings("unused")
 		class Holder11 {
 			
 			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey();
