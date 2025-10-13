@@ -21,7 +21,7 @@ import com.coralblocks.coralconfig.ConfigKey;
 
 public interface MoreConfigs {
 	
-	public static final ConfigKey<Integer> MAX_RETRIES = intKey().def(10);
+	public static final ConfigKey<Integer> MAX_RETRIES = intKey(10); // different way to specify the default value
 
 	public static final ConfigKey<String> SERVER_HOST = stringKey();
 	public static final ConfigKey<String> SERVER_IP = stringKey().def("localhost").alias(SERVER_HOST);
