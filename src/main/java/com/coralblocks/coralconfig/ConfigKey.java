@@ -18,6 +18,11 @@ package com.coralblocks.coralconfig;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A configuration key used to specify a configuration parameter. 
+ *
+ * @param <T> the type of its configuration key which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
+ */
 public final class ConfigKey<T> {
 	
 	static enum Kind {
@@ -105,7 +110,7 @@ public final class ConfigKey<T> {
 				" type=" + c.getName());
 	}
 	
-	public T parseValue(String value) {
+	T parseValue(String value) {
 		return parseValue(type, value);
 	}
 	
@@ -142,6 +147,12 @@ public final class ConfigKey<T> {
     	return new ConfigKey<K>(type, kind, isRequired, defaultValue, primary);
     }
     
+    /**
+     * Creates a new <code>ConfigKey</code> by deep cloning this config key and adding the given default value. (Fluent API)
+     * 
+     * @param defaultValue the default value for the new <code>ConfigKey</code> returned
+     * @return a new <code>ConfigKey</code> with the given default value
+     */
     public ConfigKey<T> def(T defaultValue) {
     	if (!isRequired()) {
     		throw new IllegalStateException("Trying to set up a default value twice! " +
@@ -150,6 +161,12 @@ public final class ConfigKey<T> {
     	return of(getType(), getKind(), false, defaultValue, getPrimary());
     }
     
+    /**
+     * Creates a new <code>ConfigKey</code> by deep cloning this config key and marking it as deprecated. (Fluent API)
+     * 
+     * @param primary the primary <code>ConfigKey</code> of this deprecated <code>ConfigKey</code>
+     * @return a new <code>ConfigKey</code> which is deprecated
+     */
     public ConfigKey<T> deprecated(ConfigKey<?> primary) {
     	if (getKind() == Kind.DEPRECATED) {
     		throw new IllegalStateException("Tried to call deprecated twice on the same config key!");
@@ -159,6 +176,12 @@ public final class ConfigKey<T> {
     	return of(getType(), Kind.DEPRECATED, isRequired(), getDefaultValue(), primary);
     }
     
+    /**
+     * Creates a new <code>ConfigKey</code> by deep cloning this config key and marking it as an alias of the given primary <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param primary the primary <code>ConfigKey</code> of this alias <code>ConfigKey</code>
+     * @return a new <code>ConfigKey</code> which is an alias of the given primary <code>ConfigKey</code>
+     */
     public ConfigKey<T> alias(ConfigKey<T> primary) {
     	if (getKind() == Kind.ALIAS) {
     		throw new IllegalStateException("Tried to call alias twice on the same config key!");
@@ -169,114 +192,280 @@ public final class ConfigKey<T> {
     	return of(getType(), Kind.ALIAS, isRequired(), getDefaultValue(), primary);
     }
     
+    /**
+     * Returns a new Integer <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Integer <code>ConfigKey</code>
+     */
     public static ConfigKey<Integer> intKey() {
     	return of(Integer.class, Kind.PRIMARY, true, null, null);
     }
     
-    public static ConfigKey<Integer> intKey(Integer defeaultValue) {
-    	return of(Integer.class, Kind.PRIMARY, false, defeaultValue, null);
+    /**
+     * Returns a new Integer <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Integer <code>ConfigKey</code>
+     */
+    public static ConfigKey<Integer> intKey(Integer defaultValue) {
+    	return of(Integer.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Long <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Long <code>ConfigKey</code>
+     */
     public static ConfigKey<Long> longKey() {
     	return of(Long.class, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new Long <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Long <code>ConfigKey</code>
+     */
     public static ConfigKey<Long> longKey(Long defaultValue) {
     	return of(Long.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Boolean <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Boolean <code>ConfigKey</code>
+     */
     public static ConfigKey<Boolean> boolKey() {
     	return of(Boolean.class, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new Boolean <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Boolean <code>ConfigKey</code>
+     */
     public static ConfigKey<Boolean> boolKey(Boolean defaultValue) {
     	return of(Boolean.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Double <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Double <code>ConfigKey</code>
+     */
     public static ConfigKey<Double> doubleKey() {
     	return of(Double.class, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new Double <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Double <code>ConfigKey</code>
+     */
     public static ConfigKey<Double> doubleKey(Double defaultValue) {
     	return of(Double.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Float <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Float <code>ConfigKey</code>
+     */
     public static ConfigKey<Float> floatKey() {
     	return of(Float.class, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new Float <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Float <code>ConfigKey</code>
+     */
     public static ConfigKey<Float> floatKey(Float defaultValue) {
     	return of(Float.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Short <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Short <code>ConfigKey</code>
+     */
     public static ConfigKey<Short> shortKey() {
     	return of(Short.class, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new Short <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Short <code>ConfigKey</code>
+     */
     public static ConfigKey<Short> shortKey(Short defaultValue) {
     	return of(Short.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Byte <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Byte <code>ConfigKey</code>
+     */
     public static ConfigKey<Byte> byteKey() {
     	return of(Byte.class, Kind.PRIMARY, true, null, null);
     }
-    
+
+    /**
+     * Returns a new Byte <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Byte <code>ConfigKey</code>
+     */
     public static ConfigKey<Byte> byteKey(Byte defaultValue) {
     	return of(Byte.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Character <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Character <code>ConfigKey</code>
+     */
     public static ConfigKey<Character> charKey() {
     	return of(Character.class, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new Character <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Character <code>ConfigKey</code>
+     */
     public static ConfigKey<Character> charKey(Character defaultValue) {
     	return of(Character.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new Enum <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new Enum <code>ConfigKey</code>
+     */
     public static <E extends Enum<E>> ConfigKey<E> enumKey(Class<E> enumClass) {
         return of(enumClass, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new Enum <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new Enum <code>ConfigKey</code>
+     */
     public static <E extends Enum<E>> ConfigKey<E> enumKey(Class<E> enumClass, E defaultValue) {
         return of(enumClass, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns a new String <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @return a new String <code>ConfigKey</code>
+     */
     public static ConfigKey<String> stringKey() {
     	return of(String.class, Kind.PRIMARY, true, null, null);
     }
     
+    /**
+     * Returns a new String <code>ConfigKey</code>. (Fluent API)
+     * 
+     * @param defaultValue the default value for this <code>ConfigKey</code>
+     * @return a new String <code>ConfigKey</code>
+     */
     public static ConfigKey<String> stringKey(String defaultValue) {
     	return of(String.class, Kind.PRIMARY, false, defaultValue, null);
     }
     
+    /**
+     * Returns the name of this <code>ConfigKey</code>. For example a <code>ConfigKey</code> declared as
+     * MY_INTEGER_1 (i.e. the field name) will have be automatically assigned the name "myInteger1".
+     * 
+     * @return the name of this <code>ConfigKey</code>
+     */
     public String getName() {
     	return name;
     }
 	    
+    /**
+     * Returns the type of this <code>ConfigKey</code>.
+     * Allowed types are Java primitive wrappers (Integer, Short, etc.), String and Enum.
+     * 
+     * @return the type of this <code>ConfigKey</code>
+     */
     public Class<T> getType() {
     	return type;
     }
     
+    /**
+     * Returns the kind of this <code>ConfigKey</code>.
+     * Allowed kinds are PRIMARY, ALIAS and DEPRECATED.
+     * 
+     * @return the kind of this <code>ConfigKey</code>
+     */
     public Kind getKind() {
     	return kind;
     }
     
+    /**
+     * Returns the primary <code>ConfigKey</code> of this <code>ConfigKey</code>.
+     * If the <code>ConfigKey</code> itself is primary this method returns null.
+     * 
+     * @return the primary <code>ConfigKey</code> of this alias or deprecated <code>ConfigKey</code>.
+     * Or null if this <code>ConfigKey</code> itself is primary.
+     */
     public ConfigKey<?> getPrimary() {
     	return primary;
     }
     
+    /**
+     * Returns the holder class which is specifying the static fields for the <code>ConfigKey</code>s.
+     * 
+     * @return the holder class that specifies the <code>ConfigKey</code>s.
+     */
     public Class<?> getHolder() {
     	return holder;
     }
     
+    /**
+     * Returns the exact field name of this static field, as declared in the holder class. For example:<br/><br/>
+     * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>public static final ConfigKey&lt;T&gt; MY_INTEGER_1 = intKey();</code><br/><br/>
+     * will return "MY_INTEGER_1".
+     * 
+     * @return the static field name of this <code>ConfigKey</code>
+     */
     public String getFieldName() {
     	return fieldName;
     }
     
+    /**
+     * Returns whether this <code>ConfigKey</code> is required, in other words, whether it has a given default value or not.
+     * 
+     * @return true if this <code>ConfigKey</code> is required
+     */
     public boolean isRequired() {
     	return isRequired;
     }
     
+    /**
+     * Returns whether this <code>ConfigKey</code> has a default value.<br/><br/>. This is equivalent to <code>!isRequired()</code>.
+     *  
+     * @return true if this <code>ConfigKey</code> has a default value.
+     */
+    public boolean hasDefault() {
+    	return !isRequired;
+    }
+    
+    /**
+     * Returns the default value associated/specified with this <code>ConfigKey</code>
+     * 
+     * @return the default value or null if not default value is declared
+     */
     public T getDefaultValue() {
     	return defaultValue;
     }
@@ -310,12 +499,22 @@ public final class ConfigKey<T> {
         return sb.toString();
     }
     
+    /**
+     * Returns all the aliases (in the right order) that this primary key has.
+     * 
+     * @return all the aliases or null if the <code>ConfigKey</code> is not primary
+     */
     public List<ConfigKey<?>> getAliases() {
-    	return aliases;
+    	return kind == Kind.PRIMARY ? aliases : null;
     }
     
+    /**
+     * Returns all deprecated <code>ConfigKey</code>s (in the right order) that this primary key has.
+     * 
+     * @return all the deprecated <code>ConfigKey</code>s or null if the <code>ConfigKey</code> is not primary
+     */
     public List<ConfigKey<?>> getDeprecated() {
-    	return deprecated;
+    	return kind == Kind.PRIMARY ? deprecated : null;
     }
     
 	@Override
