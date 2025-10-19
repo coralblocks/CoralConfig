@@ -5,7 +5,7 @@ CoralConfig is a configuration framework that offers a fluent API, aliases, depr
 ```java
 public class Basics {
 
-  public static final ConfigKey<Integer> MAX_RETRIES = intKey().def(4); // intKey(4) also works
+  public static final ConfigKey<Integer> MAX_RETRIES = intKey().def(4); // or intKey(4)
 	
   private final int maxRetries;
 	
@@ -64,7 +64,7 @@ MapConfiguration mc = new MapConfiguration("heartbeat=2 username=rpaiva",
 If you get the type of the config key wrong, it won't even compile:
 ```java
  // DOESN'T COMPILE (wrong type)
-String maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES);
+String maxRetries = mc.get(MAX_RETRIES);
 ```
 
 ### Supports _aliases_
