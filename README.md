@@ -11,7 +11,6 @@ public class Basics {
 	
   public Basics(Configuration config) {
     this.maxRetries = config.get(MAX_RETRIES);
-    System.out.println(MAX_RETRIES + " => " + maxRetries);
   }
 }
 ```
