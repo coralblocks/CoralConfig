@@ -4,15 +4,15 @@ CoralConfig is a configuration framework that offers a fluent API, aliases, depr
 ## Examples
 ```java
 public class Basics {
+
+  public static final ConfigKey<Integer> MAX_RETRIES = intKey().def(4); // intKey(4) also works
 	
-	public static final ConfigKey<Integer> MAX_NUMBER_OF_RETRIES = intKey().def(4); // intKey(4) also works
+  private final int maxRetries;
 	
-	private final int maxNumberOfRetries;
-	
-	public Basics(Configuration config) {
-		this.maxNumberOfRetries = config.get(MAX_NUMBER_OF_RETRIES);
-		System.out.println(MAX_NUMBER_OF_RETRIES + " => " + maxNumberOfRetries);
-	}
+  public Basics(Configuration config) {
+    this.maxRetries = config.get(MAX_RETRIES);
+    System.out.println(MAX_RETRIES + " => " + maxRetries);
+  }
 }
 ```
 To create an empty configuration:
@@ -21,26 +21,26 @@ MapConfiguration mc = new MapConfiguration(Basics.class);
 ```
 To get the default value:
 ```java
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 4 (the default)
+int maxRetries = mc.get(MAX_RETRIES); // => 4 (the default)
 ```
 To overwrite a default value:
 ```java
-mc.overwriteDefault(MAX_NUMBER_OF_RETRIES, 6);
+mc.overwriteDefault(MAX_RETRIES, 6);
 
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 6 (overwritten default)
+int maxRetries = mc.get(MAX_RETRIES); // => 6 (overwritten default)
 ```
 To configure (add) a value so this value is returned instead of the (overwritten or not) default value:
 ```java
-mc.add(MAX_NUMBER_OF_RETRIES, 2);
+mc.add(MAX_RETRIES, 2);
 
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 2 (configured)
+int maxRetries = mc.get(MAX_RETRIES); // => 2 (configured)
 ```
 To create a configuration with some values, you can pass a list of params to the constructor:
 ```java
-MapConfiguration mc = new MapConfiguration("maxNumberOfRetries=1 username=saoj heartbeat=30",
+MapConfiguration mc = new MapConfiguration("maxRetries=1 username=saoj heartbeat=30",
 													Basics.class);
 
-int maxNumberOfRetries = mc.get(MAX_NUMBER_OF_RETRIES); // => 1 (configured)
+int maxRetries = mc.get(MAX_RETRIES); // => 1 (configured)
 ```
 
 ### Supports more than one _holder_ class
