@@ -222,8 +222,9 @@ You can use the `ConfigPrinter` utility class to print all the information about
 ```plain
 java -cp target/coralconfig-all.jar \
 		com.coralblocks.coralconfig.ConfigPrinter \
-		withHeaderLine=true \
-		fullHolderName=false \
+		includeHeaderLine=true \
+		includeParamName=false \
+		includeHolderClass=false \
 		com.coralblocks.coralconfig.example.Client \
 		com.coralblocks.coralconfig.example.TcpClient \
 		| sed 's/\r$//' \
@@ -232,11 +233,11 @@ java -cp target/coralconfig-all.jar \
 ```
 With some formatting you get:
 ```plain
-Field Name             Name                 Type      Default Value   Holder Class   Kind         Parent Primary       Aliases    Deprecated   Description
-CLIENT_SEND_STRATEGY   clientSendStrategy   Enum      REGULAR         TcpClient      PRIMARY
-CLIENT_USERNAME        clientUsername       String    testClient      Client         PRIMARY                           USERNAME
-HEARTBEAT              heartbeat            Float     4.444           Client         DEPRECATED   HEARTBEAT_INTERVAL
-HEARTBEAT_INTERVAL     heartbeatInterval    Integer   5               Client         PRIMARY                                      HEARTBEAT
-MESSAGES_TO_SEND       messagesToSend       Integer   10              TcpClient      PRIMARY                                                   The number of messages to send when the client connects
-USERNAME               username             String    =REQUIRED=      Client         ALIAS        CLIENT_USERNAME
+Field Name             Type      Default Value   Kind         Parent Primary       Aliases    Deprecated   Description
+CLIENT_SEND_STRATEGY   Enum      REGULAR         PRIMARY
+CLIENT_USERNAME        String    testClient      PRIMARY                           USERNAME
+HEARTBEAT              Float     4.444           DEPRECATED   HEARTBEAT_INTERVAL
+HEARTBEAT_INTERVAL     Integer   5               PRIMARY                                      HEARTBEAT
+MESSAGES_TO_SEND       Integer   10              PRIMARY                                                   The number of messages to send when the client connects
+USERNAME               String    =REQUIRED=      ALIAS        CLIENT_USERNAME
 ```
