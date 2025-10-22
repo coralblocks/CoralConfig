@@ -29,7 +29,8 @@ public class TcpClient extends Client {
 	
 	public static final ConfigKey<SendStrategy> CLIENT_SEND_STRATEGY = enumKey(SendStrategy.class).def(SendStrategy.REGULAR);
 	
-	public static final ConfigKey<Integer> MESSAGES_TO_SEND = intKey(10);
+	public static final ConfigKey<Integer> MESSAGES_TO_SEND = intKey(10)
+											.setDescription("The number of messages to send when the client connects");
 
 	public TcpClient(Configuration config) {
 		
