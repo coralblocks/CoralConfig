@@ -53,9 +53,9 @@ public class ConfigPrinter {
 				System.out.println("First argument must be fullHolderName=true|false\n");
 				return;
 			}
-			withHeaderLine = Boolean.parseBoolean(arg2.split("\\=")[1]);
+			fullHolderName = Boolean.parseBoolean(arg2.split("\\=")[1]);
 		} else {
-			withHeaderLine = Boolean.parseBoolean(arg2);
+			fullHolderName = Boolean.parseBoolean(arg2);
 		}
 		
 		Class<?>[] classArray = new Class<?>[args.length - 2];
@@ -72,7 +72,7 @@ public class ConfigPrinter {
 		printConfigs(withHeaderLine, fullHolderName, classArray);
 	}
 	
-	public static final void printConfigs(boolean withHeaderLine, boolean fullHolderName, Class<?> ... holders) {
+	public static final void printConfigs(final boolean withHeaderLine, final boolean fullHolderName, Class<?> ... holders) {
 		
 		MapConfiguration mc = new MapConfiguration(holders);
 		
