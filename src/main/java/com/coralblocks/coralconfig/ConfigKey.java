@@ -467,8 +467,9 @@ public final class ConfigKey<T> {
      * 
      * @param description the description to set for this <code>ConfigKey</code>
      */
-    public void setDescription(String description) {
+    public ConfigKey<T> setDescription(String description) {
     	this.description = description;
+    	return this;
     }
     
     
