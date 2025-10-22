@@ -116,7 +116,7 @@ public class ConfigPrinter {
         	String line = "";
         	line += key.getFieldName();
         	if (includeParamName) {
-        		line += ", " + key.getName();
+        		line += ", " + key.getParamName();
         	}
         	if (key.getType().isEnum()) {
         		line += ", Enum";

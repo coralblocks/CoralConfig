@@ -35,7 +35,7 @@ final class ConfigContainer {
 
     private final Class<?> holder;
     private final Set<ConfigKey<?>> configKeys;
-    private final Map<String, ConfigKey<?>> configKeysByName;
+    private final Map<String, ConfigKey<?>> configKeysByParamName;
     private final String toString;
 
     private ConfigContainer(Class<?> holder) {
@@ -77,11 +77,11 @@ final class ConfigContainer {
         
         for(ConfigKey<?> configKey : collected) {
         	
-            String name = configKey.getName();
-            ConfigKey<?> prev = map.putIfAbsent(name, configKey);
+            String paramName = configKey.getParamName();
+            ConfigKey<?> prev = map.putIfAbsent(paramName, configKey);
             
             if (prev != null) {
-                throw new IllegalStateException("Duplicate config key name: " + name + " in holder " + this.holder.getName());
+                throw new IllegalStateException("Duplicate config key name: " + paramName + " in holder " + this.holder.getName());
             }
             
             set.add(configKey);
@@ -90,7 +90,7 @@ final class ConfigContainer {
         if (set.isEmpty()) throw new IllegalStateException("No config keys found in holder " + this.holder.getName());
         
         this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
-        this.configKeysByName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
+        this.configKeysByParamName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
         
         this.toString = "ConfigContainer[" + holder.getName() + ", size=" + configKeys.size() + "]";
         
@@ -143,7 +143,7 @@ final class ConfigContainer {
     	Iterator<ConfigKey<?>> iter = cc1.configKeys.iterator();
     	while(iter.hasNext()) {
     		ConfigKey<?> configKey = iter.next();
-    		ConfigKey<?> duplicate = cc2.getIgnoreCase(configKey.getName());
+    		ConfigKey<?> duplicate = cc2.getIgnoreCase(configKey.getParamName());
     		if (duplicate != null) {
     			throw new IllegalStateException("Found two keys with the same name! " +
     									"configKey1=" + configKey + " configKey2=" + duplicate);
@@ -159,15 +159,15 @@ final class ConfigContainer {
     	return configKeys.contains(configKey);
     }
 
-    public ConfigKey<?> get(String name) {
-        return configKeysByName.get(name);
+    public ConfigKey<?> get(String paramName) {
+        return configKeysByParamName.get(paramName);
     }
     
-    private ConfigKey<?> getIgnoreCase(String name) {
+    private ConfigKey<?> getIgnoreCase(String paramName) {
     	Iterator<ConfigKey<?>> iter = configKeys.iterator();
     	while(iter.hasNext()) {
     		ConfigKey<?> configKey = iter.next();
-    		if (configKey.getName().equalsIgnoreCase(name)) {
+    		if (configKey.getParamName().equalsIgnoreCase(paramName)) {
     			return configKey;
     		}
     	}

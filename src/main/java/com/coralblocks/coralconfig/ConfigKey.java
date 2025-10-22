@@ -29,7 +29,7 @@ public final class ConfigKey<T> {
 		PRIMARY, ALIAS, DEPRECATED
 	}
 	
-	private String name;
+	private String paramName;
 	private final Class<T> type;
 	private final Kind kind;
 	private final ConfigKey<?> primary;
@@ -384,13 +384,13 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Returns the name of this <code>ConfigKey</code>. For example a <code>ConfigKey</code> declared as
-     * MY_INTEGER_1 (i.e. the field name) will have be automatically assigned the name "myInteger1".
+     * Returns the param name of this <code>ConfigKey</code>. For example a <code>ConfigKey</code> declared as
+     * MY_INTEGER_1 (i.e. the field name) will have be automatically assigned the name "myInteger1". (camel case)
      * 
      * @return the name of this <code>ConfigKey</code>
      */
-    public String getName() {
-    	return name;
+    public String getParamName() {
+    	return paramName;
     }
 	    
     /**
@@ -493,7 +493,7 @@ public final class ConfigKey<T> {
     
     void setFieldName(String fieldName) {
     	this.fieldName = fieldName;
-    	this.name = toCamelCase(fieldName);
+    	this.paramName = toCamelCase(fieldName);
     }
     
     private static String toCamelCase(String input) {
@@ -548,16 +548,16 @@ public final class ConfigKey<T> {
 			suffix = "_deprecatedInFavorOf_[" + primary + "]";
 		}
 		
-		String name = this.name == null ? "Not_Defined_Yet" : this.name;
+		String paramName = this.paramName == null ? "Not_Defined_Yet" : this.paramName;
 		
 		if (fieldName == null && holder == null) {
-			return "(\"" + name + "\")" + suffix;
+			return "(\"" + paramName + "\")" + suffix;
 		} else if (fieldName != null && holder != null) {
-			return holder.getSimpleName() + "." + fieldName + "(\"" + name + "\")" + suffix;
+			return holder.getSimpleName() + "." + fieldName + "(\"" + paramName + "\")" + suffix;
 		} else if (fieldName != null) {
-			return fieldName + "(\"" + name + "\")" + suffix;
+			return fieldName + "(\"" + paramName + "\")" + suffix;
 		} else { // => holder != null && fieldName == null
-			return holder.getSimpleName() + "(\"" + name + "\")" + suffix;
+			return holder.getSimpleName() + "(\"" + paramName + "\")" + suffix;
 		}
 	}
 }
