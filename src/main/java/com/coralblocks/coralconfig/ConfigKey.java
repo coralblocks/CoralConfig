@@ -39,6 +39,7 @@ public final class ConfigKey<T> {
 	Class<?> holder;
 	private final T defaultValue;
 	private final boolean isRequired;
+	private String description;
 	
 	private ConfigKey(Class<T> type, Kind kind, boolean isRequired, T defaultValue, ConfigKey<?> primary) {
 		enforceType(type);
@@ -459,6 +460,25 @@ public final class ConfigKey<T> {
      */
     public boolean hasDefault() {
     	return !isRequired;
+    }
+    
+    /**
+     * Sets the description for this <code>ConfigKey</code>.
+     * 
+     * @param description the description to set for this <code>ConfigKey</code>
+     */
+    public void setDescription(String description) {
+    	this.description = description;
+    }
+    
+    
+    /**
+     * Returns the description for this <code>ConfigKey</code>.
+     * 
+     * @return the description or null if not defined
+     */
+    public String getDescription() {
+    	return description;
     }
     
     /**
