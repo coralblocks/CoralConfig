@@ -227,7 +227,7 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public List<ConfigKey<?>> allConfigKeys() {
-		return allConfigKeys;
+		return Collections.unmodifiableList(allConfigKeys);
 	}
 	
 	@Override
