@@ -22,7 +22,8 @@ public class PrintConfigs {
 	public static void main(String[] args) {
 		
 		boolean withHeaderLine = args.length > 0 ? Boolean.parseBoolean(args[0]) : true;
+		boolean fullHolderName = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
 		
-		ConfigPrinter.printConfigs(withHeaderLine, TcpClient.class, Client.class);
+		ConfigPrinter.printConfigs(withHeaderLine, fullHolderName, TcpClient.class, Client.class);
 	}
 }

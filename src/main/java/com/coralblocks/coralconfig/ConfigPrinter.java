@@ -27,7 +27,52 @@ public class ConfigPrinter {
 		
 	}
 	
-	public static final void printConfigs(boolean withHeaderLine, Class<?> ... holders) {
+	public static void main(String[] args) {
+		
+		if (args.length <= 2) {
+			System.out.println("Missing arguments: withHeaderLine=true|false fullHolderName=true|false Hoder1 Hoder2 ...\n");
+			return;
+		}
+		
+		boolean withHeaderLine = true;
+		String arg1 = args[0];
+		if (arg1.contains("=")) {
+			if (!arg1.startsWith("withHeaderLine=")) {
+				System.out.println("First argument must be withHeaderLine=true|false\n");
+				return;
+			}
+			withHeaderLine = Boolean.parseBoolean(arg1.split("\\=")[1]);
+		} else {
+			withHeaderLine = Boolean.parseBoolean(arg1);
+		}
+		
+		boolean fullHolderName = true;
+		String arg2 = args[1];
+		if (arg2.contains("=")) {
+			if (!arg1.startsWith("fullHolderName=")) {
+				System.out.println("First argument must be fullHolderName=true|false\n");
+				return;
+			}
+			withHeaderLine = Boolean.parseBoolean(arg2.split("\\=")[1]);
+		} else {
+			withHeaderLine = Boolean.parseBoolean(arg2);
+		}
+		
+		Class<?>[] classArray = new Class<?>[args.length - 2];
+		
+		for(int i = 2; i < args.length; i++) {
+			String className = args[i];
+			try {
+				classArray[i - 2] = Class.forName(className);
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		printConfigs(withHeaderLine, fullHolderName, classArray);
+	}
+	
+	public static final void printConfigs(boolean withHeaderLine, boolean fullHolderName, Class<?> ... holders) {
 		
 		MapConfiguration mc = new MapConfiguration(holders);
 		
@@ -61,7 +106,7 @@ public class ConfigPrinter {
         	} else {
         		line += ", =REQUIRED=";
         	}
-        	line += ", " + key.getHolder().getName();
+        	line += ", " + (fullHolderName ? key.getHolder().getName() : key.getHolder().getSimpleName());
         	line += ", " + key.getKind();
         	if (key.getKind() == Kind.PRIMARY) {
         		line += ", ";
