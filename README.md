@@ -216,3 +216,27 @@ public void testEnum() {
 	assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM)); // test default
 }
 ```
+
+### Printing the Config Keys
+You can use the `ConfigPrinter` utility class to print all the information about your configuration, in comma-separated lines:
+```plain
+java -cp target/coralconfig-all.jar \
+		com.coralblocks.coralconfig.ConfigPrinter \
+		withHeaderLine=true \
+		fullHolderName=false \
+		com.coralblocks.coralconfig.example.Client \
+		com.coralblocks.coralconfig.example.TcpClient \
+		| sed 's/\r$//' \
+		| column -s, -t \
+		| less -S
+```
+With some formatting you get:
+```plain
+Field Name             Name                 Type      Default Value   Holder Class   Kind         Parent Primary       Aliases    Deprecated   Description
+CLIENT_SEND_STRATEGY   clientSendStrategy   Enum      REGULAR         TcpClient      PRIMARY
+CLIENT_USERNAME        clientUsername       String    testClient      Client         PRIMARY                           USERNAME
+HEARTBEAT              heartbeat            Float     4.444           Client         DEPRECATED   HEARTBEAT_INTERVAL
+HEARTBEAT_INTERVAL     heartbeatInterval    Integer   5               Client         PRIMARY                                      HEARTBEAT
+MESSAGES_TO_SEND       messagesToSend       Integer   10              TcpClient      PRIMARY                                                   The number of messages to send when the client connects
+USERNAME               username             String    =REQUIRED=      Client         ALIAS        CLIENT_USERNAME
+```
