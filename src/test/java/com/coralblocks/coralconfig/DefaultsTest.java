@@ -16,12 +16,39 @@
 package com.coralblocks.coralconfig;
 
 import static com.coralblocks.coralconfig.ConfigKey.*;
+import static org.junit.Assert.*;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 
 public class DefaultsTest {
+	
+	@Test
+	public void testNullDefaults() {
+		
+		class Base1 {
+			public static final ConfigKey<String> MY_STRING = stringKey().def(null); 
+		}
+		
+		MapConfiguration mc1 = new MapConfiguration(Base1.class);
+		Assert.assertEquals(false, Base1.MY_STRING.isRequired());
+		Assert.assertNull(mc1.get(Base1.MY_STRING));
+		
+		class Base2 {
+			public static final ConfigKey<String> MY_STRING = stringKey();
+		}
+		
+		MapConfiguration mc2 = new MapConfiguration(Base2.class);
+		Assert.assertEquals(true, Base2.MY_STRING.isRequired());
+		
+		try {
+			mc2.get(Base2.MY_STRING); // REQUIRED
+			fail();
+		} catch(RuntimeException e) {
+			// Good!
+		}
+	}
 	
 	@Test
 	public void testBasicsOfBasics() {
