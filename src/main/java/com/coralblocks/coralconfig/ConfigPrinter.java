@@ -49,7 +49,7 @@ public class ConfigPrinter {
 		boolean fullHolderName = true;
 		String arg2 = args[1];
 		if (arg2.contains("=")) {
-			if (!arg1.startsWith("fullHolderName=")) {
+			if (!arg2.startsWith("fullHolderName=")) {
 				System.out.println("First argument must be fullHolderName=true|false\n");
 				return;
 			}
