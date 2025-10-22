@@ -29,50 +29,68 @@ public class ConfigPrinter {
 	
 	public static void main(String[] args) {
 		
-		if (args.length <= 2) {
-			System.out.println("Missing arguments: withHeaderLine=true|false fullHolderName=true|false Hoder1 Hoder2 ...\n");
+		if (args.length <= 3) {
+			System.out.println("Missing arguments: includeHeaderLine=true|false"
+								+ " includeParamName=true|false"
+								+ " includeHolderClass=true|false"
+								+ " Holder1 Holder2 ...\n");
 			return;
 		}
 		
-		boolean withHeaderLine = true;
+		boolean includeHeaderLine;
 		String arg1 = args[0];
 		if (arg1.contains("=")) {
-			if (!arg1.startsWith("withHeaderLine=")) {
-				System.out.println("First argument must be withHeaderLine=true|false\n");
+			if (!arg1.startsWith("includeHeaderLine=")) {
+				System.out.println("First argument must be includeHeaderLine=true|false\n");
 				return;
 			}
-			withHeaderLine = Boolean.parseBoolean(arg1.split("\\=")[1]);
+			includeHeaderLine = Boolean.parseBoolean(arg1.split("\\=")[1]);
 		} else {
-			withHeaderLine = Boolean.parseBoolean(arg1);
+			includeHeaderLine = Boolean.parseBoolean(arg1);
 		}
 		
-		boolean fullHolderName = true;
-		String arg2 = args[1];
+		boolean includeParamName;
+		String arg2= args[1];
 		if (arg2.contains("=")) {
-			if (!arg2.startsWith("fullHolderName=")) {
-				System.out.println("First argument must be fullHolderName=true|false\n");
+			if (!arg2.startsWith("includeParamName=")) {
+				System.out.println("Second argument must be includeParamName=true|false\n");
 				return;
 			}
-			fullHolderName = Boolean.parseBoolean(arg2.split("\\=")[1]);
+			includeParamName = Boolean.parseBoolean(arg2.split("\\=")[1]);
 		} else {
-			fullHolderName = Boolean.parseBoolean(arg2);
+			includeParamName = Boolean.parseBoolean(arg2);
 		}
 		
-		Class<?>[] classArray = new Class<?>[args.length - 2];
+		boolean includeHolderClass;
+		String arg3= args[2];
+		if (arg3.contains("=")) {
+			if (!arg3.startsWith("includeHolderClass=")) {
+				System.out.println("Third argument must be includeHolderClass=true|false\n");
+				return;
+			}
+			includeHolderClass = Boolean.parseBoolean(arg3.split("\\=")[1]);
+		} else {
+			includeHolderClass = Boolean.parseBoolean(arg3);
+		}
 		
-		for(int i = 2; i < args.length; i++) {
+		Class<?>[] classArray = new Class<?>[args.length - 3];
+		
+		for(int i = 3; i < args.length; i++) {
 			String className = args[i];
 			try {
-				classArray[i - 2] = Class.forName(className);
+				classArray[i - 3] = Class.forName(className);
 			} catch(Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 		
-		printConfigs(withHeaderLine, fullHolderName, classArray);
+		printConfigs(includeHeaderLine, includeParamName, includeHolderClass, classArray);
 	}
 	
-	public static final void printConfigs(final boolean withHeaderLine, final boolean fullHolderName, Class<?> ... holders) {
+	public static final void printConfigs(final boolean includeHeaderLine, 
+										  final boolean includeParamName, 
+										  final boolean includeHolderClass,
+										  Class<?> ... holders) {
 		
 		MapConfiguration mc = new MapConfiguration(holders);
 		
@@ -88,14 +106,18 @@ public class ConfigPrinter {
         List<ConfigKey<?>> sorted = new ArrayList<ConfigKey<?>>(allConfigs);
         sorted.sort(byName);
         
-        String header = "Field Name, Name, Type, Default Value, Holder Class, Kind, Parent Primary, Aliases, Deprecated, Description";
+        String header = "Field Name," + (includeParamName ? " Param Name," : "") 
+        			+ " Type, Default Value," + (includeHolderClass ? " Holder Class," : "")
+        			+ " Kind, Parent Primary, Aliases, Deprecated, Description";
         
-        if (withHeaderLine) System.out.println(header);
+        if (includeHeaderLine) System.out.println(header);
         
         for(final ConfigKey<?> key : sorted) {
         	String line = "";
         	line += key.getFieldName();
-        	line += ", " + key.getName();
+        	if (includeParamName) {
+        		line += ", " + key.getName();
+        	}
         	if (key.getType().isEnum()) {
         		line += ", Enum";
         	} else {
@@ -106,7 +128,9 @@ public class ConfigPrinter {
         	} else {
         		line += ", =REQUIRED=";
         	}
-        	line += ", " + (fullHolderName ? key.getHolder().getName() : key.getHolder().getSimpleName());
+        	if (includeHolderClass) {
+        		line += ", " + key.getHolder().getSimpleName();
+        	}
         	line += ", " + key.getKind();
         	if (key.getKind() == Kind.PRIMARY) {
         		line += ", ";
