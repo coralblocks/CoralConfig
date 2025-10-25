@@ -115,6 +115,11 @@ public interface Configuration {
 	public <T> boolean removeOverwrittenDefault(ConfigKey<T> configKey);
 	
 	/**
+	 * Removes the overwritten defaults associated with all <code>ConfigKey</code>s that this configuration has.
+	 */
+	public void removeAllOverwrittenDefaults();
+	
+	/**
 	 * Returns a set with all <code>ConfigKey</code>s that have overwritten default values.
 	 * 
 	 * @return all the <code>ConfigKey</code>s with overwritten default values

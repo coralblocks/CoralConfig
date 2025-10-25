@@ -272,6 +272,7 @@ public class MapConfiguration implements Configuration {
 
 	@Override
 	public <T> T getOverwrittenDefault(ConfigKey<T> configKey) {
+		
 		enforceConfigKey(configKey);
 		
 		if (configKey.getKind() == Kind.DEPRECATED) {
@@ -298,7 +299,9 @@ public class MapConfiguration implements Configuration {
 	 * @return a previous value that was added for the given <code>ConfigKey</code> or null if there was none
 	 */
 	public <T> T add(ConfigKey<T> configKey, T value) {
+		
 		enforceConfigKey(configKey);
+		
 		enforceValue(configKey, value);
 		
 		if (configKey.getKind() == Kind.DEPRECATED) {
@@ -349,6 +352,11 @@ public class MapConfiguration implements Configuration {
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void removeAllOverwrittenDefaults() {
+		overwrittenDefaults.clear();
 	}
 	
 	private static <T> Object getImpl(ConfigKey<T> ck, Map<ConfigKey<?>, Object> values) {
