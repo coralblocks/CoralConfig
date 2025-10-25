@@ -286,6 +286,20 @@ public class MapConfiguration implements Configuration {
 	}
 	
 	@Override
+	public <T> boolean hasOverwrittenDefault(ConfigKey<T> configKey) {
+		
+		enforceConfigKey(configKey);
+		
+		if (configKey.getKind() == Kind.DEPRECATED) {
+			for(int i = 0; i < listeners.size(); i++) {
+				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
+			}
+		}
+		
+		return overwrittenDefaults.containsKey(configKey);
+	}
+	
+	@Override
 	public Class<?>[] getHolders() {
 		return holders;
 	}

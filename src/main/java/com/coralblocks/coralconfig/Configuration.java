@@ -120,6 +120,15 @@ public interface Configuration {
 	public void removeAllOverwrittenDefaults();
 	
 	/**
+	 * Check if the given <code>ConfigKey</code> has an associated overwritten default.
+	 * 
+	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
+	 * @param configKey the <code>ConfigKey</code> for which to check if it has an overwritten default
+	 * @return true if it has an overwritten default
+	 */
+	public <T> boolean hasOverwrittenDefault(ConfigKey<T> configKey);
+	
+	/**
 	 * Returns a set with all <code>ConfigKey</code>s that have overwritten default values.
 	 * 
 	 * @return all the <code>ConfigKey</code>s with overwritten default values
