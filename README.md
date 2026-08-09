@@ -43,7 +43,7 @@ int maxRetries = mc.get(MAX_RETRIES); // => 1 (configured)
 ```
 
 ### Supports more than one _holder_ class
-The configuration can handle multiple _holder_ classes with distinct configuration keys. The configuration enforces that there are no duplicate keys in each _holder_ class as well as across all _holder_ classes.
+The configuration can handle multiple _holder_ classes with distinct configuration keys. The configuration enforces that there are no duplicate keys across all _holder_ classes.
 ```java
 public class Client {
     public static final ConfigKey<Integer> HEARTBEAT = intKey(5);
