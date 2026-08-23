@@ -78,6 +78,38 @@ public class MapConfigurationTest {
 		mapConfig.remove(MY_ENUM);
 		Assert.assertEquals(null, mapConfig.get(MY_ENUM)); // don't have it anymore! apply overwrite!
 	}
+
+	@Test
+	public void testParamsParsing() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> OK_KEY = ConfigKey.intKey();
+			public static final ConfigKey<String> MY_STRING = ConfigKey.stringKey();
+		}
+
+		MapConfiguration config = new MapConfiguration("  okKey=1 myString=a=b  ", Holder.class);
+
+		Assert.assertEquals(1, config.get(Holder.OK_KEY).intValue());
+		Assert.assertEquals("a=b", config.get(Holder.MY_STRING));
+
+		config = new MapConfiguration("myString=", Holder.class);
+		Assert.assertEquals("", config.get(Holder.MY_STRING));
+
+		config = new MapConfiguration("   ", Holder.class);
+		Assert.assertEquals(0, config.size());
+
+		try {
+
+			new MapConfiguration("okKey=1 okKey=2", Holder.class);
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals("Duplicate config key in params: okKey (first: okKey=1, duplicate: okKey=2)", e.getMessage());
+		}
+	}
 	
 	@Test
 	public void testBasics1() {

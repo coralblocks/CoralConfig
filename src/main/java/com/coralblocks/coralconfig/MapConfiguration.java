@@ -68,14 +68,22 @@ public class MapConfiguration implements Configuration {
 		if (configContainers.length > 1) ConfigContainer.enforceNoDuplicates(configContainers); // important!
 		
 		if (params != null) {
-			String[] keyValues = params.split("\\s+");
+			Map<String, String> parsedParams = new HashMap<String, String>();
+			String[] keyValues = params.trim().split("\\s+");
 			for(String keyValue : keyValues) {
-				String[] temp = keyValue.split("=");
+				if (keyValue.isEmpty()) continue;
+				String[] temp = keyValue.split("=", 2);
 				if (temp.length != 2) {
 					throw new IllegalArgumentException("The params argument is invalid: " + params + " (" + keyValue + ")");
 				}
 				String key = temp[0];
 				String value = temp[1];
+
+				String previous = parsedParams.putIfAbsent(key, keyValue);
+				if (previous != null) {
+					throw new IllegalArgumentException("Duplicate config key in params: " + key +
+																   " (first: " + previous + ", duplicate: " + keyValue + ")");
+				}
 				
 				ConfigKey<?> configKey = getByName(key);
 				if (configKey == null) {
