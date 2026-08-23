@@ -56,15 +56,17 @@ final class ConfigContainer {
             	
                 if (!f.canAccess(null)) f.setAccessible(true);
                 
-                Object val = f.get(null);
-                
-                ConfigKey<?> configKey = (ConfigKey<?>) val;
+                ConfigKey<?> configKey = (ConfigKey<?>) f.get(null);
+
+                if (configKey == null) {
+                    throw new IllegalStateException("Config key field is null: " + holder.getName() + "." + f.getName());
+                }
                 
                 configKey.setFieldName(f.getName());
                 
                 configKey.holder = holder;
                 
-                if (val != null) collected.add(configKey);
+                collected.add(configKey);
                 
             } catch (IllegalAccessException e) {
             	

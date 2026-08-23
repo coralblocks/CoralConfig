@@ -75,4 +75,27 @@ public class ConfigContainerTest {
 			// Good!
 		}
 	}
+
+	@Test
+	public void testNullConfigKeyField() {
+
+		@SuppressWarnings("unused")
+		class Holder {
+
+			public static final ConfigKey<Integer> VALID = ConfigKey.intKey();
+
+			public static final ConfigKey<Integer> NULL_KEY = null;
+		}
+
+		try {
+
+			ConfigContainer.of(Holder.class);
+
+			fail();
+
+		} catch(IllegalStateException e) {
+
+			Assert.assertEquals("Config key field is null: " + Holder.class.getName() + ".NULL_KEY", e.getMessage());
+		}
+	}
 }
