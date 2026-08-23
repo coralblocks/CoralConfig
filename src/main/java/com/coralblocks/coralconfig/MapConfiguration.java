@@ -38,6 +38,7 @@ public class MapConfiguration implements Configuration {
 	private final Map<ConfigKey<?>, Object> values = new HashMap<ConfigKey<?>, Object>();
 	private final Map<ConfigKey<?>, Object> overwrittenDefaults = new HashMap<ConfigKey<?>, Object>();
 	private final List<DeprecatedListener> listeners = new ArrayList<DeprecatedListener>();
+	private final Set<ConfigKey<?>> reportedDeprecatedKeys = new HashSet<ConfigKey<?>>();
 	private final List<ConfigKey<?>> allConfigKeys;
 	
 	/**
@@ -104,6 +105,7 @@ public class MapConfiguration implements Configuration {
 	
 	/**
 	 * Creates a new <code>MapConfiguration</code> by copying everything from the given configuration.
+	 * Listeners are not copied. Copying another <code>MapConfiguration</code> does not notify its listeners.
 	 * 
 	 * @param config the configuration to copy everything from for this new <code>MapConfiguration</code>
 	 */
@@ -119,14 +121,18 @@ public class MapConfiguration implements Configuration {
 		
 		if (configContainers.length > 1) ConfigContainer.enforceNoDuplicates(configContainers); // important!
 		
-		for(ConfigKey<?> configKey : config.keys()) {
-			addCaptured(configKey, config);
-		}
-		
-		// Copy overwritten defaults too
-		
-		for(ConfigKey<?> configKey : config.keysWithOverwrittenDefault()) {
-			overwriteDefaultCaptured(configKey, config);
+		if (config instanceof MapConfiguration) {
+			MapConfiguration mapConfig = (MapConfiguration) config;
+			this.values.putAll(mapConfig.values);
+			this.overwrittenDefaults.putAll(mapConfig.overwrittenDefaults);
+		} else {
+			for(ConfigKey<?> configKey : config.keys()) {
+				addCaptured(configKey, config);
+			}
+
+			for(ConfigKey<?> configKey : config.keysWithOverwrittenDefault()) {
+				overwriteDefaultCaptured(configKey, config);
+			}
 		}
 		
 		this.allConfigKeys = gatherAllConfigKeys();
@@ -314,7 +320,7 @@ public class MapConfiguration implements Configuration {
 	
 	private <T> void checkDeprecated(ConfigKey<T> configKey) {
 		
-		if (configKey.getKind() == Kind.DEPRECATED) {
+		if (configKey.getKind() == Kind.DEPRECATED && !listeners.isEmpty() && reportedDeprecatedKeys.add(configKey)) {
 			for(DeprecatedListener listener : new ArrayList<DeprecatedListener>(listeners)) {
 				listener.deprecatedConfig(configKey, configKey.getPrimary());
 			}
@@ -326,8 +332,6 @@ public class MapConfiguration implements Configuration {
 		
 		enforceConfigKey(configKey);
 		
-		checkDeprecated(configKey);
-		
 		Object val = getImpl(configKey, overwrittenDefaults);
 		return coerceNumber(val, configKey.getType());
 	}
@@ -336,8 +340,6 @@ public class MapConfiguration implements Configuration {
 	public <T> boolean hasOverwrittenDefault(ConfigKey<T> configKey) {
 		
 		enforceConfigKey(configKey);
-		
-		checkDeprecated(configKey);
 		
 		return hasImpl(configKey, overwrittenDefaults);
 	}
@@ -378,8 +380,6 @@ public class MapConfiguration implements Configuration {
 		
 		enforceConfigKey(configKey);
 		
-		checkDeprecated(configKey);
-		
 		Object prev = values.remove(configKey);
 		return prev != null ? configKey.getType().cast(prev) : null;
 	}
@@ -388,8 +388,6 @@ public class MapConfiguration implements Configuration {
 	public <T> boolean removeOverwrittenDefault(ConfigKey<T> configKey) {
 		
 		enforceConfigKey(configKey);
-		
-		checkDeprecated(configKey);
 		
 		if (overwrittenDefaults.containsKey(configKey)) { // it can have NULLs...
 			overwrittenDefaults.remove(configKey);
@@ -572,8 +570,6 @@ public class MapConfiguration implements Configuration {
 	public boolean has(ConfigKey<?> configKey) {
 		
 		enforceConfigKey(configKey);
-		
-		checkDeprecated(configKey);
 		
 		return hasImpl(configKey, values);
 	}

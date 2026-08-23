@@ -26,7 +26,8 @@ import java.util.Set;
 public interface Configuration {
 	
 	/**
-	 * Adds a <code>DeprecatedListener</code> to receive callbacks.
+	 * Adds a <code>DeprecatedListener</code> to receive callbacks. A configuration reports each deprecated key at most once,
+	 * when it is first read or configured while at least one listener is registered.
 	 * 
 	 * @param listener the <code>DeprecatedListener</code> to receive callbacks
 	 */
