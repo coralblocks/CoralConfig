@@ -314,8 +314,8 @@ public class MapConfiguration implements Configuration {
 	private <T> void checkDeprecated(ConfigKey<T> configKey) {
 		
 		if (configKey.getKind() == Kind.DEPRECATED) {
-			for(int i = 0; i < listeners.size(); i++) {
-				listeners.get(i).deprecatedConfig(configKey, configKey.getPrimary());
+			for(DeprecatedListener listener : new ArrayList<DeprecatedListener>(listeners)) {
+				listener.deprecatedConfig(configKey, configKey.getPrimary());
 			}
 		}
 	}

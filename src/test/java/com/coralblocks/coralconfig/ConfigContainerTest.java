@@ -104,6 +104,29 @@ public class ConfigContainerTest {
 	}
 
 	@Test
+	public void testNonFinalConfigKeyField() {
+
+		class Holder {
+
+			public static ConfigKey<Integer> MUTABLE = ConfigKey.intKey();
+		}
+
+		try {
+
+			ConfigContainer.of(Holder.class);
+
+			fail();
+
+		} catch(IllegalStateException e) {
+
+			Assert.assertEquals("Config key field must be final: " + Holder.class.getName() + ".MUTABLE", e.getMessage());
+		}
+
+		Assert.assertEquals(null, Holder.MUTABLE.getFieldName());
+		Assert.assertEquals(null, Holder.MUTABLE.getHolder());
+	}
+
+	@Test
 	public void testRegisterRelationshipsWithoutGhostKeys() {
 
 		class Holder {

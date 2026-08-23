@@ -38,7 +38,7 @@ public interface Configuration {
 	public void removeListener(DeprecatedListener listener);
 	
 	/**
-	 * The holder classes which are defining/declaring/specifying the <code>ConfigKey</code>s for this configuration as static fields.
+	 * The holder classes which are defining/declaring/specifying the <code>ConfigKey</code>s for this configuration as static final fields.
 	 * Note that a configuration can have several holders, not just one.
 	 * 
 	 * @return a copy of the holder classes that this configuration has

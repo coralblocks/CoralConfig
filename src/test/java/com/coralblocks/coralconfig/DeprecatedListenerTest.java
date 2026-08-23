@@ -107,4 +107,40 @@ public class DeprecatedListenerTest {
 		Assert.assertEquals(Base.ANOTHER_FLOAT3, testListener.deprecated);
 		Assert.assertEquals(Base.ANOTHER_FLOAT1, testListener.primary);
 	}
+
+	@Test
+	public void testListenerCanRemoveItself() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> PRIMARY = intKey(1);
+			public static final ConfigKey<Integer> DEPRECATED = intKey().deprecated(PRIMARY);
+		}
+
+		MapConfiguration config = new MapConfiguration(Holder.class);
+		int[] selfRemovingCalls = new int[1];
+
+		DeprecatedListener selfRemoving = new DeprecatedListener() {
+
+			@Override
+			public void deprecatedConfig(ConfigKey<?> deprecatedKey, ConfigKey<?> primaryKey) {
+				selfRemovingCalls[0]++;
+				config.removeListener(this);
+			}
+		};
+
+		TestListener following = new TestListener();
+		config.addListener(selfRemoving);
+		config.addListener(following);
+
+		config.get(Holder.DEPRECATED);
+
+		Assert.assertEquals(1, selfRemovingCalls[0]);
+		Assert.assertEquals(1, following.calls);
+
+		config.get(Holder.DEPRECATED);
+
+		Assert.assertEquals(1, selfRemovingCalls[0]);
+		Assert.assertEquals(2, following.calls);
+	}
 }

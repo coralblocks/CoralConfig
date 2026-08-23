@@ -16,6 +16,7 @@
 package com.coralblocks.coralconfig;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Iterator;
@@ -55,6 +56,10 @@ final class ConfigContainer {
             if (!Modifier.isStatic(m)) continue;
             
             if (!ConfigKey.class.isAssignableFrom(f.getType())) continue;
+
+            if (!Modifier.isFinal(m)) {
+                throw new IllegalStateException("Config key field must be final: " + holder.getName() + "." + f.getName());
+            }
             
             try {
             	
@@ -72,9 +77,9 @@ final class ConfigContainer {
                                                     ": " + previousField + " and " + f.getName());
                 }
                 
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException | InaccessibleObjectException e) {
             	
-                throw new RuntimeException("Cannot access field: " + f, e);
+                throw new IllegalStateException("Cannot access config key field: " + holder.getName() + "." + f.getName(), e);
             }
         }
         
