@@ -66,8 +66,8 @@ public class MapConfigurationTest {
 		try {
 			mapConfig.overwriteDefault(TIMEOUT, null); // null default value not allowed for Integer
 			fail();
-		} catch(RuntimeException e) {
-			// Good!
+		} catch(IllegalArgumentException e) {
+			Assert.assertTrue(e.getMessage().startsWith("defaultValue can be null only for String and Enum keys."));
 		}
 		
 		mapConfig.overwriteDefault(TIMEOUT, 222);
@@ -109,6 +109,17 @@ public class MapConfigurationTest {
 		} catch(IllegalArgumentException e) {
 
 			Assert.assertEquals("Duplicate config key in params: okKey (first: okKey=1, duplicate: okKey=2)", e.getMessage());
+		}
+
+		try {
+
+			new MapConfiguration("unknown=1", Holder.class);
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals("A config key in params does not belong to this configuration: unknown", e.getMessage());
 		}
 	}
 	
@@ -236,8 +247,23 @@ public class MapConfigurationTest {
 		try {
 			mapConfig.add(TIMEOUT, null); // null values are not allowed
 			fail();
-		} catch(RuntimeException e) {
-			// Good!
+		} catch(IllegalArgumentException e) {
+			Assert.assertTrue(e.getMessage().startsWith("value cannot be null; remove the config key instead."));
+		}
+
+		try {
+			mapConfig.get(null);
+			fail();
+		} catch(IllegalArgumentException e) {
+			Assert.assertEquals("configKey cannot be null.", e.getMessage());
+		}
+
+		ConfigKey<Integer> foreignKey = ConfigKey.intKey();
+		try {
+			mapConfig.get(foreignKey);
+			fail();
+		} catch(IllegalArgumentException e) {
+			Assert.assertTrue(e.getMessage().startsWith("Config key does not belong to this configuration:"));
 		}
 		
 		TestEnum prevEnum = mapConfig.add(MY_ENUM, TestEnum.BILLY);

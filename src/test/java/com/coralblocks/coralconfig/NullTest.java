@@ -83,22 +83,22 @@ public class NullTest {
 		try {
 			mc1.overwriteDefault(MY_INTEGER, null);
 			fail();
-		} catch(RuntimeException e) {
-			// Good!
+		} catch(IllegalArgumentException e) {
+			Assert.assertTrue(e.getMessage().startsWith("defaultValue can be null only for String and Enum keys."));
 		}
 		
 		try {
 			Assert.assertEquals(1, mc1.get(MY_INTEGER).intValue());
 			fail();
-		} catch(RuntimeException e) {
-			// Good!
+		} catch(IllegalStateException e) {
+			Assert.assertEquals("Required config key 'myInteger' (MY_INTEGER in NullTest) has no configured value and no default.", e.getMessage());
 		}
 		
 		try {
 			mc1.overwriteDefault(MY_INTEGER, 1);	
 			fail();
-		} catch(RuntimeException e) {
-			// Good!
+		} catch(IllegalStateException e) {
+			Assert.assertEquals("Config key 'myInteger' (MY_INTEGER in NullTest) has no resolvable default to overwrite.", e.getMessage());
 		}
 	}
 	
@@ -176,8 +176,8 @@ public class NullTest {
 		try {
 			Assert.assertEquals(10, mc11.get(Holder11.MY_INTEGER_1).intValue());
 			fail();
-		} catch(RuntimeException e) {
-			// Good!
+		} catch(IllegalStateException e) {
+			Assert.assertEquals("Required config key 'myInteger1' (MY_INTEGER_1 in Holder11) cannot be resolved because its related keys define 2 distinct defaults.", e.getMessage());
 		}
 		
 		// Answer: No because there are two values! (ambiguous)
@@ -291,4 +291,3 @@ public class NullTest {
 		// Answer: It works and the default is returned!
 	}
 }
-	

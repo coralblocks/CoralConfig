@@ -85,7 +85,7 @@ public class MapConfiguration implements Configuration {
 				
 				ConfigKey<?> configKey = getByName(key);
 				if (configKey == null) {
-					throw new IllegalStateException("A config key in params does not belong to this configuration: " + key);
+					throw new IllegalArgumentException("A config key in params does not belong to this configuration: " + key);
 				}
 
 				String previous = parsedParams.putIfAbsent(configKey, keyValue);
@@ -176,8 +176,7 @@ public class MapConfiguration implements Configuration {
 	
 	private void enforceValue(ConfigKey<?> configKey, Object value) {
 		if (value == null) {
-			throw new RuntimeException("Null values are not allowed! (You should remove the config key from the configuration instead)" + 
-									   " configKey=" + configKey);
+			throw new IllegalArgumentException("value cannot be null; remove the config key instead. configKey=" + configKey);
 		}
 	}
 	
@@ -191,8 +190,7 @@ public class MapConfiguration implements Configuration {
 			return; // allow null for String and Enum
 		}
 		
-		throw new RuntimeException("Null default values are only allowed for Strings and Enums!" + 
-				   " configKey=" + configKey);
+		throw new IllegalArgumentException("defaultValue can be null only for String and Enum keys. configKey=" + configKey);
 	}
 	
 	private boolean checkConfigContainers(ConfigKey<?> configKey) {
@@ -205,13 +203,16 @@ public class MapConfiguration implements Configuration {
 	private void enforceConfigKey(ConfigKey<?> configKey) {
 		
 		if (configKey == null) {
-			throw new NullPointerException("The config key can never be null!");
+			throw new IllegalArgumentException("configKey cannot be null.");
 		}
 		
 		if (!checkConfigContainers(configKey)) {
-			throw new IllegalStateException("ConfigKey does not belong to holder class!" +
-											" configKey=" + configKey); 
+			throw new IllegalArgumentException("Config key does not belong to this configuration: " + configKey);
 		}
+	}
+
+	private static String describeConfigKey(ConfigKey<?> configKey) {
+		return "'" + configKey.getParamName() + "' (" + configKey.getFieldName() + " in " + configKey.getHolder().getSimpleName() + ")";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -296,8 +297,7 @@ public class MapConfiguration implements Configuration {
 		checkDeprecated(configKey);
 
 		if (!collectAndCheckIfDefaultExists(configKey)) {
-			throw new IllegalStateException("The configKey will not (or cannot) return a default value, so it cannot be overwritten! " +
-											" configKey=" + configKey + " defaultValue=" + defaultValue);
+			throw new IllegalStateException("Config key " + describeConfigKey(configKey) + " has no resolvable default to overwrite.");
 		}
 		
 		boolean hadAlready = overwrittenDefaults.containsKey(configKey);
@@ -547,13 +547,13 @@ public class MapConfiguration implements Configuration {
 					val = collect.iterator().next();
 					return coerceNumber(val, configKey.getType());
 				} else if (collect.size() > 1) {
-					throw new RuntimeException("More than one default value found!" +
-							" configKey=" + configKey + " numberOfDefaults=" + collect.size());
+					throw new IllegalStateException("Required config key " + describeConfigKey(configKey) +
+							" cannot be resolved because its related keys define " + collect.size() + " distinct defaults.");
 				}
 			}
 			
-			throw new RuntimeException("Expected config key not found!" +
-									" configKey=" + configKey);
+			throw new IllegalStateException("Required config key " + describeConfigKey(configKey) +
+									" has no configured value and no default.");
 		}
 		
 		if (hasImpl(configKey, overwrittenDefaults)) {

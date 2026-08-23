@@ -21,6 +21,7 @@ import java.util.Set;
 /**
  * The common contract for reading configuration values and customizing their fallback defaults.
  * Directly adding or removing configured values is implementation-specific.
+ * Invalid inputs or values cause an <code>IllegalArgumentException</code>; a valid request that cannot be resolved from the configuration causes an <code>IllegalStateException</code>.
  */
 public interface Configuration {
 	
@@ -74,6 +75,8 @@ public interface Configuration {
 	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
 	 * @param configKey the <code>ConfigKey</code> to get a value for
 	 * @return the value for the given <code>ConfigKey</code>
+	 * @throws IllegalArgumentException if the config key is invalid or the resolved value cannot be converted to its type
+	 * @throws IllegalStateException if a required config key has no resolvable value or default
 	 */
 	public <T> T get(ConfigKey<T> configKey);
 	
@@ -100,6 +103,8 @@ public interface Configuration {
 	 * @param configKey the <code>ConfigKey</code> to overwrite its default value
 	 * @param defaultValue the new default value
 	 * @return true if a previous overwritten default value was substituted by the new one
+	 * @throws IllegalArgumentException if the config key or default value is invalid
+	 * @throws IllegalStateException if the config key has no resolvable default to overwrite
 	 */
 	public <T> boolean overwriteDefault(ConfigKey<T> configKey, T defaultValue);
 	
