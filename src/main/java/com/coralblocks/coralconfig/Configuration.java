@@ -123,7 +123,7 @@ public interface Configuration {
 	 * 
 	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
 	 * @param configKey the <code>ConfigKey</code> for which to remove the current overwritten default value
-	 * @return true if a overwritten default value was removed or false if there was none to remove in the first place
+	 * @return true if an overwritten default value was removed, or false if there was none to remove
 	 */
 	public <T> boolean removeOverwrittenDefault(ConfigKey<T> configKey);
 	

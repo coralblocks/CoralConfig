@@ -218,7 +218,7 @@ public void testEnum() {
 ```
 
 ### Printing the Config Keys
-You can use the `ConfigPrinter` utility class to print all the information about your configuration, in comma-separated lines:
+You can use the `ConfigPrinter` utility class to write configuration metadata as CSV:
 ```plain
 java -cp target/coralconfig-all.jar \
 		com.coralblocks.coralconfig.ConfigPrinter \
@@ -227,11 +227,9 @@ java -cp target/coralconfig-all.jar \
 		includeHolderClass=false \
 		com.coralblocks.coralconfig.example.Client \
 		com.coralblocks.coralconfig.example.TcpClient \
-		| sed 's/\r$//' \
-		| column -s, -t \
-		| less -S
+		> config-keys.csv
 ```
-With some formatting you get:
+Open the result with a CSV-aware viewer. It will display the data in columns like this:
 ```plain
 Field Name             Type      Default Value   Kind         Parent Primary       Aliases    Deprecated   Description
 CLIENT_SEND_STRATEGY   Enum      REGULAR         PRIMARY

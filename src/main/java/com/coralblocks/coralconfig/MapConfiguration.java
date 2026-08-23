@@ -52,8 +52,8 @@ public class MapConfiguration implements Configuration {
 	
 	/**
 	 * Creates a new <code>MapConfiguration</code> with the <code>ConfigKey</code>s present in the given list of holder classes.
-	 * You can pass a list of parameters to be configured, for example:
-	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>"myInteger1=2 myString=blah myEnum=BALL myFloat3=3.12"</code>
+	 * You can pass a list of parameters to configure, for example:
+	 * <pre>{@code "myInteger1=2 myString=blah myEnum=BALL myFloat3=3.12"}</pre>
 	 * 
 	 * @param params some initial values for some of the <code>ConfigKey</code>s of this configuration
 	 * @param holders the holder classes from where to get the <code>ConfigKey</code>s

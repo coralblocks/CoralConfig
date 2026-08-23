@@ -69,7 +69,7 @@ public final class ConfigKey<T> {
 	private void enforceRelationship(Class<T> type, Kind kind, ConfigKey<?> primary) {
 		if (kind == Kind.PRIMARY) {
 			if (primary != null) {
-				throw new IllegalStateException("When defining a primary config key, it must not have have a parent primary!" +
+				throw new IllegalStateException("When defining a primary config key, it must not have a parent primary!" +
 									" type=" + type.getSimpleName() + " primary=" + primary);
 			}
 		} else if (kind == Kind.ALIAS) {
@@ -357,6 +357,8 @@ public final class ConfigKey<T> {
     /**
      * Returns a new Enum <code>ConfigKey</code>. (Fluent API)
      * 
+     * @param <E> the Enum type
+     * @param enumClass the Enum class for this <code>ConfigKey</code>
      * @return a new Enum <code>ConfigKey</code>
      */
     public static <E extends Enum<E>> ConfigKey<E> enumKey(Class<E> enumClass) {
@@ -366,6 +368,8 @@ public final class ConfigKey<T> {
     /**
      * Returns a new Enum <code>ConfigKey</code>. (Fluent API)
      * 
+     * @param <E> the Enum type
+     * @param enumClass the Enum class for this <code>ConfigKey</code>
      * @param defaultValue the default value for this <code>ConfigKey</code>
      * @return a new Enum <code>ConfigKey</code>
      */
@@ -394,7 +398,7 @@ public final class ConfigKey<T> {
     
     /**
      * Returns the param name of this <code>ConfigKey</code>. For example a <code>ConfigKey</code> declared as
-     * MY_INTEGER_1 (i.e. the field name) will have be automatically assigned the name "myInteger1". (camel case)
+     * MY_INTEGER_1 (i.e. the field name) will be automatically assigned the camel-case name "myInteger1".
      * 
      * @return the name of this <code>ConfigKey</code>
      */
@@ -434,7 +438,7 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Returns the holder class which is specifying the static fields for the <code>ConfigKey</code>s.
+     * Returns the holder class that declares the static <code>ConfigKey</code> fields.
      * 
      * @return the holder class that specifies the <code>ConfigKey</code>s.
      */
@@ -443,9 +447,9 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Returns the exact field name of this static field, as declared in the holder class. For example:<br/><br/>
-     * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>public static final ConfigKey&lt;T&gt; MY_INTEGER_1 = intKey();</code><br/><br/>
-     * will return "MY_INTEGER_1".
+     * Returns the exact field name of this static field, as declared in the holder class. For example,
+     * <pre>{@code public static final ConfigKey<T> MY_INTEGER_1 = intKey();}</pre>
+     * returns "MY_INTEGER_1".
      * 
      * @return the static field name of this <code>ConfigKey</code>
      */
@@ -454,7 +458,7 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Returns whether this <code>ConfigKey</code> is required, in other words, whether it has a given default value or not.
+     * Returns whether this <code>ConfigKey</code> is required, meaning it has no declared default value.
      * 
      * @return true if this <code>ConfigKey</code> is required
      */
@@ -463,7 +467,7 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Returns whether this <code>ConfigKey</code> has a default value.<br/><br/>. This is equivalent to <code>!isRequired()</code>.
+     * Returns whether this <code>ConfigKey</code> has a default value. This is equivalent to <code>!isRequired()</code>.
      *  
      * @return true if this <code>ConfigKey</code> has a default value.
      */
@@ -493,9 +497,9 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Returns the default value associated/specified with this <code>ConfigKey</code>
+     * Returns the default value declared for this <code>ConfigKey</code>.
      * 
-     * @return the default value or null if not default value is declared
+     * @return the default value, or null if no default value is declared
      */
     public T getDefaultValue() {
     	return defaultValue;

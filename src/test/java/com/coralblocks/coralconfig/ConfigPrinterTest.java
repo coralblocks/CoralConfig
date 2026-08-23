@@ -30,6 +30,7 @@ public class ConfigPrinterTest {
 
 		public static final ConfigKey<Integer> PRIMARY = ConfigKey.intKey(1);
 		public static final ConfigKey<Integer> DEPRECATED = ConfigKey.intKey().deprecated(PRIMARY).def(2);
+		public static final ConfigKey<String> TEXT = ConfigKey.stringKey("a,b").setDescription("A \"quoted\", description");
 	}
 
 	@Test
@@ -49,13 +50,15 @@ public class ConfigPrinterTest {
 		}
 
 		String newline = System.lineSeparator();
-		String expected = "Field Name, Param Name, Type, Default Value, Holder Class, Kind, Parent Primary, Aliases, Deprecated, Description" + newline
-				+ "DEPRECATED, deprecated, Integer, 2, PrinterHolder, DEPRECATED, PRIMARY, , , " + newline
-				+ "PRIMARY, primary, Integer, 1, PrinterHolder, PRIMARY, , , DEPRECATED, " + newline;
+		String expected = "Field Name,Param Name,Type,Default Value,Holder Class,Kind,Parent Primary,Aliases,Deprecated,Description" + newline
+				+ "DEPRECATED,deprecated,Integer,2,PrinterHolder,DEPRECATED,PRIMARY,,," + newline
+				+ "PRIMARY,primary,Integer,1,PrinterHolder,PRIMARY,,,DEPRECATED," + newline
+				+ "TEXT,text,String,\"a,b\",PrinterHolder,PRIMARY,,,,\"A \"\"quoted\"\", description\"" + newline;
 
 		Assert.assertEquals(expected, output.toString(StandardCharsets.UTF_8));
 		Assert.assertEquals("PRIMARY", PrinterHolder.PRIMARY.getFieldName());
 		Assert.assertEquals("DEPRECATED", PrinterHolder.DEPRECATED.getFieldName());
+		Assert.assertEquals("TEXT", PrinterHolder.TEXT.getFieldName());
 	}
 
 	@Test
