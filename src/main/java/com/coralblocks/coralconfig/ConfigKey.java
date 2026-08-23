@@ -50,14 +50,6 @@ public final class ConfigKey<T> {
         this.defaultValue = defaultValue;
         this.primary = primary;
 
-        if (primary != null && (primary.aliases.getClass().getName().startsWith("java.util.Collections$Unmodifiable") ||
-        		primary.deprecated.getClass().getName().startsWith("java.util.Collections$Unmodifiable"))) return;
-        
-        if (kind == Kind.ALIAS) {
-        	primary.aliases.add(this);
-        } else if (kind == Kind.DEPRECATED) {
-        	primary.deprecated.add(this);
-        }
         if (kind != Kind.PRIMARY) enforceCompatibleType(primary, this, kind);
     }
 	

@@ -97,7 +97,18 @@ final class ConfigContainer {
         this.toString = "ConfigContainer[" + holder.getName() + ", size=" + configKeys.size() + "]";
         
         enforcePrimarySameHolder(configKeys);
+        registerRelationships(configKeys);
         adjustLists(configKeys);
+    }
+
+    private static void registerRelationships(Set<ConfigKey<?>> configKeys) {
+		for(ConfigKey<?> configKey : configKeys) {
+			if (configKey.getKind() == Kind.ALIAS) {
+				configKey.getPrimary().aliases.add(configKey);
+			} else if (configKey.getKind() == Kind.DEPRECATED) {
+				configKey.getPrimary().deprecated.add(configKey);
+			}
+		}
     }
     
     private static void adjustLists(Set<ConfigKey<?>> configKeys) {

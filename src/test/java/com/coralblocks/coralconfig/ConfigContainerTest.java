@@ -98,4 +98,27 @@ public class ConfigContainerTest {
 			Assert.assertEquals("Config key field is null: " + Holder.class.getName() + ".NULL_KEY", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testRegisterRelationshipsWithoutGhostKeys() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> PRIMARY = ConfigKey.intKey();
+			public static final ConfigKey<Integer> ALIAS_DEFAULT_AFTER = ConfigKey.intKey().alias(PRIMARY).def(1);
+			public static final ConfigKey<Integer> ALIAS_DEFAULT_BEFORE = ConfigKey.intKey().def(2).alias(PRIMARY);
+			public static final ConfigKey<Integer> DEPRECATED_DEFAULT_AFTER = ConfigKey.intKey().deprecated(PRIMARY).def(3);
+			public static final ConfigKey<Integer> DEPRECATED_DEFAULT_BEFORE = ConfigKey.intKey().def(4).deprecated(PRIMARY);
+		}
+
+		ConfigContainer.of(Holder.class);
+
+		Assert.assertEquals(2, Holder.PRIMARY.getAliases().size());
+		Assert.assertTrue(Holder.PRIMARY.getAliases().contains(Holder.ALIAS_DEFAULT_AFTER));
+		Assert.assertTrue(Holder.PRIMARY.getAliases().contains(Holder.ALIAS_DEFAULT_BEFORE));
+
+		Assert.assertEquals(2, Holder.PRIMARY.getDeprecated().size());
+		Assert.assertTrue(Holder.PRIMARY.getDeprecated().contains(Holder.DEPRECATED_DEFAULT_AFTER));
+		Assert.assertTrue(Holder.PRIMARY.getDeprecated().contains(Holder.DEPRECATED_DEFAULT_BEFORE));
+	}
 }
