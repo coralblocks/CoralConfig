@@ -18,7 +18,6 @@ package com.coralblocks.coralconfig;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -30,7 +29,13 @@ import com.coralblocks.coralconfig.ConfigKey.Kind;
 
 final class ConfigContainer {
 
-    private static final Map<Class<?>, ConfigContainer> ALL = new HashMap<>();
+    private static final ClassValue<ConfigContainer> CONTAINERS = new ClassValue<ConfigContainer>() {
+
+        @Override
+        protected ConfigContainer computeValue(Class<?> holder) {
+            return new ConfigContainer(holder);
+        }
+    };
 
     private final Class<?> holder;
     private final Set<ConfigKey<?>> configKeys;
@@ -148,12 +153,7 @@ final class ConfigContainer {
     }
 
     public static ConfigContainer of(Class<?> holder) {
-    	ConfigContainer configContainer = ALL.get(holder);
-    	if (configContainer == null) {
-    		configContainer = new ConfigContainer(holder);
-    		ALL.put(holder, configContainer);
-    	}
-    	return configContainer;
+        return CONTAINERS.get(holder);
     }
     
     public static void enforceNoDuplicates(ConfigContainer ... configContainers) {

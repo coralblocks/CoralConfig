@@ -39,6 +39,7 @@ public class ConfigContainerTest {
 		}
 		
 		ConfigContainer cc1 = ConfigContainer.of(Base1.class);
+		Assert.assertSame(cc1, ConfigContainer.of(Base1.class));
 		
 		Assert.assertEquals(2, cc1.size());
 		Assert.assertEquals(Base1.TIMEOUT, cc1.get("timeout"));
