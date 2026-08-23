@@ -103,8 +103,8 @@ final class ConfigContainer {
         registerRelationships(set);
         adjustLists(set);
         
-        this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
-        this.configKeysByParamName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
+        this.configKeys = Collections.unmodifiableSet(set);
+        this.configKeysByParamName = Collections.unmodifiableMap(map);
         
         this.toString = "ConfigContainer[" + holder.getName() + ", size=" + configKeys.size() + "]";
     }
@@ -147,7 +147,7 @@ final class ConfigContainer {
         }
     }
 
-    public synchronized static ConfigContainer of(Class<?> holder) {
+    public static ConfigContainer of(Class<?> holder) {
     	ConfigContainer configContainer = ALL.get(holder);
     	if (configContainer == null) {
     		configContainer = new ConfigContainer(holder);

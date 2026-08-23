@@ -28,13 +28,14 @@ import com.coralblocks.coralconfig.ConfigKey.Kind;
 
 /**
  * The main implementation of the <code>Configuration</code> interface. It performs a bunch of checks to enforce uniqueness of <code>ConfigKey</code>s and much more.
+ * This class is not thread-safe.
  */
 public class MapConfiguration implements Configuration {
 	
 	private final ConfigContainer[] configContainers;
 	private final Class<?>[] holders;
-	private final Map<ConfigKey<?>, Object> values = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
-	private final Map<ConfigKey<?>, Object> overwrittenDefaults = Collections.synchronizedMap(new HashMap<ConfigKey<?>, Object>());
+	private final Map<ConfigKey<?>, Object> values = new HashMap<ConfigKey<?>, Object>();
+	private final Map<ConfigKey<?>, Object> overwrittenDefaults = new HashMap<ConfigKey<?>, Object>();
 	private final List<DeprecatedListener> listeners = new ArrayList<DeprecatedListener>();
 	private final List<ConfigKey<?>> allConfigKeys;
 	
@@ -583,9 +584,6 @@ public class MapConfiguration implements Configuration {
 
 	@Override
 	public Set<ConfigKey<?>> keys() {
-		// let's be thread-safe here and return a new Set each time...
-		synchronized(values) {
-			return new HashSet<ConfigKey<?>>(values.keySet());
-		}
+		return new HashSet<ConfigKey<?>>(values.keySet());
 	}
 }
