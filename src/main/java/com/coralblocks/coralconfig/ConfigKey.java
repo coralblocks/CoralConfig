@@ -165,6 +165,7 @@ public final class ConfigKey<T> {
     
     /**
      * Creates a new <code>ConfigKey</code> by deep cloning this config key and marking it as deprecated. (Fluent API)
+     * If this key and its primary use different numeric types, values must be exactly representable in the requested type.
      * 
      * @param primary the primary <code>ConfigKey</code> of this deprecated <code>ConfigKey</code>
      * @return a new <code>ConfigKey</code> which is deprecated

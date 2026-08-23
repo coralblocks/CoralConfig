@@ -300,12 +300,20 @@ public class MapConfigurationTest {
 		Assert.assertEquals(false, config.get(Base1.NO_REWIND));
 	
 		config.add(Base1.TIME_FLOAT, 2.84234f);
-		Assert.assertEquals(2, config.get(Base1.TIME_INTEGER).intValue());
+		try {
+			config.get(Base1.TIME_INTEGER);
+			fail();
+		} catch(IllegalArgumentException e) {
+			Assert.assertTrue(e.getMessage().startsWith("Cannot convert numeric value without loss!"));
+		}
 		Assert.assertTrue(2.84234f == config.get(Base1.TIME_FLOAT).floatValue());
+
+		config.add(Base1.TIME_FLOAT, 2f);
+		Assert.assertEquals(2, config.get(Base1.TIME_INTEGER).intValue());
 		
 		config.add(Base1.TIME_INTEGER, 3);
 		Assert.assertEquals(3, config.get(Base1.TIME_INTEGER).intValue());
-		Assert.assertTrue(2.84234f == config.get(Base1.TIME_FLOAT).floatValue());
+		Assert.assertTrue(2f == config.get(Base1.TIME_FLOAT).floatValue());
 		
 		@SuppressWarnings("unused")
 		class Base2 {
@@ -316,5 +324,53 @@ public class MapConfigurationTest {
 		
 		MapConfiguration mc = new MapConfiguration(Base1.class, Base2.class);
 		Assert.assertEquals(10, mc.allConfigKeys().size());
+	}
+
+	@Test
+	public void testNumericCoercionRejectsLoss() {
+
+		class Holder {
+
+			public static final ConfigKey<Byte> SMALL = ConfigKey.byteKey();
+			public static final ConfigKey<Integer> BIG = ConfigKey.intKey().deprecated(SMALL);
+			public static final ConfigKey<Float> FLOAT = ConfigKey.floatKey();
+			public static final ConfigKey<Double> DOUBLE = ConfigKey.doubleKey().deprecated(FLOAT);
+		}
+
+		MapConfiguration config = new MapConfiguration(Holder.class);
+
+		config.add(Holder.BIG, 300);
+
+		try {
+
+			config.get(Holder.SMALL);
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals("Cannot convert numeric value without loss! value=300 valueType=Integer targetType=Byte", e.getMessage());
+		}
+
+		config.add(Holder.BIG, 100);
+
+		Assert.assertEquals(100, config.get(Holder.SMALL).byteValue());
+
+		config.add(Holder.DOUBLE, 0.1d);
+
+		try {
+
+			config.get(Holder.FLOAT);
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals("Cannot convert numeric value without loss! value=0.1 valueType=Double targetType=Float", e.getMessage());
+		}
+
+		config.add(Holder.DOUBLE, 0.5d);
+
+		Assert.assertTrue(0.5f == config.get(Holder.FLOAT).floatValue());
 	}
 }

@@ -75,7 +75,7 @@ public class Client implements MoreConfigs {
 		System.out.println();
 		
 		MapConfiguration mc1 = new MapConfiguration(MoreConfigs.class, Client.class);
-		mc1.add(HEARTBEAT, 7.9f);
+		mc1.add(HEARTBEAT, 7f);
 		
 		System.out.println("-----> 3:");
 		new Client(mc1);

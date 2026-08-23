@@ -15,6 +15,7 @@
  */
 package com.coralblocks.coralconfig;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -203,34 +204,59 @@ public class MapConfiguration implements Configuration {
 	
 	@SuppressWarnings("unchecked")
 	private static <T> T coerceNumber(Object value, Class<T> targetType) {
-		
-	    if (value == null) return null;
 
-	    if (targetType.isInstance(value)) {
-	        return (T) value;
-	    }
+		if (value == null) return null;
 
-	    if (!(value instanceof Number))
-	        throw new IllegalArgumentException("Cannot convert a type that is not a number!" + 
-	        			" valueType=" + value.getClass().getSimpleName() +
-	        			" targetType=" + targetType.getSimpleName());
+		if (targetType.isInstance(value)) return (T) value;
 
-	    Number n = (Number) value;
+		if (!(value instanceof Number)) {
+			throw new IllegalArgumentException("Cannot convert a type that is not a number!" +
+											   " valueType=" + value.getClass().getSimpleName() +
+											   " targetType=" + targetType.getSimpleName());
+		}
 
-	    if (targetType == Integer.class)
-	        return (T) Integer.valueOf(n.intValue());
-	    if (targetType == Long.class)
-	        return (T) Long.valueOf(n.longValue());
-	    if (targetType == Float.class)
-	        return (T) Float.valueOf(n.floatValue());
-	    if (targetType == Double.class)
-	        return (T) Double.valueOf(n.doubleValue());
-	    if (targetType == Short.class)
-	        return (T) Short.valueOf(n.shortValue());
-	    if (targetType == Byte.class)
-	        return (T) Byte.valueOf(n.byteValue());
+		Number number = (Number) value;
 
-	    throw new IllegalArgumentException("Unsupported numeric type: " + targetType);
+		try {
+			BigDecimal decimal = toBigDecimal(number);
+
+			if (targetType == Integer.class) return (T) Integer.valueOf(decimal.intValueExact());
+			if (targetType == Long.class) return (T) Long.valueOf(decimal.longValueExact());
+			if (targetType == Short.class) return (T) Short.valueOf(decimal.shortValueExact());
+			if (targetType == Byte.class) return (T) Byte.valueOf(decimal.byteValueExact());
+			if (targetType == Float.class) {
+				Float converted = Float.valueOf(number.floatValue());
+				enforceExactConversion(number, targetType, decimal, new BigDecimal(converted.floatValue()));
+				return (T) converted;
+			}
+			if (targetType == Double.class) {
+				Double converted = Double.valueOf(number.doubleValue());
+				enforceExactConversion(number, targetType, decimal, new BigDecimal(converted.doubleValue()));
+				return (T) converted;
+			}
+		} catch(ArithmeticException | NumberFormatException e) {
+			throw cannotConvertWithoutLoss(number, targetType, e);
+		}
+
+		throw new IllegalArgumentException("Unsupported numeric type: " + targetType);
+	}
+
+	private static BigDecimal toBigDecimal(Number value) {
+		if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long) {
+			return BigDecimal.valueOf(value.longValue());
+		}
+		return new BigDecimal(value.doubleValue());
+	}
+
+	private static void enforceExactConversion(Number value, Class<?> targetType, BigDecimal original, BigDecimal converted) {
+		if (original.compareTo(converted) != 0) throw cannotConvertWithoutLoss(value, targetType, null);
+	}
+
+	private static IllegalArgumentException cannotConvertWithoutLoss(Number value, Class<?> targetType, Exception cause) {
+		String message = "Cannot convert numeric value without loss!" +
+						 " value=" + value + " valueType=" + value.getClass().getSimpleName() +
+						 " targetType=" + targetType.getSimpleName();
+		return cause == null ? new IllegalArgumentException(message) : new IllegalArgumentException(message, cause);
 	}
 	
 	@Override

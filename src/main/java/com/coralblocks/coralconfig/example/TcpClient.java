@@ -49,7 +49,7 @@ public class TcpClient extends Client {
 	
 	private static Configuration overwrite(Configuration config) {
 		config.overwriteDefault(MAX_RETRIES, 22);
-		config.overwriteDefault(HEARTBEAT, 5.555f);
+		config.overwriteDefault(HEARTBEAT, 5f);
 		return config;
 	}
 	
@@ -71,7 +71,7 @@ public class TcpClient extends Client {
 		System.out.println();
 		
 		MapConfiguration mc1 = new MapConfiguration(MoreConfigs.class, Client.class, TcpClient.class);
-		mc1.add(HEARTBEAT, 7.9f);
+		mc1.add(HEARTBEAT, 7f);
 		
 		System.out.println("-----> 3:");
 		new TcpClient(mc1);
