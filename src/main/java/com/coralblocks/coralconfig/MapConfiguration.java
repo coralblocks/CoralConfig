@@ -327,8 +327,8 @@ public class MapConfiguration implements Configuration {
 		
 		checkDeprecated(configKey);
 		
-		Object val = overwrittenDefaults.get(configKey);
-		return val != null ? configKey.getType().cast(val) : null;
+		Object val = getImpl(configKey, overwrittenDefaults);
+		return coerceNumber(val, configKey.getType());
 	}
 	
 	@Override
@@ -338,7 +338,7 @@ public class MapConfiguration implements Configuration {
 		
 		checkDeprecated(configKey);
 		
-		return overwrittenDefaults.containsKey(configKey);
+		return hasImpl(configKey, overwrittenDefaults);
 	}
 	
 	@Override

@@ -97,11 +97,11 @@ public interface Configuration {
 	public <T> boolean overwriteDefault(ConfigKey<T> configKey, T defaultValue);
 	
 	/**
-	 * Returns the current overwritten default value associated with this <code>ConfigKey</code>.
+	 * Returns the current overwritten default value associated with this <code>ConfigKey</code> or its primary, aliases, or deprecated keys.
 	 * 
 	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
 	 * @param configKey the <code>ConfigKey</code> for which the overwritten default value will be returned
-	 * @return the overwritten default value or null if it is not defined
+	 * @return the overwritten default value, or null if it is not defined or was overwritten with null
 	 */
 	public <T> T getOverwrittenDefault(ConfigKey<T> configKey);
 	
@@ -120,7 +120,7 @@ public interface Configuration {
 	public void removeAllOverwrittenDefaults();
 	
 	/**
-	 * Check if the given <code>ConfigKey</code> has an associated overwritten default.
+	 * Check if the given <code>ConfigKey</code>, its primary, aliases, or deprecated keys have an associated overwritten default.
 	 * 
 	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
 	 * @param configKey the <code>ConfigKey</code> for which to check if it has an overwritten default

@@ -23,6 +23,36 @@ import org.junit.Test;
 
 
 public class DefaultsTest {
+
+	@Test
+	public void testOverwrittenDefaultAccessorsResolveKeyGroup() {
+
+		class NumericHolder {
+
+			public static final ConfigKey<Integer> PRIMARY = intKey(1);
+			public static final ConfigKey<Float> OLD = floatKey().deprecated(PRIMARY);
+		}
+
+		MapConfiguration numericConfig = new MapConfiguration(NumericHolder.class);
+		numericConfig.overwriteDefault(NumericHolder.OLD, 9f);
+
+		Assert.assertTrue(numericConfig.hasOverwrittenDefault(NumericHolder.PRIMARY));
+		Assert.assertEquals(9, numericConfig.getOverwrittenDefault(NumericHolder.PRIMARY).intValue());
+		Assert.assertEquals(9, numericConfig.get(NumericHolder.PRIMARY).intValue());
+
+		class NullableHolder {
+
+			public static final ConfigKey<String> PRIMARY = stringKey("default");
+			public static final ConfigKey<String> OLD = stringKey().deprecated(PRIMARY);
+		}
+
+		MapConfiguration nullableConfig = new MapConfiguration(NullableHolder.class);
+		nullableConfig.overwriteDefault(NullableHolder.OLD, null);
+
+		Assert.assertTrue(nullableConfig.hasOverwrittenDefault(NullableHolder.PRIMARY));
+		Assert.assertNull(nullableConfig.getOverwrittenDefault(NullableHolder.PRIMARY));
+		Assert.assertNull(nullableConfig.get(NullableHolder.PRIMARY));
+	}
 	
 	@Test
 	public void testNullDefaults() {
