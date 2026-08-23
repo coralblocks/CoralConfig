@@ -57,4 +57,26 @@ public class ConfigKeyTest {
 			// Nice
 		}
 	}
+
+	@Test
+	public void testIncompatibleDeprecationAfterPrimaryHolderIsScanned() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> PRIMARY = ConfigKey.intKey();
+		}
+
+		ConfigContainer.of(Holder.class);
+
+		try {
+
+			ConfigKey.stringKey().deprecated(Holder.PRIMARY);
+
+			fail();
+
+		} catch(IllegalStateException e) {
+
+			Assert.assertTrue(e.getMessage().startsWith("The types are incompatible for deprecation!"));
+		}
+	}
 }
