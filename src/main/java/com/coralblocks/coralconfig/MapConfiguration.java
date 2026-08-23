@@ -29,10 +29,11 @@ import com.coralblocks.coralconfig.ConfigKey.Kind;
 /**
  * The main implementation of the <code>Configuration</code> interface. It performs a bunch of checks to enforce uniqueness of <code>ConfigKey</code>s and much more.
  * In addition to the common contract, this implementation supports directly adding and removing configured values through <code>add</code> and <code>remove</code>.
- * This class is not thread-safe.
+ * This class is thread-safe. Each method call is atomic, but a sequence of calls is not one atomic operation.
  */
 public class MapConfiguration implements Configuration {
 	
+	private final Object lock = new Object();
 	private final ConfigContainer[] configContainers;
 	private final Class<?>[] holders;
 	private final Map<ConfigKey<?>, Object> values = new HashMap<ConfigKey<?>, Object>();
@@ -106,6 +107,7 @@ public class MapConfiguration implements Configuration {
 	/**
 	 * Creates a new <code>MapConfiguration</code> by copying everything from the given configuration.
 	 * Listeners are not copied. Copying another <code>MapConfiguration</code> does not notify its listeners.
+	 * When the source is another <code>MapConfiguration</code>, its values and overwritten defaults are captured together at one point in time.
 	 * 
 	 * @param config the configuration to copy everything from for this new <code>MapConfiguration</code>
 	 */
@@ -123,8 +125,10 @@ public class MapConfiguration implements Configuration {
 		
 		if (config instanceof MapConfiguration) {
 			MapConfiguration mapConfig = (MapConfiguration) config;
-			this.values.putAll(mapConfig.values);
-			this.overwrittenDefaults.putAll(mapConfig.overwrittenDefaults);
+			synchronized(mapConfig.lock) {
+				this.values.putAll(mapConfig.values);
+				this.overwrittenDefaults.putAll(mapConfig.overwrittenDefaults);
+			}
 		} else {
 			for(ConfigKey<?> configKey : config.keys()) {
 				addCaptured(configKey, config);
@@ -285,37 +289,40 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public void addListener(DeprecatedListener listener) {
-		if (!listeners.contains(listener)) listeners.add(listener);
+		synchronized(lock) {
+			if (!listeners.contains(listener)) listeners.add(listener);
+		}
 	}
 	
 	@Override
 	public void removeListener(DeprecatedListener listener) {
-		listeners.remove(listener);
+		synchronized(lock) {
+			listeners.remove(listener);
+		}
 	}
 
 	@Override
 	public <T> boolean overwriteDefault(ConfigKey<T> configKey, T defaultValue) {
-		
-		enforceConfigKey(configKey);
-		
-		enforceDefaultValue(configKey, defaultValue);
-		
-		checkDeprecated(configKey);
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+			enforceDefaultValue(configKey, defaultValue);
+			checkDeprecated(configKey);
 
-		if (!hasResolvableDefault(configKey, collectGroupDefaults(configKey))) {
-			throw new IllegalStateException("Config key " + describeConfigKey(configKey) + " has no resolvable default to overwrite.");
+			if (!hasResolvableDefault(configKey, collectGroupDefaults(configKey))) {
+				throw new IllegalStateException("Config key " + describeConfigKey(configKey) + " has no resolvable default to overwrite.");
+			}
+
+			boolean hadAlready = overwrittenDefaults.containsKey(configKey);
+			overwrittenDefaults.put(configKey, defaultValue);
+			return hadAlready;
 		}
-		
-		boolean hadAlready = overwrittenDefaults.containsKey(configKey);
-			
-		overwrittenDefaults.put(configKey, defaultValue);
-		
-		return hadAlready;
 	}
 	
 	@Override
 	public Set<ConfigKey<?>> keysWithOverwrittenDefault() {
-		return Collections.unmodifiableSet(new HashSet<ConfigKey<?>>(overwrittenDefaults.keySet()));
+		synchronized(lock) {
+			return Collections.unmodifiableSet(new HashSet<ConfigKey<?>>(overwrittenDefaults.keySet()));
+		}
 	}
 	
 	private <T> void checkDeprecated(ConfigKey<T> configKey) {
@@ -329,19 +336,19 @@ public class MapConfiguration implements Configuration {
 
 	@Override
 	public <T> T getOverwrittenDefault(ConfigKey<T> configKey) {
-		
-		enforceConfigKey(configKey);
-		
-		Object val = getImpl(configKey, overwrittenDefaults);
-		return coerceNumber(val, configKey.getType());
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+			Object val = getImpl(configKey, overwrittenDefaults);
+			return coerceNumber(val, configKey.getType());
+		}
 	}
 	
 	@Override
 	public <T> boolean hasOverwrittenDefault(ConfigKey<T> configKey) {
-		
-		enforceConfigKey(configKey);
-		
-		return hasImpl(configKey, overwrittenDefaults);
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+			return hasImpl(configKey, overwrittenDefaults);
+		}
 	}
 	
 	@Override
@@ -358,15 +365,14 @@ public class MapConfiguration implements Configuration {
 	 * @return a previous value that was added for the given <code>ConfigKey</code> or null if there was none
 	 */
 	public <T> T add(ConfigKey<T> configKey, T value) {
-		
-		enforceConfigKey(configKey);
-		
-		enforceValue(configKey, value);
-		
-		checkDeprecated(configKey);
-		
-		Object prev = values.put(configKey, value);
-		return prev != null ? configKey.getType().cast(prev) : null;
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+			enforceValue(configKey, value);
+			checkDeprecated(configKey);
+
+			Object prev = values.put(configKey, value);
+			return prev != null ? configKey.getType().cast(prev) : null;
+		}
 	}
 	
 	/**
@@ -377,29 +383,32 @@ public class MapConfiguration implements Configuration {
 	 * @return a previous value that was added for the given <code>ConfigKey</code> or null if there was none
 	 */
 	public <T> T remove(ConfigKey<T> configKey) {
-		
-		enforceConfigKey(configKey);
-		
-		Object prev = values.remove(configKey);
-		return prev != null ? configKey.getType().cast(prev) : null;
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+			Object prev = values.remove(configKey);
+			return prev != null ? configKey.getType().cast(prev) : null;
+		}
 	}
 	
 	@Override
 	public <T> boolean removeOverwrittenDefault(ConfigKey<T> configKey) {
-		
-		enforceConfigKey(configKey);
-		
-		if (overwrittenDefaults.containsKey(configKey)) { // it can have NULLs...
-			overwrittenDefaults.remove(configKey);
-			return true;
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+
+			if (overwrittenDefaults.containsKey(configKey)) { // it can have NULLs...
+				overwrittenDefaults.remove(configKey);
+				return true;
+			}
+
+			return false;
 		}
-		
-		return false;
 	}
 	
 	@Override
 	public void removeAllOverwrittenDefaults() {
-		overwrittenDefaults.clear();
+		synchronized(lock) {
+			overwrittenDefaults.clear();
+		}
 	}
 	
 	private static <T> Object getImpl(ConfigKey<T> ck, Map<ConfigKey<?>, Object> values) {
@@ -498,72 +507,74 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public <T> T get(ConfigKey<T> configKey) {
-		
-		enforceConfigKey(configKey);
-		
-		checkDeprecated(configKey);
-		
-		Object val = getImpl(configKey, values);
-		if (val != null) return coerceNumber(val, configKey.getType());
-		
-		Set<Object> groupDefaults = collectGroupDefaults(configKey);
-		if (hasResolvableDefault(configKey, groupDefaults)) {
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+			checkDeprecated(configKey);
+
+			Object val = getImpl(configKey, values);
+			if (val != null) return coerceNumber(val, configKey.getType());
+
+			Set<Object> groupDefaults = collectGroupDefaults(configKey);
+			if (hasResolvableDefault(configKey, groupDefaults)) {
+				if (hasImpl(configKey, overwrittenDefaults)) {
+					val = getImpl(configKey, overwrittenDefaults);
+					return coerceNumber(val, configKey.getType());
+				}
+			}
+
+			if (configKey.isRequired()) {
+				// well, see if its primary has a default..
+				if (configKey.getKind() != Kind.PRIMARY) {
+					ConfigKey<?> primaryKey = configKey.getPrimary();
+					if (!primaryKey.isRequired()) {
+						return coerceNumber(primaryKey.getDefaultValue(), configKey.getType());
+					}
+				} else { // PRIMARY KEY
+					if (groupDefaults.size() == 1) {
+						val = groupDefaults.iterator().next();
+						return coerceNumber(val, configKey.getType());
+					} else if (groupDefaults.size() > 1) {
+						throw new IllegalStateException("Required config key " + describeConfigKey(configKey) +
+								" cannot be resolved because its related keys define " + groupDefaults.size() + " distinct defaults.");
+					}
+				}
+
+				throw new IllegalStateException("Required config key " + describeConfigKey(configKey) +
+										" has no configured value and no default.");
+			}
+
 			if (hasImpl(configKey, overwrittenDefaults)) {
 				val = getImpl(configKey, overwrittenDefaults);
-				return coerceNumber(val, configKey.getType());
-			}
-		}
-		
-		if (configKey.isRequired()) {
-			
-			// well, see if its primary has a default..
-			if (configKey.getKind() != Kind.PRIMARY) {
-				ConfigKey<?> primaryKey = configKey.getPrimary();
-				if (!primaryKey.isRequired()) {
-					return coerceNumber(primaryKey.getDefaultValue(), configKey.getType());
-				}
-				
-			} else { // PRIMARY KEY
-				if (groupDefaults.size() == 1) {
-					val = groupDefaults.iterator().next();
+				if (val != null) {
 					return coerceNumber(val, configKey.getType());
-				} else if (groupDefaults.size() > 1) {
-					throw new IllegalStateException("Required config key " + describeConfigKey(configKey) +
-							" cannot be resolved because its related keys define " + groupDefaults.size() + " distinct defaults.");
+				} else {
+					return null; // Defaults can contain NULL !!!
 				}
 			}
-			
-			throw new IllegalStateException("Required config key " + describeConfigKey(configKey) +
-									" has no configured value and no default.");
+
+			return configKey.getDefaultValue();
 		}
-		
-		if (hasImpl(configKey, overwrittenDefaults)) {
-			val = getImpl(configKey, overwrittenDefaults);
-			if (val != null) {
-				return coerceNumber(val, configKey.getType());
-			} else {
-				return null; // Defaults can contain NULL !!!
-			}
-		}
-		
-		return configKey.getDefaultValue();
 	}
 	
 	@Override
 	public boolean has(ConfigKey<?> configKey) {
-		
-		enforceConfigKey(configKey);
-		
-		return hasImpl(configKey, values);
+		synchronized(lock) {
+			enforceConfigKey(configKey);
+			return hasImpl(configKey, values);
+		}
 	}
 	
 	@Override
 	public int size() {
-		return values.size();
+		synchronized(lock) {
+			return values.size();
+		}
 	}
 
 	@Override
 	public Set<ConfigKey<?>> keys() {
-		return Collections.unmodifiableSet(new HashSet<ConfigKey<?>>(values.keySet()));
+		synchronized(lock) {
+			return Collections.unmodifiableSet(new HashSet<ConfigKey<?>>(values.keySet()));
+		}
 	}
 }

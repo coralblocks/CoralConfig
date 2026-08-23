@@ -17,11 +17,14 @@ package com.coralblocks.coralconfig;
 
 /**
  * A <code>DeprecatedListener</code> can receive a callback when a <code>Configuration</code> first reads or configures a deprecated <code>ConfigKey</code>.
+ * Callbacks run on the thread using the configuration and may run concurrently when the listener is registered with multiple configurations,
+ * so listener implementations must be thread-safe.
  */
 public interface DeprecatedListener {
 	
 	/**
 	 * The given deprecated <code>ConfigKey</code> was used. The default implementation of this method simply prints information to stdout.
+	 * A <code>MapConfiguration</code> remains locked during the callback; do not wait for another thread to operate on that same configuration.
 	 * 
 	 * @param deprecatedKey the deprecated <code>ConfigKey</code> that was used
 	 * @param primaryKey the primary <code>ConfigKey</code> of the used deprecated <code>ConfigKey</code>

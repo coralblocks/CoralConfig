@@ -15,12 +15,12 @@
  */
 package com.coralblocks.coralconfig;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * A configuration key used to specify a configuration parameter. 
+ * A thread-safe configuration key used to specify a configuration parameter.
+ * Its holder metadata is published when the holder is first used by a configuration.
  *
  * @param <T> the type of its configuration key which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
  */
@@ -30,17 +30,17 @@ public final class ConfigKey<T> {
 		PRIMARY, ALIAS, DEPRECATED
 	}
 	
-	private String paramName;
+	private volatile String paramName;
 	private final Class<T> type;
 	private final Kind kind;
 	private final ConfigKey<?> primary;
-	List<ConfigKey<?>> aliases = new ArrayList<ConfigKey<?>>();
-	List<ConfigKey<?>> deprecated = new ArrayList<ConfigKey<?>>();
-	private String fieldName;
-	Class<?> holder;
+	volatile List<ConfigKey<?>> aliases = Collections.emptyList();
+	volatile List<ConfigKey<?>> deprecated = Collections.emptyList();
+	private volatile String fieldName;
+	volatile Class<?> holder;
 	private final T defaultValue;
 	private final boolean isRequired;
-	private String description;
+	private volatile String description;
 	
 	private ConfigKey(Class<T> type, Kind kind, boolean isRequired, T defaultValue, ConfigKey<?> primary) {
 		enforceType(type);
@@ -477,6 +477,7 @@ public final class ConfigKey<T> {
     
     /**
      * Sets the description by mutating and returning this <code>ConfigKey</code>.
+     * The description is shared by every configuration that uses this key, and updates are visible across threads.
      * 
      * @param description the description to set for this <code>ConfigKey</code>
      * @return this <code>ConfigKey</code>
@@ -505,9 +506,10 @@ public final class ConfigKey<T> {
     	return defaultValue;
     }
     
-    void setFieldName(String fieldName) {
-    	this.fieldName = fieldName;
-    	this.paramName = toCamelCase(fieldName);
+    void register(String fieldName, Class<?> holder) {
+		this.fieldName = fieldName;
+		this.paramName = toCamelCase(fieldName);
+		this.holder = holder;
     }
     
     static String toCamelCase(String input) {
@@ -542,7 +544,7 @@ public final class ConfigKey<T> {
      * @return all the aliases, or an empty list if the <code>ConfigKey</code> is not primary
      */
     public List<ConfigKey<?>> getAliases() {
-	return kind == Kind.PRIMARY ? Collections.unmodifiableList(aliases) : Collections.emptyList();
+	return kind == Kind.PRIMARY ? aliases : Collections.emptyList();
     }
     
     /**
@@ -552,7 +554,7 @@ public final class ConfigKey<T> {
      * @return all the deprecated <code>ConfigKey</code>s, or an empty list if the <code>ConfigKey</code> is not primary
      */
     public List<ConfigKey<?>> getDeprecated() {
-	return kind == Kind.PRIMARY ? Collections.unmodifiableList(deprecated) : Collections.emptyList();
+	return kind == Kind.PRIMARY ? deprecated : Collections.emptyList();
     }
     
 	@Override

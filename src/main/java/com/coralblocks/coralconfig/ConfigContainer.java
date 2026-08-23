@@ -18,10 +18,12 @@ package com.coralblocks.coralconfig;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +31,8 @@ import java.util.Set;
 import com.coralblocks.coralconfig.ConfigKey.Kind;
 
 final class ConfigContainer {
+
+    private static final Object SCAN_LOCK = new Object();
 
     private static final ClassValue<ConfigContainer> CONTAINERS = new ClassValue<ConfigContainer>() {
 
@@ -101,17 +105,18 @@ final class ConfigContainer {
         
         if (set.isEmpty()) throw new IllegalStateException("No config keys found in holder " + this.holder.getName());
 
-        enforceNotRegisteredByAnotherHolder(holder, set);
-        enforcePrimarySameHolder(holder, set);
+        // ClassValue may compute more than once under contention. Serialize only the shared-key mutation phase;
+        // relationship lists are replaced rather than appended, so repeated computations remain harmless.
+        synchronized(SCAN_LOCK) {
+            enforceNotRegisteredByAnotherHolder(holder, set);
+            enforcePrimarySameHolder(holder, set);
 
-        for(Map.Entry<ConfigKey<?>, String> entry : collected.entrySet()) {
-            ConfigKey<?> configKey = entry.getKey();
-            configKey.setFieldName(entry.getValue());
-            configKey.holder = holder;
+            for(Map.Entry<ConfigKey<?>, String> entry : collected.entrySet()) {
+                entry.getKey().register(entry.getValue(), holder);
+            }
+
+            registerRelationships(set);
         }
-
-        registerRelationships(set);
-        adjustLists(set);
         
         this.configKeys = Collections.unmodifiableSet(set);
         this.configKeysByParamName = Collections.unmodifiableMap(map);
@@ -129,20 +134,28 @@ final class ConfigContainer {
     }
 
     private static void registerRelationships(Set<ConfigKey<?>> configKeys) {
-		for(ConfigKey<?> configKey : configKeys) {
-			if (configKey.getKind() == Kind.ALIAS) {
-				configKey.getPrimary().aliases.add(configKey);
-			} else if (configKey.getKind() == Kind.DEPRECATED) {
-				configKey.getPrimary().deprecated.add(configKey);
-			}
-		}
-    }
-    
-    private static void adjustLists(Set<ConfigKey<?>> configKeys) {
-    	for(ConfigKey<?> configKey : configKeys) {
-    		configKey.aliases = Collections.unmodifiableList(configKey.aliases);
-    		configKey.deprecated = Collections.unmodifiableList(configKey.deprecated);
-    	}
+        Map<ConfigKey<?>, List<ConfigKey<?>>> aliases = new LinkedHashMap<ConfigKey<?>, List<ConfigKey<?>>>();
+        Map<ConfigKey<?>, List<ConfigKey<?>>> deprecated = new LinkedHashMap<ConfigKey<?>, List<ConfigKey<?>>>();
+
+        for(ConfigKey<?> configKey : configKeys) {
+            if (configKey.getKind() == Kind.PRIMARY) {
+                aliases.put(configKey, new ArrayList<ConfigKey<?>>());
+                deprecated.put(configKey, new ArrayList<ConfigKey<?>>());
+            }
+        }
+
+        for(ConfigKey<?> configKey : configKeys) {
+            if (configKey.getKind() == Kind.ALIAS) {
+                aliases.get(configKey.getPrimary()).add(configKey);
+            } else if (configKey.getKind() == Kind.DEPRECATED) {
+                deprecated.get(configKey.getPrimary()).add(configKey);
+            }
+        }
+
+        for(ConfigKey<?> configKey : aliases.keySet()) {
+            configKey.aliases = Collections.unmodifiableList(aliases.get(configKey));
+            configKey.deprecated = Collections.unmodifiableList(deprecated.get(configKey));
+        }
     }
     
     private static void enforcePrimarySameHolder(Class<?> holder, Set<ConfigKey<?>> configKeys) {

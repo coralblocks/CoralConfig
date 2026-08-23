@@ -22,6 +22,8 @@ import java.util.Set;
  * The common contract for reading configuration values and customizing their fallback defaults.
  * Directly adding or removing configured values is implementation-specific.
  * Invalid inputs or values cause an <code>IllegalArgumentException</code>; a valid request that cannot be resolved from the configuration causes an <code>IllegalStateException</code>.
+ * Implementations must be thread-safe: each method call is atomic, and returned collections are immutable snapshots.
+ * A sequence of method calls is not one atomic operation.
  */
 public interface Configuration {
 	
