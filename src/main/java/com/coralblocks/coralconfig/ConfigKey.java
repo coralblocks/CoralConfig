@@ -117,7 +117,9 @@ public final class ConfigKey<T> {
 	    } else if (type == Long.class || type == long.class) {
 	        return (K) Long.valueOf(value);
 	    } else if (type == Boolean.class || type == boolean.class) {
-	        return (K) Boolean.valueOf(value);
+	        if ("true".equalsIgnoreCase(value)) return (K) Boolean.TRUE;
+	        if ("false".equalsIgnoreCase(value)) return (K) Boolean.FALSE;
+	        throw new IllegalArgumentException("Invalid boolean value: " + value);
 	    } else if (type == Double.class || type == double.class) {
 	        return (K) Double.valueOf(value);
 	    } else if (type == Float.class || type == float.class) {

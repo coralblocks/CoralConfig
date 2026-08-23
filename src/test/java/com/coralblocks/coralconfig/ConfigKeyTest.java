@@ -100,6 +100,26 @@ public class ConfigKeyTest {
 	}
 
 	@Test
+	public void testBooleanParsingIsStrict() {
+
+		ConfigKey<Boolean> boolKey = ConfigKey.boolKey();
+
+		Assert.assertEquals(true, boolKey.parseValue("TrUe"));
+		Assert.assertEquals(false, boolKey.parseValue("FaLsE"));
+
+		try {
+
+			boolKey.parseValue("ture");
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals("Invalid boolean value: ture", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testIncompatibleDeprecationAfterPrimaryHolderIsScanned() {
 
 		class Holder {

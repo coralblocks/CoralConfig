@@ -44,9 +44,9 @@ public class ConfigPrinter {
 				System.out.println("First argument must be includeHeaderLine=true|false\n");
 				return;
 			}
-			includeHeaderLine = Boolean.parseBoolean(arg1.split("\\=")[1]);
+			includeHeaderLine = parseBoolean(arg1.substring(arg1.indexOf('=') + 1), "includeHeaderLine");
 		} else {
-			includeHeaderLine = Boolean.parseBoolean(arg1);
+			includeHeaderLine = parseBoolean(arg1, "includeHeaderLine");
 		}
 		
 		boolean includeParamName;
@@ -56,9 +56,9 @@ public class ConfigPrinter {
 				System.out.println("Second argument must be includeParamName=true|false\n");
 				return;
 			}
-			includeParamName = Boolean.parseBoolean(arg2.split("\\=")[1]);
+			includeParamName = parseBoolean(arg2.substring(arg2.indexOf('=') + 1), "includeParamName");
 		} else {
-			includeParamName = Boolean.parseBoolean(arg2);
+			includeParamName = parseBoolean(arg2, "includeParamName");
 		}
 		
 		boolean includeHolderClass;
@@ -68,9 +68,9 @@ public class ConfigPrinter {
 				System.out.println("Third argument must be includeHolderClass=true|false\n");
 				return;
 			}
-			includeHolderClass = Boolean.parseBoolean(arg3.split("\\=")[1]);
+			includeHolderClass = parseBoolean(arg3.substring(arg3.indexOf('=') + 1), "includeHolderClass");
 		} else {
-			includeHolderClass = Boolean.parseBoolean(arg3);
+			includeHolderClass = parseBoolean(arg3, "includeHolderClass");
 		}
 		
 		Class<?>[] classArray = new Class<?>[args.length - 3];
@@ -85,6 +85,12 @@ public class ConfigPrinter {
 		}
 		
 		printConfigs(includeHeaderLine, includeParamName, includeHolderClass, classArray);
+	}
+
+	private static boolean parseBoolean(String value, String argumentName) {
+		if ("true".equalsIgnoreCase(value)) return true;
+		if ("false".equalsIgnoreCase(value)) return false;
+		throw new IllegalArgumentException("Invalid boolean value for " + argumentName + ": " + value);
 	}
 	
 	public static final void printConfigs(final boolean includeHeaderLine, 
