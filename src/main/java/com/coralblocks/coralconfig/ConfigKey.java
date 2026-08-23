@@ -508,6 +508,7 @@ public final class ConfigKey<T> {
             } else {
                 if (sb.length() == 0) {
                     sb.append(Character.toLowerCase(c));
+                    nextUpper = false;
                 } else if (nextUpper) {
                     sb.append(Character.toUpperCase(c));
                     nextUpper = false;

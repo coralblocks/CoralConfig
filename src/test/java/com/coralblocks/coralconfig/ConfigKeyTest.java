@@ -87,6 +87,19 @@ public class ConfigKeyTest {
 	}
 
 	@Test
+	public void testLeadingUnderscoreIsIgnoredInParamName() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> _MY_KEY = ConfigKey.intKey();
+		}
+
+		ConfigContainer.of(Holder.class);
+
+		Assert.assertEquals("myKey", Holder._MY_KEY.getParamName());
+	}
+
+	@Test
 	public void testIncompatibleDeprecationAfterPrimaryHolderIsScanned() {
 
 		class Holder {
