@@ -17,10 +17,46 @@ package com.coralblocks.coralconfig;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ConfigPrinterTest {
+
+	public static class PrinterHolder {
+
+		public static final ConfigKey<Integer> PRIMARY = ConfigKey.intKey(1);
+		public static final ConfigKey<Integer> DEPRECATED = ConfigKey.intKey().deprecated(PRIMARY).def(2);
+	}
+
+	@Test
+	public void testPrintedConfiguration() {
+
+		PrintStream originalOut = System.out;
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+		try (PrintStream capture = new PrintStream(output, true, StandardCharsets.UTF_8)) {
+
+			System.setOut(capture);
+			ConfigPrinter.printConfigs(true, true, true, PrinterHolder.class);
+
+		} finally {
+
+			System.setOut(originalOut);
+		}
+
+		String newline = System.lineSeparator();
+		String expected = "Field Name, Param Name, Type, Default Value, Holder Class, Kind, Parent Primary, Aliases, Deprecated, Description" + newline
+				+ "DEPRECATED, deprecated, Integer, 2, PrinterHolder, DEPRECATED, PRIMARY, , , " + newline
+				+ "PRIMARY, primary, Integer, 1, PrinterHolder, PRIMARY, , , DEPRECATED, " + newline;
+
+		Assert.assertEquals(expected, output.toString(StandardCharsets.UTF_8));
+		Assert.assertEquals("PRIMARY", PrinterHolder.PRIMARY.getFieldName());
+		Assert.assertEquals("DEPRECATED", PrinterHolder.DEPRECATED.getFieldName());
+	}
 
 	@Test
 	public void testBooleanArgumentsAreStrict() {

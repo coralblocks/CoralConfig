@@ -9,9 +9,9 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.coralblocks.coralconfig;
 
@@ -21,8 +21,25 @@ import static org.junit.Assert.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class DefaultsTest {
+
+	private static final class DefaultsHolder {
+
+		public static final ConfigKey<Integer> MY_INTEGER_1 = intKey(10);
+		public static final ConfigKey<Integer> MY_INTEGER_2 = intKey(20).deprecated(MY_INTEGER_1);
+		public static final ConfigKey<Integer> MY_INTEGER_3 = intKey(30).alias(MY_INTEGER_1);
+	}
+
+	private static final class Overwrite {
+
+		private final ConfigKey<Integer> configKey;
+		private final int value;
+
+		private Overwrite(ConfigKey<Integer> configKey, int value) {
+			this.configKey = configKey;
+			this.value = value;
+		}
+	}
 
 	@Test
 	public void testEquivalentNumericGroupDefaultsResolve() {
@@ -83,930 +100,209 @@ public class DefaultsTest {
 		Assert.assertTrue(nullableConfig.hasOverwrittenDefault(NullableHolder.PRIMARY));
 		Assert.assertNull(nullableConfig.getOverwrittenDefault(NullableHolder.PRIMARY));
 		Assert.assertNull(nullableConfig.get(NullableHolder.PRIMARY));
+
+		MapConfiguration nullableCopy = new MapConfiguration(nullableConfig);
+
+		Assert.assertTrue(nullableCopy.hasOverwrittenDefault(NullableHolder.PRIMARY));
+		Assert.assertNull(nullableCopy.getOverwrittenDefault(NullableHolder.PRIMARY));
+		Assert.assertNull(nullableCopy.get(NullableHolder.PRIMARY));
 	}
-	
+
 	@Test
 	public void testNullDefaults() {
-		
+
 		class Base1 {
-			public static final ConfigKey<String> MY_STRING = stringKey().def(null); 
+			public static final ConfigKey<String> MY_STRING = stringKey().def(null);
 		}
-		
+
 		MapConfiguration mc1 = new MapConfiguration(Base1.class);
-		Assert.assertEquals(false, Base1.MY_STRING.isRequired());
+		Assert.assertFalse(Base1.MY_STRING.isRequired());
 		Assert.assertNull(mc1.get(Base1.MY_STRING));
-		
+
 		class Base2 {
 			public static final ConfigKey<String> MY_STRING = stringKey();
 		}
-		
+
 		MapConfiguration mc2 = new MapConfiguration(Base2.class);
-		Assert.assertEquals(true, Base2.MY_STRING.isRequired());
-		
+		Assert.assertTrue(Base2.MY_STRING.isRequired());
+
 		try {
-			mc2.get(Base2.MY_STRING); // REQUIRED
+
+			mc2.get(Base2.MY_STRING);
 			fail();
-		} catch(RuntimeException e) {
-			// Good!
+
+		} catch(IllegalStateException e) {
+
+			// Expected: the key is required.
 		}
 	}
-	
+
 	@Test
 	public void testBasicsOfBasics() {
-		
+
 		class Base {
-		    public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey().def(5);
-		    public static final ConfigKey<Integer> HEARTBEAT = intKey().alias(HEARTBEAT_INTERVAL);
+			public static final ConfigKey<Integer> HEARTBEAT_INTERVAL = intKey(5);
+			public static final ConfigKey<Integer> HEARTBEAT = intKey().alias(HEARTBEAT_INTERVAL);
 		}
-		
+
 		MapConfiguration mc = new MapConfiguration(Base.class);
 		Assert.assertEquals(5, mc.get(Base.HEARTBEAT_INTERVAL).intValue());
 		Assert.assertEquals(5, mc.get(Base.HEARTBEAT).intValue());
-		
+
 		mc.add(Base.HEARTBEAT_INTERVAL, 2);
 		Assert.assertEquals(2, mc.get(Base.HEARTBEAT_INTERVAL).intValue());
 		Assert.assertEquals(2, mc.get(Base.HEARTBEAT).intValue());
-		
+
 		mc.remove(Base.HEARTBEAT_INTERVAL);
 		mc.add(Base.HEARTBEAT, 1);
 		Assert.assertEquals(1, mc.get(Base.HEARTBEAT_INTERVAL).intValue());
 		Assert.assertEquals(1, mc.get(Base.HEARTBEAT).intValue());
 	}
-	
+
 	@Test
 	public void testEnum() {
-		
+
 		enum TestEnum { BALL, BOB, BILL }
-		
+
 		class Base {
-		    public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class, TestEnum.BOB);
+			public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class, TestEnum.BOB);
 		}
-		
+
 		MapConfiguration mc = new MapConfiguration(Base.class);
-		
-		Assert.assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM)); // test default
-		
+
+		Assert.assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM));
+
 		mc.overwriteDefault(Base.MY_ENUM, TestEnum.BILL);
-		
-		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
-		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM));
+
 		mc.add(Base.MY_ENUM, TestEnum.BALL);
-		
-		Assert.assertEquals(TestEnum.BALL, mc.get(Base.MY_ENUM)); // test configured
-		
+		Assert.assertEquals(TestEnum.BALL, mc.get(Base.MY_ENUM));
+
 		mc.remove(Base.MY_ENUM);
-		
-		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
-		
-		mc.overwriteDefault(Base.MY_ENUM, null); // String and Enum support NULL !!!
-		
-		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test overwritten default
-		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM));
+
+		mc.overwriteDefault(Base.MY_ENUM, null);
+		Assert.assertNull(mc.get(Base.MY_ENUM));
+
 		mc.removeOverwrittenDefault(Base.MY_ENUM);
-		
-		Assert.assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM)); // test default
+		Assert.assertEquals(TestEnum.BOB, mc.get(Base.MY_ENUM));
 	}
-	
+
 	@Test
 	public void testEnumNullDefault() {
-		
+
 		enum TestEnum { BALL, BOB, BILL }
-		
+
 		class Base {
-		    public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class).def(null);
+			public static final ConfigKey<TestEnum> MY_ENUM = enumKey(TestEnum.class).def(null);
 		}
-		
+
 		MapConfiguration mc = new MapConfiguration(Base.class);
-		
-		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test default
-		
+
+		Assert.assertNull(mc.get(Base.MY_ENUM));
+
 		mc.overwriteDefault(Base.MY_ENUM, TestEnum.BILL);
-		
-		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
-		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM));
+
 		mc.add(Base.MY_ENUM, TestEnum.BALL);
-		
-		Assert.assertEquals(TestEnum.BALL, mc.get(Base.MY_ENUM)); // test configured
-		
+		Assert.assertEquals(TestEnum.BALL, mc.get(Base.MY_ENUM));
+
 		mc.remove(Base.MY_ENUM);
-		
-		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM)); // test overwritten default
-		
-		mc.overwriteDefault(Base.MY_ENUM, null); // String and Enum support NULL !!!
-		
-		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test overwritten default
-		
+		Assert.assertEquals(TestEnum.BILL, mc.get(Base.MY_ENUM));
+
+		mc.overwriteDefault(Base.MY_ENUM, null);
+		Assert.assertNull(mc.get(Base.MY_ENUM));
+
 		mc.removeOverwrittenDefault(Base.MY_ENUM);
-		
-		Assert.assertEquals(null, mc.get(Base.MY_ENUM)); // test default
+		Assert.assertNull(mc.get(Base.MY_ENUM));
 	}
-	
+
 	@Test
-	public void testDefaults1() {
-		
-		class Holder {
-			
-			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey().def(10);
-			public static final ConfigKey<Integer> MY_INTEGER_2 = intKey().def(20).deprecated(MY_INTEGER_1);
-			public static final ConfigKey<Integer> MY_INTEGER_3 = intKey().def(30).alias(MY_INTEGER_1);
-		}
-		
-		MapConfiguration mc1 = new MapConfiguration(Holder.class);
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 11);
-		
-		Assert.assertEquals(11, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(11, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(11, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		
-		Assert.assertEquals(10, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(20, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(30, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 22);
-		
-		Assert.assertEquals(22, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(22, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(22, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 33);
-		
-		Assert.assertEquals(33, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(33, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(33, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 88);
-		
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(88, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		// REMEMBER: Alias has precedence over deprecated!
-		
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		
-		// REMEMBER: Alias has precedence over deprecated!
-		
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(66, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(77, mc1.get(Holder.MY_INTEGER_3).intValue());
+	public void testOverwrittenDefaultResolutionTable() {
+
+		assertOverwrittenDefaults("declared defaults", 10, 20, 30);
+		assertOverwrittenDefaults("primary", 11, 11, 11,
+				overwrite(DefaultsHolder.MY_INTEGER_1, 11));
+		assertOverwrittenDefaults("deprecated", 22, 22, 22,
+				overwrite(DefaultsHolder.MY_INTEGER_2, 22));
+		assertOverwrittenDefaults("alias", 33, 33, 33,
+				overwrite(DefaultsHolder.MY_INTEGER_3, 33));
+		assertOverwrittenDefaults("all keys", 66, 77, 88,
+				overwrite(DefaultsHolder.MY_INTEGER_1, 66),
+				overwrite(DefaultsHolder.MY_INTEGER_2, 77),
+				overwrite(DefaultsHolder.MY_INTEGER_3, 88));
+		assertOverwrittenDefaults("primary and deprecated", 66, 77, 66,
+				overwrite(DefaultsHolder.MY_INTEGER_1, 66),
+				overwrite(DefaultsHolder.MY_INTEGER_2, 77));
+		assertOverwrittenDefaults("primary and alias", 66, 66, 77,
+				overwrite(DefaultsHolder.MY_INTEGER_1, 66),
+				overwrite(DefaultsHolder.MY_INTEGER_3, 77));
+		assertOverwrittenDefaults("deprecated then alias", 77, 66, 77,
+				overwrite(DefaultsHolder.MY_INTEGER_2, 66),
+				overwrite(DefaultsHolder.MY_INTEGER_3, 77));
+		assertOverwrittenDefaults("alias then deprecated", 77, 66, 77,
+				overwrite(DefaultsHolder.MY_INTEGER_3, 77),
+				overwrite(DefaultsHolder.MY_INTEGER_2, 66));
+		assertOverwrittenDefaults("alias then primary", 66, 66, 77,
+				overwrite(DefaultsHolder.MY_INTEGER_3, 77),
+				overwrite(DefaultsHolder.MY_INTEGER_1, 66));
+		assertOverwrittenDefaults("alias only", 77, 77, 77,
+				overwrite(DefaultsHolder.MY_INTEGER_3, 77));
+		assertOverwrittenDefaults("deprecated only", 77, 77, 77,
+				overwrite(DefaultsHolder.MY_INTEGER_2, 77));
 	}
-	
+
 	@Test
-	public void testDefaults2() {
-		
-		class Holder {
-			
-			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey().def(10);
-			public static final ConfigKey<Integer> MY_INTEGER_2 = intKey().def(20).deprecated(MY_INTEGER_1);
-			public static final ConfigKey<Integer> MY_INTEGER_3 = intKey().def(30).alias(MY_INTEGER_1);
-		}
-		
-		MapConfiguration mc1 = new MapConfiguration("myInteger1=5", Holder.class);
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 11);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 22);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 33);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 88);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
+	public void testConfiguredValueResolutionTable() {
+
+		assertConfiguredValues("primary configured", "myInteger1=5", 5, 5, 5);
+		assertConfiguredValues("deprecated configured", "myInteger2=5", 5, 5, 5);
+		assertConfiguredValues("alias configured", "myInteger3=5", 5, 5, 5);
+		assertConfiguredValues("deprecated and alias configured", "myInteger2=6 myInteger3=5", 5, 6, 5);
+		assertConfiguredValues("primary and alias configured", "myInteger1=5 myInteger3=6", 5, 5, 6);
+		assertConfiguredValues("primary and deprecated configured", "myInteger1=5 myInteger2=6", 5, 6, 5);
 	}
-	
-	@Test
-	public void testDefaults3() {
-		
-		class Holder {
-			
-			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey().def(10);
-			public static final ConfigKey<Integer> MY_INTEGER_2 = intKey().def(20).deprecated(MY_INTEGER_1);
-			public static final ConfigKey<Integer> MY_INTEGER_3 = intKey().def(30).alias(MY_INTEGER_1);
+
+	private static void assertOverwrittenDefaults(String description,
+			int expectedPrimary, int expectedDeprecated, int expectedAlias, Overwrite ... overwrites) {
+
+		MapConfiguration config = new MapConfiguration(DefaultsHolder.class);
+
+		for(Overwrite overwrite : overwrites) {
+			config.overwriteDefault(overwrite.configKey, overwrite.value);
 		}
-		
-		MapConfiguration mc1 = new MapConfiguration("myInteger2=5", Holder.class);
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 11);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 22);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 33);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 88);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
+
+		assertValues(description, config, expectedPrimary, expectedDeprecated, expectedAlias);
 	}
-	
-	@Test
-	public void testDefaults4() {
-		
-		class Holder {
-			
-			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey().def(10);
-			public static final ConfigKey<Integer> MY_INTEGER_2 = intKey().def(20).deprecated(MY_INTEGER_1);
-			public static final ConfigKey<Integer> MY_INTEGER_3 = intKey().def(30).alias(MY_INTEGER_1);
-		}
-		
-		MapConfiguration mc1 = new MapConfiguration("myInteger3=5", Holder.class);
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 11);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 22);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 33);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 88);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
+
+	private static void assertConfiguredValues(String description, String params,
+			int expectedPrimary, int expectedDeprecated, int expectedAlias) {
+
+		MapConfiguration config = new MapConfiguration(params, DefaultsHolder.class);
+
+		assertValues(description + " before overwrites", config,
+				expectedPrimary, expectedDeprecated, expectedAlias);
+
+		config.overwriteDefault(DefaultsHolder.MY_INTEGER_1, 66);
+		config.overwriteDefault(DefaultsHolder.MY_INTEGER_2, 77);
+		config.overwriteDefault(DefaultsHolder.MY_INTEGER_3, 88);
+
+		assertValues(description + " after overwrites", config,
+				expectedPrimary, expectedDeprecated, expectedAlias);
 	}
-	
-	@Test
-	public void testDefaults5() {
-		
-		class Holder {
-			
-			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey().def(10);
-			public static final ConfigKey<Integer> MY_INTEGER_2 = intKey().def(20).deprecated(MY_INTEGER_1);
-			public static final ConfigKey<Integer> MY_INTEGER_3 = intKey().def(30).alias(MY_INTEGER_1);
-		}
-		
-		MapConfiguration mc1 = new MapConfiguration("myInteger2=6 myInteger3=5", Holder.class);
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 11);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 22);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 33);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 88);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
+
+	private static Overwrite overwrite(ConfigKey<Integer> configKey, int value) {
+		return new Overwrite(configKey, value);
 	}
-	
-	@Test
-	public void testDefaults6() {
-		
-		class Holder {
-			
-			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey().def(10);
-			public static final ConfigKey<Integer> MY_INTEGER_2 = intKey().def(20).deprecated(MY_INTEGER_1);
-			public static final ConfigKey<Integer> MY_INTEGER_3 = intKey().def(30).alias(MY_INTEGER_1);
-		}
-		
-		MapConfiguration mc1 = new MapConfiguration("myInteger1=5 myInteger3=6", Holder.class);
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 11);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 22);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 33);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 88);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_3).intValue());
-	}
-	
-	@Test
-	public void testDefaults7() {
-		
-		class Holder {
-			
-			public static final ConfigKey<Integer> MY_INTEGER_1 = intKey().def(10);
-			public static final ConfigKey<Integer> MY_INTEGER_2 = intKey().def(20).deprecated(MY_INTEGER_1);
-			public static final ConfigKey<Integer> MY_INTEGER_3 = intKey().def(30).alias(MY_INTEGER_1);
-		}
-		
-		MapConfiguration mc1 = new MapConfiguration("myInteger1=5 myInteger2=6", Holder.class);
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 11);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 22);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 33);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 88);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		mc1.overwriteDefault(Holder.MY_INTEGER_1, 66);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_3, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
-		
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_1);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_2);
-		mc1.removeOverwrittenDefault(Holder.MY_INTEGER_3);
-		mc1.overwriteDefault(Holder.MY_INTEGER_2, 77);
-		
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_1).intValue());
-		Assert.assertEquals(6, mc1.get(Holder.MY_INTEGER_2).intValue());
-		Assert.assertEquals(5, mc1.get(Holder.MY_INTEGER_3).intValue());
+
+	private static void assertValues(String description, MapConfiguration config,
+			int expectedPrimary, int expectedDeprecated, int expectedAlias) {
+
+		Assert.assertEquals(description + " primary", expectedPrimary,
+				config.get(DefaultsHolder.MY_INTEGER_1).intValue());
+		Assert.assertEquals(description + " deprecated", expectedDeprecated,
+				config.get(DefaultsHolder.MY_INTEGER_2).intValue());
+		Assert.assertEquals(description + " alias", expectedAlias,
+				config.get(DefaultsHolder.MY_INTEGER_3).intValue());
 	}
 }
