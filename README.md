@@ -81,17 +81,17 @@ int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5 (default)
 // This also works with the default value of the primary config key!
 int heartbeat = mc.get(HEARTBEAT); // => 5 (default)
 ```
-And if you declare a value for the new config key `heartbeatInterval` then the primary key together with all its aliases will get the declared value:
+If `heartbeatInterval` is the only configured value in the key group, both lookups resolve to it:
 ```java
 mc.add(HEARTBEAT_INTERVAL, 2);
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
-// The alias also gets the declared value!
+// The alias also resolves to the only configured value.
 int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
 ```
-or if you do this instead:
+Or, if `heartbeat` is the only configured value:
 ```java
 mc.add(HEARTBEAT, 2);
-// The primary key gets the value declared for its alias!
+// The primary key resolves to the value configured for its alias.
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
 int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
 ```
@@ -119,17 +119,17 @@ int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 5 (default)
 // This also works with the default value of the primary config key!
 int heartbeat = mc.get(HEARTBEAT); // => 5 (default)
 ```
-And if you declare a value for the new config key `heartbeatInterval` then the primary key together with all its deprecated keys will get the declared value:
+If `heartbeatInterval` is the only configured value in the key group, both lookups resolve to it:
 ```java
 mc.add(HEARTBEAT_INTERVAL, 2);
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
-// The deprecated key also gets the declared value!
+// The deprecated key also resolves to the only configured value.
 int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
 ```
-or if you do this instead:
+Or, if `heartbeat` is the only configured value:
 ```java
 mc.add(HEARTBEAT, 2);
-// The primary key gets the value declared for its deprecated keys!
+// The primary key resolves to the value configured for its deprecated key.
 int heartbeatInterval = mc.get(HEARTBEAT_INTERVAL); // => 2 (configured)
 int heartbeat = mc.get(HEARTBEAT); // => 2 (configured)
 ```

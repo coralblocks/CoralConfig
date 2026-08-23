@@ -61,10 +61,15 @@ public interface Configuration {
 	public int size();
 	
 	/**
-	 * Gets the value configured in this configuration for the given <code>ConfigKey</code>. Note that it can return a default value instead.<br/>
-	 * <b>IMPORTANT:</b> If the <code>ConfigKey</code> does not have a default value, it is a <b>required</b>
-	 * <code>ConfigKey</code> and it must contain a value (or return a value from an alias/deprecated <code>ConfigKey</code>> or this method will
-	 * throw a <code>RuntimeException</code>.
+	 * Gets the value for the given <code>ConfigKey</code>. Resolution proceeds in this order:
+	 * <ol>
+	 * <li>The configured value of the requested key.</li>
+	 * <li>The configured value of its primary, when the requested key is an alias or deprecated key.</li>
+	 * <li>Remaining configured aliases and then configured deprecated keys, each in holder declaration order.</li>
+	 * <li>Overwritten defaults, using the same group order.</li>
+	 * <li>Declared defaults: the requested key's own default; for a required alias or deprecated key, its primary's default; or, for a required primary, the single distinct default supplied by its related keys.</li>
+	 * </ol>
+	 * A required key that remains unresolved causes an exception. A required primary also causes an exception when it must borrow a default and its related keys supply multiple distinct values.
 	 * 
 	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
 	 * @param configKey the <code>ConfigKey</code> to get a value for
