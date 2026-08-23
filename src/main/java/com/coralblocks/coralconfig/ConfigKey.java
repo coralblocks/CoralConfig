@@ -148,9 +148,15 @@ public final class ConfigKey<T> {
     static <K> ConfigKey<K> of(Class<K> type, Kind kind, boolean isRequired, K defaultValue, ConfigKey<?> primary) {
     	return new ConfigKey<K>(type, kind, isRequired, defaultValue, primary);
     }
+
+	private ConfigKey<T> copy(Kind kind, boolean isRequired, T defaultValue, ConfigKey<?> primary) {
+		ConfigKey<T> copy = of(type, kind, isRequired, defaultValue, primary);
+		copy.description = description;
+		return copy;
+	}
     
     /**
-     * Creates a new <code>ConfigKey</code> by deep cloning this config key and adding the given default value. (Fluent API)
+     * Creates a copy of this <code>ConfigKey</code> with the given default value. (Fluent API)
      * 
      * @param defaultValue the default value for the new <code>ConfigKey</code> returned
      * @return a new <code>ConfigKey</code> with the given default value
@@ -160,11 +166,11 @@ public final class ConfigKey<T> {
     		throw new IllegalStateException("Trying to set up a default value twice! " +
     										"previousDefault=" + getDefaultValue() + " newDefault=" + defaultValue);
     	}
-    	return of(getType(), getKind(), false, defaultValue, getPrimary());
+		return copy(getKind(), false, defaultValue, getPrimary());
     }
     
     /**
-     * Creates a new <code>ConfigKey</code> by deep cloning this config key and marking it as deprecated. (Fluent API)
+     * Creates a copy of this <code>ConfigKey</code> marked as deprecated. (Fluent API)
      * If this key and its primary use different numeric types, values must be exactly representable in the requested type.
      * 
      * @param primary the primary <code>ConfigKey</code> of this deprecated <code>ConfigKey</code>
@@ -176,11 +182,11 @@ public final class ConfigKey<T> {
     	} else if (getKind() == Kind.ALIAS) {
     		throw new IllegalStateException("Tried to call deprecated on a config key that is already an alias!");
     	}
-    	return of(getType(), Kind.DEPRECATED, isRequired(), getDefaultValue(), primary);
+		return copy(Kind.DEPRECATED, isRequired(), getDefaultValue(), primary);
     }
     
     /**
-     * Creates a new <code>ConfigKey</code> by deep cloning this config key and marking it as an alias of the given primary <code>ConfigKey</code>. (Fluent API)
+     * Creates a copy of this <code>ConfigKey</code> marked as an alias of the given primary <code>ConfigKey</code>. (Fluent API)
      * 
      * @param primary the primary <code>ConfigKey</code> of this alias <code>ConfigKey</code>
      * @return a new <code>ConfigKey</code> which is an alias of the given primary <code>ConfigKey</code>
@@ -192,7 +198,7 @@ public final class ConfigKey<T> {
     		throw new IllegalStateException("Tried to call alias on a config key that is already deprecated!");
     	}
     	
-    	return of(getType(), Kind.ALIAS, isRequired(), getDefaultValue(), primary);
+		return copy(Kind.ALIAS, isRequired(), getDefaultValue(), primary);
     }
     
     /**
@@ -465,9 +471,10 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Sets the description for this <code>ConfigKey</code>.
+     * Sets the description by mutating and returning this <code>ConfigKey</code>.
      * 
      * @param description the description to set for this <code>ConfigKey</code>
+     * @return this <code>ConfigKey</code>
      */
     public ConfigKey<T> setDescription(String description) {
     	this.description = description;

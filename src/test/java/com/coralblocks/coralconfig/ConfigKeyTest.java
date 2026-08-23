@@ -120,6 +120,27 @@ public class ConfigKeyTest {
 	}
 
 	@Test
+	public void testDescriptionSurvivesFluentCalls() {
+
+		class Holder {
+
+			public static final ConfigKey<String> PRIMARY = ConfigKey.stringKey();
+			public static final ConfigKey<String> DEFAULT = ConfigKey.stringKey().setDescription("default").def("value");
+			public static final ConfigKey<String> ALIAS = ConfigKey.stringKey().setDescription("alias").alias(PRIMARY);
+			public static final ConfigKey<String> DEPRECATED = ConfigKey.stringKey().setDescription("deprecated").deprecated(PRIMARY);
+		}
+
+		ConfigContainer.of(Holder.class);
+
+		Assert.assertEquals("default", Holder.DEFAULT.getDescription());
+		Assert.assertEquals("alias", Holder.ALIAS.getDescription());
+		Assert.assertEquals("deprecated", Holder.DEPRECATED.getDescription());
+
+		ConfigKey<String> configKey = ConfigKey.stringKey();
+		Assert.assertSame(configKey, configKey.setDescription("mutated"));
+	}
+
+	@Test
 	public void testIncompatibleDeprecationAfterPrimaryHolderIsScanned() {
 
 		class Holder {
