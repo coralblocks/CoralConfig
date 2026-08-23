@@ -25,6 +25,37 @@ import org.junit.Test;
 public class DefaultsTest {
 
 	@Test
+	public void testEquivalentNumericGroupDefaultsResolve() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> PRIMARY = intKey();
+			public static final ConfigKey<Integer> OLD_INT = intKey(5).deprecated(PRIMARY);
+			public static final ConfigKey<Long> OLD_LONG = longKey(5L).deprecated(PRIMARY);
+		}
+
+		MapConfiguration config = new MapConfiguration(Holder.class);
+
+		Assert.assertEquals(5, config.get(Holder.PRIMARY).intValue());
+		Assert.assertFalse(config.overwriteDefault(Holder.PRIMARY, 7));
+		Assert.assertEquals(7, config.get(Holder.PRIMARY).intValue());
+	}
+
+	@Test
+	public void testPrimaryOwnDefaultTakesPrecedenceOverGroupDefaults() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> PRIMARY = intKey(5);
+			public static final ConfigKey<Float> OLD = floatKey(7.5f).deprecated(PRIMARY);
+		}
+
+		MapConfiguration config = new MapConfiguration(Holder.class);
+
+		Assert.assertEquals(5, config.get(Holder.PRIMARY).intValue());
+	}
+
+	@Test
 	public void testOverwrittenDefaultAccessorsResolveKeyGroup() {
 
 		class NumericHolder {

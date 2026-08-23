@@ -100,7 +100,7 @@ public final class ConfigKey<T> {
         	// We are good!
         	return;
         }
-        throw new IllegalStateException("Type can only be a Java primitive (Integer, Boolean, etc.), Enum or String!" +
+		throw new IllegalStateException("Type must be a Java primitive wrapper (Integer, Boolean, etc.), an Enum, or String!" +
 				" type=" + c.getName());
 	}
 	
@@ -113,23 +113,23 @@ public final class ConfigKey<T> {
 	    if (value == null) return null;
 	    if (type == String.class) {
 	        return (K) value;
-	    } else if (type == Integer.class || type == int.class) {
+	    } else if (type == Integer.class) {
 	        return (K) Integer.valueOf(value);
-	    } else if (type == Long.class || type == long.class) {
+	    } else if (type == Long.class) {
 	        return (K) Long.valueOf(value);
-	    } else if (type == Boolean.class || type == boolean.class) {
+	    } else if (type == Boolean.class) {
 	        if ("true".equalsIgnoreCase(value)) return (K) Boolean.TRUE;
 	        if ("false".equalsIgnoreCase(value)) return (K) Boolean.FALSE;
 	        throw new IllegalArgumentException("Invalid boolean value: " + value);
-	    } else if (type == Double.class || type == double.class) {
+	    } else if (type == Double.class) {
 	        return (K) Double.valueOf(value);
-	    } else if (type == Float.class || type == float.class) {
+	    } else if (type == Float.class) {
 	        return (K) Float.valueOf(value);
-	    } else if (type == Short.class || type == short.class) {
+	    } else if (type == Short.class) {
 	        return (K) Short.valueOf(value);
-	    } else if (type == Byte.class || type == byte.class) {
+	    } else if (type == Byte.class) {
 	        return (K) Byte.valueOf(value);
-	    } else if (type == Character.class || type == char.class) {
+	    } else if (type == Character.class) {
 	        if (value.length() != 1) throw new IllegalArgumentException("Invalid char value: " + value);
 	        return (K) Character.valueOf(value.charAt(0));
 	    } else if (type.isEnum()) {

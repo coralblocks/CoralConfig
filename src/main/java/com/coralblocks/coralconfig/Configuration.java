@@ -69,7 +69,7 @@ public interface Configuration {
 	 * <li>The configured value of its primary, when the requested key is an alias or deprecated key.</li>
 	 * <li>Remaining configured aliases and then configured deprecated keys, each in holder declaration order.</li>
 	 * <li>Overwritten defaults, using the same group order.</li>
-	 * <li>Declared defaults: the requested key's own default; for a required alias or deprecated key, its primary's default; or, for a required primary, the single distinct default supplied by its related keys.</li>
+	 * <li>Declared defaults: the requested key's own default; for a required alias or deprecated key, its primary's default; or, for a required primary, the single distinct default supplied by its related keys after lossless conversion to the primary's type.</li>
 	 * </ol>
 	 * A required key that remains unresolved causes an exception. A required primary also causes an exception when it must borrow a default and its related keys supply multiple distinct values.
 	 * 

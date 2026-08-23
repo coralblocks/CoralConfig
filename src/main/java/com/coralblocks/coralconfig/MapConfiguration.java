@@ -302,7 +302,7 @@ public class MapConfiguration implements Configuration {
 		
 		checkDeprecated(configKey);
 
-		if (!collectAndCheckIfDefaultExists(configKey)) {
+		if (!hasResolvableDefault(configKey, collectGroupDefaults(configKey))) {
 			throw new IllegalStateException("Config key " + describeConfigKey(configKey) + " has no resolvable default to overwrite.");
 		}
 		
@@ -470,33 +470,30 @@ public class MapConfiguration implements Configuration {
 		}
 	}
 	
-	private static boolean collectAndCheckIfDefaultExists(ConfigKey<?> configKey) {
+	private static Set<Object> collectGroupDefaults(ConfigKey<?> configKey) {
+		if (!configKey.isRequired() || configKey.getKind() != Kind.PRIMARY) return Collections.emptySet();
 
-		if (!configKey.isRequired()) return true; // it has a default!
-		
-		// well, see if its primary has a default..
-		if (configKey.getKind() != Kind.PRIMARY) {
-			ConfigKey<?> primaryKey = configKey.getPrimary();
-			if (!primaryKey.isRequired()) {
-				return true;
-			}
-			
-		} else { // PRIMARY KEY
-			
-			Set<Object> collect = new HashSet<Object>();
-			
-			for(ConfigKey<?> ck : configKey.getAliases()) {
-				if (!ck.isRequired()) collect.add(ck.getDefaultValue());
-			}
-			
-			for(ConfigKey<?> ck : configKey.getDeprecated()) {
-				if (!ck.isRequired()) collect.add(ck.getDefaultValue());
-			}
-			
-			if (collect.size() == 1) return true;
+		Set<Object> defaults = new HashSet<Object>();
+
+		for(ConfigKey<?> relatedKey : configKey.getAliases()) {
+			collectDefault(defaults, relatedKey, configKey.getType());
 		}
-		
-		return false;
+
+		for(ConfigKey<?> relatedKey : configKey.getDeprecated()) {
+			collectDefault(defaults, relatedKey, configKey.getType());
+		}
+
+		return defaults;
+	}
+
+	private static void collectDefault(Set<Object> defaults, ConfigKey<?> relatedKey, Class<?> targetType) {
+		if (!relatedKey.isRequired()) defaults.add(coerceNumber(relatedKey.getDefaultValue(), targetType));
+	}
+
+	private static boolean hasResolvableDefault(ConfigKey<?> configKey, Set<Object> groupDefaults) {
+		if (!configKey.isRequired()) return true;
+		if (configKey.getKind() != Kind.PRIMARY) return !configKey.getPrimary().isRequired();
+		return groupDefaults.size() == 1;
 	}
 	
 	@Override
@@ -509,15 +506,12 @@ public class MapConfiguration implements Configuration {
 		Object val = getImpl(configKey, values);
 		if (val != null) return coerceNumber(val, configKey.getType());
 		
-		// check if it will return a default:
-		boolean willReturnDefault = collectAndCheckIfDefaultExists(configKey);
-		if (willReturnDefault) {
+		Set<Object> groupDefaults = collectGroupDefaults(configKey);
+		if (hasResolvableDefault(configKey, groupDefaults)) {
 			if (hasImpl(configKey, overwrittenDefaults)) {
 				val = getImpl(configKey, overwrittenDefaults);
 				return coerceNumber(val, configKey.getType());
 			}
-		} else {
-			// let it roll (there is some redundant logic ahead, but for simplicity let it roll
 		}
 		
 		if (configKey.isRequired()) {
@@ -530,23 +524,12 @@ public class MapConfiguration implements Configuration {
 				}
 				
 			} else { // PRIMARY KEY
-				
-				Set<Object> collect = new HashSet<Object>();
-				
-				for(ConfigKey<?> ck : configKey.getAliases()) {
-					if (!ck.isRequired()) collect.add(ck.getDefaultValue());
-				}
-				
-				for(ConfigKey<?> ck : configKey.getDeprecated()) {
-					if (!ck.isRequired()) collect.add(ck.getDefaultValue());
-				}
-				
-				if (collect.size() == 1) {
-					val = collect.iterator().next();
+				if (groupDefaults.size() == 1) {
+					val = groupDefaults.iterator().next();
 					return coerceNumber(val, configKey.getType());
-				} else if (collect.size() > 1) {
+				} else if (groupDefaults.size() > 1) {
 					throw new IllegalStateException("Required config key " + describeConfigKey(configKey) +
-							" cannot be resolved because its related keys define " + collect.size() + " distinct defaults.");
+							" cannot be resolved because its related keys define " + groupDefaults.size() + " distinct defaults.");
 				}
 			}
 			
