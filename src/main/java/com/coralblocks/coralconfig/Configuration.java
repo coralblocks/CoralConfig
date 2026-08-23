@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The contract for a <code>Configuration</code>.
+ * The common contract for reading configuration values and customizing their fallback defaults.
+ * Directly adding or removing configured values is implementation-specific.
  */
 public interface Configuration {
 	
@@ -87,7 +88,8 @@ public interface Configuration {
 	public Set<ConfigKey<?>> keys();
 
 	/**
-	 * If this <code>ConfigKey</code> is returning a default value, overwrite it with the given new default value.
+	 * Changes the fallback default returned by this <code>ConfigKey</code> when no configured value exists.
+	 * This does not add a configured value, and configured values still take precedence.
 	 * 
 	 * @param <T> the type of this <code>ConfigKey</code> which can be a Java primitive wrapper (Integer, Short, etc.), a String and an Enum.
 	 * @param configKey the <code>ConfigKey</code> to overwrite its default value

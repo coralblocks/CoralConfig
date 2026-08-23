@@ -28,6 +28,7 @@ import com.coralblocks.coralconfig.ConfigKey.Kind;
 
 /**
  * The main implementation of the <code>Configuration</code> interface. It performs a bunch of checks to enforce uniqueness of <code>ConfigKey</code>s and much more.
+ * In addition to the common contract, this implementation supports directly adding and removing configured values through <code>add</code> and <code>remove</code>.
  * This class is not thread-safe.
  */
 public class MapConfiguration implements Configuration {
