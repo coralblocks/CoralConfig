@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,7 +80,7 @@ final class ConfigContainer {
         	
             ConfigKey<?> configKey = entry.getKey();
             String paramName = ConfigKey.toCamelCase(entry.getValue());
-            ConfigKey<?> prev = map.putIfAbsent(paramName, configKey);
+            ConfigKey<?> prev = map.putIfAbsent(normalizeParamName(paramName), configKey);
             
             if (prev != null) {
                 throw new IllegalStateException("Duplicate config key name: " + paramName + " in holder " + this.holder.getName());
@@ -169,15 +170,15 @@ final class ConfigContainer {
     }
     
     static void enforceNoDuplicates(ConfigContainer cc1, ConfigContainer cc2) {
-    	Iterator<ConfigKey<?>> iter = cc1.configKeys.iterator();
-    	while(iter.hasNext()) {
-    		ConfigKey<?> configKey = iter.next();
-    		ConfigKey<?> duplicate = cc2.getIgnoreCase(configKey.getParamName());
-    		if (duplicate != null) {
-    			throw new IllegalStateException("Found two keys with the same name! " +
-    									"configKey1=" + configKey + " configKey2=" + duplicate);
-    		}
-    	}
+        Iterator<ConfigKey<?>> iter = cc1.configKeys.iterator();
+        while(iter.hasNext()) {
+            ConfigKey<?> configKey = iter.next();
+            ConfigKey<?> duplicate = cc2.get(configKey.getParamName());
+            if (duplicate != null) {
+                throw new IllegalStateException("Found two keys with the same name! " +
+                                                "configKey1=" + configKey + " configKey2=" + duplicate);
+            }
+        }
     }
 
     public int size() {
@@ -189,18 +190,11 @@ final class ConfigContainer {
     }
 
     public ConfigKey<?> get(String paramName) {
-        return configKeysByParamName.get(paramName);
+        return configKeysByParamName.get(normalizeParamName(paramName));
     }
-    
-    private ConfigKey<?> getIgnoreCase(String paramName) {
-    	Iterator<ConfigKey<?>> iter = configKeys.iterator();
-    	while(iter.hasNext()) {
-    		ConfigKey<?> configKey = iter.next();
-    		if (configKey.getParamName().equalsIgnoreCase(paramName)) {
-    			return configKey;
-    		}
-    	}
-    	return null;
+
+    private static String normalizeParamName(String paramName) {
+        return paramName == null ? null : paramName.toLowerCase(Locale.ROOT);
     }
     
     public Set<ConfigKey<?>> configKeys() {

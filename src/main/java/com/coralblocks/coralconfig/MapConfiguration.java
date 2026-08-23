@@ -70,7 +70,7 @@ public class MapConfiguration implements Configuration {
 		if (configContainers.length > 1) ConfigContainer.enforceNoDuplicates(configContainers); // important!
 		
 		if (params != null) {
-			Map<String, String> parsedParams = new HashMap<String, String>();
+			Map<ConfigKey<?>, String> parsedParams = new HashMap<ConfigKey<?>, String>();
 			String[] keyValues = params.trim().split("\\s+");
 			for(String keyValue : keyValues) {
 				if (keyValue.isEmpty()) continue;
@@ -80,17 +80,18 @@ public class MapConfiguration implements Configuration {
 				}
 				String key = temp[0];
 				String value = temp[1];
-
-				String previous = parsedParams.putIfAbsent(key, keyValue);
-				if (previous != null) {
-					throw new IllegalArgumentException("Duplicate config key in params: " + key +
-																   " (first: " + previous + ", duplicate: " + keyValue + ")");
-				}
 				
 				ConfigKey<?> configKey = getByName(key);
 				if (configKey == null) {
 					throw new IllegalStateException("A config key in params does not belong to this configuration: " + key);
 				}
+
+				String previous = parsedParams.putIfAbsent(configKey, keyValue);
+				if (previous != null) {
+					throw new IllegalArgumentException("Duplicate config key in params: " + configKey.getParamName() +
+																   " (first: " + previous + ", duplicate: " + keyValue + ")");
+				}
+
 				Object parsedValue = configKey.parseValue(value);
 				addParsed(configKey, parsedValue);
 			}

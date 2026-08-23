@@ -124,4 +124,63 @@ public class ConfigContainerTest {
 		Assert.assertTrue(Holder.PRIMARY.getDeprecated().contains(Holder.DEPRECATED_DEFAULT_AFTER));
 		Assert.assertTrue(Holder.PRIMARY.getDeprecated().contains(Holder.DEPRECATED_DEFAULT_BEFORE));
 	}
+
+	@Test
+	public void testParamNamesAreCaseInsensitive() {
+
+		@SuppressWarnings("unused")
+		class DuplicateHolder {
+
+			public static final ConfigKey<Integer> MYKEY = ConfigKey.intKey();
+			public static final ConfigKey<Integer> MY_KEY = ConfigKey.intKey();
+		}
+
+		try {
+
+			ConfigContainer.of(DuplicateHolder.class);
+
+			fail();
+
+		} catch(IllegalStateException e) {
+
+			Assert.assertTrue(e.getMessage().startsWith("Duplicate config key name:"));
+		}
+
+		class Holder1 {
+
+			public static final ConfigKey<Integer> MYKEY = ConfigKey.intKey();
+		}
+
+		@SuppressWarnings("unused")
+		class Holder2 {
+
+			public static final ConfigKey<Integer> MY_KEY = ConfigKey.intKey();
+		}
+
+		try {
+
+			new MapConfiguration(Holder1.class, Holder2.class);
+
+			fail();
+
+		} catch(IllegalStateException e) {
+
+			Assert.assertTrue(e.getMessage().startsWith("Found two keys with the same name!"));
+		}
+
+		MapConfiguration config = new MapConfiguration("MyKeY=7", Holder1.class);
+
+		Assert.assertEquals(7, config.get(Holder1.MYKEY).intValue());
+
+		try {
+
+			new MapConfiguration("mykey=7 MYKEY=8", Holder1.class);
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals("Duplicate config key in params: mykey (first: mykey=7, duplicate: MYKEY=8)", e.getMessage());
+		}
+	}
 }
