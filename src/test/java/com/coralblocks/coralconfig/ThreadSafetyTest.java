@@ -17,9 +17,12 @@ package com.coralblocks.coralconfig;
 
 import static com.coralblocks.coralconfig.ConfigKey.intKey;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -31,46 +34,77 @@ import org.junit.Test;
 
 public class ThreadSafetyTest {
 
-	@Test(timeout = 10000)
+	@Test(timeout = 30000)
 	public void testConcurrentFirstHolderScan() throws Exception {
 
-		class Holder {
-
-			public static final ConfigKey<Integer> PRIMARY = intKey(1);
-			public static final ConfigKey<Integer> ALIAS = intKey().alias(PRIMARY);
-			public static final ConfigKey<Integer> DEPRECATED = intKey().deprecated(PRIMARY);
-		}
+		// Each round defines ScanRaceHolder again through a fresh child-first class loader, producing a
+		// brand-new Class object, so every round races the very first ConfigContainer scan of that class
+		// instead of hitting the container cached by an earlier round.
 
 		int threadCount = 16;
+		int rounds = 300;
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-		CountDownLatch ready = new CountDownLatch(threadCount);
-		CountDownLatch start = new CountDownLatch(1);
-		List<Future<ConfigContainer>> futures = new ArrayList<Future<ConfigContainer>>();
 
 		try {
-			for(int i = 0; i < threadCount; i++) {
-				futures.add(executor.submit(() -> {
-					ready.countDown();
-					start.await();
-					return ConfigContainer.of(Holder.class);
-				}));
-			}
+			for(int round = 0; round < rounds; round++) {
 
-			Assert.assertTrue(ready.await(5, TimeUnit.SECONDS));
-			start.countDown();
+				final Class<?> holder = loadFreshHolderClass();
+				Assert.assertNotSame(ScanRaceHolder.class, holder); // must be a fresh Class, or the round tests nothing
+				final CyclicBarrier barrier = new CyclicBarrier(threadCount);
+				List<Future<ConfigContainer>> futures = new ArrayList<Future<ConfigContainer>>();
 
-			ConfigContainer expected = futures.get(0).get();
-			for(Future<ConfigContainer> future : futures) {
-				Assert.assertSame(expected, future.get());
+				for(int i = 0; i < threadCount; i++) {
+					futures.add(executor.submit(() -> {
+						barrier.await();
+						return ConfigContainer.of(holder);
+					}));
+				}
+
+				ConfigContainer expected = futures.get(0).get();
+				for(Future<ConfigContainer> future : futures) {
+					Assert.assertSame(expected, future.get());
+				}
+
+				ConfigKey<?> primary = (ConfigKey<?>) holder.getField("PRIMARY").get(null);
+				ConfigKey<?> alias = (ConfigKey<?>) holder.getField("ALIAS").get(null);
+				ConfigKey<?> deprecated = (ConfigKey<?>) holder.getField("DEPRECATED").get(null);
+
+				Assert.assertEquals(1, primary.getAliases().size());
+				Assert.assertSame(alias, primary.getAliases().get(0));
+				Assert.assertEquals(1, primary.getDeprecated().size());
+				Assert.assertSame(deprecated, primary.getDeprecated().get(0));
 			}
 		} finally {
 			executor.shutdownNow();
 		}
+	}
 
-		Assert.assertEquals(1, Holder.PRIMARY.getAliases().size());
-		Assert.assertSame(Holder.ALIAS, Holder.PRIMARY.getAliases().get(0));
-		Assert.assertEquals(1, Holder.PRIMARY.getDeprecated().size());
-		Assert.assertSame(Holder.DEPRECATED, Holder.PRIMARY.getDeprecated().get(0));
+	private static Class<?> loadFreshHolderClass() throws Exception {
+
+		ClassLoader loader = new ClassLoader(ThreadSafetyTest.class.getClassLoader()) {
+
+			@Override
+			protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+				if (!name.equals(ScanRaceHolder.class.getName())) return super.loadClass(name, resolve);
+				synchronized(getClassLoadingLock(name)) {
+					Class<?> defined = findLoadedClass(name);
+					if (defined == null) {
+						String resource = name.replace('.', '/') + ".class";
+						try(InputStream in = getParent().getResourceAsStream(resource)) {
+							if (in == null) throw new ClassNotFoundException(name);
+							byte[] bytes = in.readAllBytes();
+							defined = defineClass(name, bytes, 0, bytes.length);
+						} catch(IOException e) {
+							throw new ClassNotFoundException(name, e);
+						}
+					}
+					if (resolve) resolveClass(defined);
+					return defined;
+				}
+			}
+		};
+
+		return Class.forName(ScanRaceHolder.class.getName(), false, loader);
 	}
 
 	@Test(timeout = 10000)
