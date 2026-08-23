@@ -17,6 +17,8 @@ package com.coralblocks.coralconfig;
 
 import static org.junit.Assert.*;
 
+import java.util.Locale;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,6 +26,10 @@ public class ConfigKeyTest {
 	
 	static enum TestEnum {
 		BLAH, FOO, CAT, DOG
+	}
+
+	static enum MixedCaseEnum {
+		BILL, CamelCase
 	}
 	
 	@Test
@@ -55,6 +61,28 @@ public class ConfigKeyTest {
 			fail();
 		} catch(IllegalArgumentException e) {
 			// Nice
+		}
+	}
+
+	@Test
+	public void testEnumParsingIsCaseInsensitiveAndLocaleIndependent() {
+
+		ConfigKey<MixedCaseEnum> enumKey = ConfigKey.enumKey(MixedCaseEnum.class);
+
+		Assert.assertEquals(MixedCaseEnum.CamelCase, enumKey.parseValue("CamelCase"));
+		Assert.assertEquals(MixedCaseEnum.CamelCase, enumKey.parseValue("camelcase"));
+
+		Locale defaultLocale = Locale.getDefault();
+
+		try {
+
+			Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+
+			Assert.assertEquals(MixedCaseEnum.BILL, enumKey.parseValue("bill"));
+
+		} finally {
+
+			Locale.setDefault(defaultLocale);
 		}
 	}
 

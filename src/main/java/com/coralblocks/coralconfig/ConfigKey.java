@@ -130,7 +130,14 @@ public final class ConfigKey<T> {
 	        if (value.length() != 1) throw new IllegalArgumentException("Invalid char value: " + value);
 	        return (K) Character.valueOf(value.charAt(0));
 	    } else if (type.isEnum()) {
-	        return (K) Enum.valueOf((Class<Enum>) type.asSubclass(Enum.class), value.toUpperCase());
+	        try {
+	            return (K) Enum.valueOf((Class<Enum>) type.asSubclass(Enum.class), value);
+	        } catch(IllegalArgumentException e) {
+	            for(K enumConstant : type.getEnumConstants()) {
+	                if (((Enum<?>) enumConstant).name().equalsIgnoreCase(value)) return enumConstant;
+	            }
+	            throw e;
+	        }
 	    } else {
 	    	throw new IllegalStateException("This type is not valid/expected: " + type);
 	    }
