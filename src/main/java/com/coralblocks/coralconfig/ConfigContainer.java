@@ -17,13 +17,11 @@ package com.coralblocks.coralconfig;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +40,7 @@ final class ConfigContainer {
     	
         this.holder = holder;
         
-        List<ConfigKey<?>> collected = new ArrayList<>();
+        Map<ConfigKey<?>, String> collected = new LinkedHashMap<ConfigKey<?>, String>();
         
         for(Field f : holder.getDeclaredFields()) {
         	
@@ -62,11 +60,11 @@ final class ConfigContainer {
                     throw new IllegalStateException("Config key field is null: " + holder.getName() + "." + f.getName());
                 }
                 
-                configKey.setFieldName(f.getName());
-                
-                configKey.holder = holder;
-                
-                collected.add(configKey);
+                String previousField = collected.putIfAbsent(configKey, f.getName());
+                if (previousField != null) {
+                    throw new IllegalStateException("Config key is declared by multiple fields in holder " + holder.getName() +
+                                                    ": " + previousField + " and " + f.getName());
+                }
                 
             } catch (IllegalAccessException e) {
             	
@@ -77,9 +75,10 @@ final class ConfigContainer {
         Map<String, ConfigKey<?>> map = new LinkedHashMap<String, ConfigKey<?>>();
         Set<ConfigKey<?>> set = new LinkedHashSet<ConfigKey<?>>();
         
-        for(ConfigKey<?> configKey : collected) {
+        for(Map.Entry<ConfigKey<?>, String> entry : collected.entrySet()) {
         	
-            String paramName = configKey.getParamName();
+            ConfigKey<?> configKey = entry.getKey();
+            String paramName = ConfigKey.toCamelCase(entry.getValue());
             ConfigKey<?> prev = map.putIfAbsent(paramName, configKey);
             
             if (prev != null) {
@@ -90,15 +89,32 @@ final class ConfigContainer {
         }
         
         if (set.isEmpty()) throw new IllegalStateException("No config keys found in holder " + this.holder.getName());
+
+        enforceNotRegisteredByAnotherHolder(holder, set);
+        enforcePrimarySameHolder(holder, set);
+
+        for(Map.Entry<ConfigKey<?>, String> entry : collected.entrySet()) {
+            ConfigKey<?> configKey = entry.getKey();
+            configKey.setFieldName(entry.getValue());
+            configKey.holder = holder;
+        }
+
+        registerRelationships(set);
+        adjustLists(set);
         
         this.configKeys = Collections.synchronizedSet(Collections.unmodifiableSet(set));
         this.configKeysByParamName = Collections.synchronizedMap(Collections.unmodifiableMap(map));
         
         this.toString = "ConfigContainer[" + holder.getName() + ", size=" + configKeys.size() + "]";
-        
-        enforcePrimarySameHolder(configKeys);
-        registerRelationships(configKeys);
-        adjustLists(configKeys);
+    }
+
+    private static void enforceNotRegisteredByAnotherHolder(Class<?> holder, Set<ConfigKey<?>> configKeys) {
+        for(ConfigKey<?> configKey : configKeys) {
+            if (configKey.holder != null && configKey.holder != holder) {
+                throw new IllegalStateException("Config key already belongs to another holder!" +
+                                                " holder=" + holder + " existingHolder=" + configKey.holder);
+            }
+        }
     }
 
     private static void registerRelationships(Set<ConfigKey<?>> configKeys) {
@@ -118,16 +134,16 @@ final class ConfigContainer {
     	}
     }
     
-    private static void enforcePrimarySameHolder(Set<ConfigKey<?>> configKeys) {
-    	for(ConfigKey<?> configKey : configKeys) {
-    		if (configKey.getKind() != Kind.PRIMARY) {
-    			ConfigKey<?> primary = configKey.getPrimary();
-    			if (primary.holder == null || primary.holder != configKey.holder) {
-    				throw new IllegalStateException("The primary config key does not contain the same holder!" +
-    									" holder=" + configKey.holder + " primaryHolder=" + primary.holder);
-    			}
-    		}
-    	}
+    private static void enforcePrimarySameHolder(Class<?> holder, Set<ConfigKey<?>> configKeys) {
+        for(ConfigKey<?> configKey : configKeys) {
+            if (configKey.getKind() != Kind.PRIMARY) {
+                ConfigKey<?> primary = configKey.getPrimary();
+                if (!configKeys.contains(primary)) {
+                    throw new IllegalStateException("The primary config key does not contain the same holder!" +
+                                                    " holder=" + holder + " primaryHolder=" + primary.holder);
+                }
+            }
+        }
     }
 
     public synchronized static ConfigContainer of(Class<?> holder) {

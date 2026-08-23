@@ -67,6 +67,14 @@ public class PrimaryConfigTest {
 		} catch(IllegalStateException e) {
 			// Good!
 		}
+
+		Assert.assertEquals(null, Base2.ANOTHER_FLOAT1.getFieldName());
+		Assert.assertEquals(null, Base2.ANOTHER_FLOAT1.getHolder());
+		Assert.assertEquals(null, Base2.ANOTHER_FLOAT2.getFieldName());
+		Assert.assertEquals(null, Base2.ANOTHER_FLOAT2.getHolder());
+		Assert.assertEquals(null, Base2.ANOTHER_FLOAT3.getFieldName());
+		Assert.assertEquals(null, Base2.ANOTHER_FLOAT3.getHolder());
+		Assert.assertFalse(Base1.NEW_FLOAT.getAliases().contains(Base2.ANOTHER_FLOAT3));
 		
 		@SuppressWarnings("unused")
 		class Base3 {

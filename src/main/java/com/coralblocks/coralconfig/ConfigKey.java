@@ -505,7 +505,7 @@ public final class ConfigKey<T> {
     	this.paramName = toCamelCase(fieldName);
     }
     
-    private static String toCamelCase(String input) {
+    static String toCamelCase(String input) {
         if (input == null || input.isEmpty()) return input;
 
         StringBuilder sb = new StringBuilder();

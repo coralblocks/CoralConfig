@@ -97,6 +97,9 @@ public class ConfigContainerTest {
 
 			Assert.assertEquals("Config key field is null: " + Holder.class.getName() + ".NULL_KEY", e.getMessage());
 		}
+
+		Assert.assertEquals(null, Holder.VALID.getFieldName());
+		Assert.assertEquals(null, Holder.VALID.getHolder());
 	}
 
 	@Test
