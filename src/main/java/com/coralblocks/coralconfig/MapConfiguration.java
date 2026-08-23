@@ -60,6 +60,7 @@ public class MapConfiguration implements Configuration {
 		if (holders == null || holders.length == 0) throw new IllegalArgumentException("Must pass a holder!");
 		
 		this.holders = holders.clone();
+		enforceNoDuplicateHolders(this.holders);
 		
 		this.configContainers = new ConfigContainer[this.holders.length];
 		for(int i = 0; i < this.holders.length; i++) {
@@ -106,6 +107,7 @@ public class MapConfiguration implements Configuration {
 	public MapConfiguration(Configuration config) {
 		
 		this.holders = config.getHolders().clone();
+		enforceNoDuplicateHolders(this.holders);
 		
 		this.configContainers = new ConfigContainer[holders.length];
 		for(int i = 0; i < holders.length; i++) {
@@ -125,6 +127,13 @@ public class MapConfiguration implements Configuration {
 		}
 		
 		this.allConfigKeys = gatherAllConfigKeys();
+	}
+
+	private static void enforceNoDuplicateHolders(Class<?>[] holders) {
+		Set<Class<?>> unique = new HashSet<Class<?>>();
+		for(Class<?> holder : holders) {
+			if (!unique.add(holder)) throw new IllegalArgumentException("Duplicate holder class: " + holder.getName());
+		}
 	}
 	
 	private List<ConfigKey<?>> gatherAllConfigKeys() {

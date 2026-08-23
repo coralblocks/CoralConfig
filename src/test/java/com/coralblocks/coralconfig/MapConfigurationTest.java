@@ -190,6 +190,42 @@ public class MapConfigurationTest {
 		sourceHolders[0] = String.class;
 		Assert.assertEquals(Holder.class, copy.getHolders()[0]);
 	}
+
+	@Test
+	public void testDuplicateHoldersAreRejected() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> KEY = ConfigKey.intKey();
+		}
+
+		String expectedMessage = "Duplicate holder class: " + Holder.class.getName();
+
+		try {
+
+			new MapConfiguration(Holder.class, Holder.class);
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals(expectedMessage, e.getMessage());
+		}
+
+		Configuration source = Mockito.mock(Configuration.class);
+		Mockito.when(source.getHolders()).thenReturn(new Class<?>[] { Holder.class, Holder.class });
+
+		try {
+
+			new MapConfiguration(source);
+
+			fail();
+
+		} catch(IllegalArgumentException e) {
+
+			Assert.assertEquals(expectedMessage, e.getMessage());
+		}
+	}
 	
 	@Test
 	public void testBasics3() {
