@@ -17,8 +17,11 @@ package com.coralblocks.coralconfig;
 
 import static org.junit.Assert.*;
 
+import java.util.Collections;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class MapConfigurationTest {
 	
@@ -124,6 +127,36 @@ public class MapConfigurationTest {
 		} catch(RuntimeException e) {
 			// Good!
 		}
+	}
+
+	@Test
+	public void testHolderArraysAreDefensivelyCopied() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> KEY = ConfigKey.intKey();
+		}
+
+		Class<?>[] constructorHolders = { Holder.class };
+		MapConfiguration config = new MapConfiguration(constructorHolders);
+
+		constructorHolders[0] = String.class;
+		Assert.assertEquals(Holder.class, config.getHolders()[0]);
+
+		Class<?>[] returnedHolders = config.getHolders();
+		returnedHolders[0] = String.class;
+		Assert.assertEquals(Holder.class, config.getHolders()[0]);
+
+		Class<?>[] sourceHolders = { Holder.class };
+		Configuration source = Mockito.mock(Configuration.class);
+		Mockito.when(source.getHolders()).thenReturn(sourceHolders);
+		Mockito.when(source.keys()).thenReturn(Collections.emptySet());
+		Mockito.when(source.keysWithOverwrittenDefault()).thenReturn(Collections.emptySet());
+
+		MapConfiguration copy = new MapConfiguration(source);
+
+		sourceHolders[0] = String.class;
+		Assert.assertEquals(Holder.class, copy.getHolders()[0]);
 	}
 	
 	@Test

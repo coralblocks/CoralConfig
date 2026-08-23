@@ -58,11 +58,11 @@ public class MapConfiguration implements Configuration {
 		
 		if (holders == null || holders.length == 0) throw new IllegalArgumentException("Must pass a holder!");
 		
-		this.holders = holders;
+		this.holders = holders.clone();
 		
-		this.configContainers = new ConfigContainer[holders.length];
-		for(int i = 0; i < holders.length; i++) {
-			this.configContainers[i] = ConfigContainer.of(holders[i]);
+		this.configContainers = new ConfigContainer[this.holders.length];
+		for(int i = 0; i < this.holders.length; i++) {
+			this.configContainers[i] = ConfigContainer.of(this.holders[i]);
 		}
 		
 		if (configContainers.length > 1) ConfigContainer.enforceNoDuplicates(configContainers); // important!
@@ -96,7 +96,7 @@ public class MapConfiguration implements Configuration {
 	 */
 	public MapConfiguration(Configuration config) {
 		
-		this.holders = config.getHolders();
+		this.holders = config.getHolders().clone();
 		
 		this.configContainers = new ConfigContainer[holders.length];
 		for(int i = 0; i < holders.length; i++) {
@@ -298,7 +298,7 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public Class<?>[] getHolders() {
-		return holders;
+		return holders.clone();
 	}
 	
 	/**

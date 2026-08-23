@@ -41,7 +41,7 @@ public interface Configuration {
 	 * The holder classes which are defining/declaring/specifying the <code>ConfigKey</code>s for this configuration as static fields.
 	 * Note that a configuration can have several holders, not just one.
 	 * 
-	 * @return the holder classes that this configuration has
+	 * @return a copy of the holder classes that this configuration has
 	 */
 	public Class<?>[] getHolders();
 	
