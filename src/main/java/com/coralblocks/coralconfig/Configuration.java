@@ -47,9 +47,9 @@ public interface Configuration {
 	public Class<?>[] getHolders();
 	
 	/**
-	 * Returns all <code>ConfigKey</code>s that this configuration has (from all its holder classes)
+	 * Returns an unmodifiable snapshot of all <code>ConfigKey</code>s that this configuration has (from all its holder classes).
 	 * 
-	 * @return all the <code>ConfigKey</code>s for this configuration (from all holders)
+	 * @return an unmodifiable snapshot of all the <code>ConfigKey</code>s for this configuration (from all holders)
 	 */
 	public List<ConfigKey<?>> allConfigKeys();
 
@@ -81,9 +81,9 @@ public interface Configuration {
 	public boolean has(ConfigKey<?> configKey);
 	
 	/**
-	 * Returns all <code>ConfigKey</code>s that have a value associated/configured in this configuration.
+	 * Returns an unmodifiable snapshot of all <code>ConfigKey</code>s that have a value associated/configured in this configuration.
 	 * 
-	 * @return a set containing all the <code>ConfigKey</code>s with values in this configuration
+	 * @return an unmodifiable snapshot containing all the <code>ConfigKey</code>s with values in this configuration
 	 */
 	public Set<ConfigKey<?>> keys();
 
@@ -131,9 +131,9 @@ public interface Configuration {
 	public <T> boolean hasOverwrittenDefault(ConfigKey<T> configKey);
 	
 	/**
-	 * Returns a set with all <code>ConfigKey</code>s that have overwritten default values.
+	 * Returns an unmodifiable snapshot of all <code>ConfigKey</code>s that have overwritten default values.
 	 * 
-	 * @return all the <code>ConfigKey</code>s with overwritten default values
+	 * @return an unmodifiable snapshot of all the <code>ConfigKey</code>s with overwritten default values
 	 */
 	public Set<ConfigKey<?>> keysWithOverwrittenDefault();
 }

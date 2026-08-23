@@ -18,6 +18,7 @@ package com.coralblocks.coralconfig;
 import static org.junit.Assert.*;
 
 import java.util.Collections;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -360,6 +361,50 @@ public class MapConfigurationTest {
 		
 		MapConfiguration mc = new MapConfiguration(Base1.class, Base2.class);
 		Assert.assertEquals(10, mc.allConfigKeys().size());
+	}
+
+	@Test
+	public void testCollectionResultsAreUnmodifiableSnapshots() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> FIRST = ConfigKey.intKey(1);
+			public static final ConfigKey<Integer> SECOND = ConfigKey.intKey(2);
+		}
+
+		MapConfiguration config = new MapConfiguration(Holder.class);
+		config.add(Holder.FIRST, 10);
+		config.add(Holder.SECOND, 20);
+		config.overwriteDefault(Holder.FIRST, 11);
+		config.overwriteDefault(Holder.SECOND, 22);
+
+		Set<ConfigKey<?>> configuredKeys = config.keys();
+		Set<ConfigKey<?>> overwrittenKeys = config.keysWithOverwrittenDefault();
+
+		for(ConfigKey<?> configKey : configuredKeys) {
+			if (configKey == Holder.FIRST) {
+				config.remove(Holder.FIRST);
+			} else {
+				config.remove(Holder.SECOND);
+			}
+		}
+
+		for(ConfigKey<?> configKey : overwrittenKeys) {
+			if (configKey == Holder.FIRST) {
+				config.removeOverwrittenDefault(Holder.FIRST);
+			} else {
+				config.removeOverwrittenDefault(Holder.SECOND);
+			}
+		}
+
+		Assert.assertEquals(2, configuredKeys.size());
+		Assert.assertEquals(2, overwrittenKeys.size());
+		Assert.assertTrue(config.keys().isEmpty());
+		Assert.assertTrue(config.keysWithOverwrittenDefault().isEmpty());
+
+		Assert.assertThrows(UnsupportedOperationException.class, configuredKeys::clear);
+		Assert.assertThrows(UnsupportedOperationException.class, overwrittenKeys::clear);
+		Assert.assertThrows(UnsupportedOperationException.class, config.allConfigKeys()::clear);
 	}
 
 	@Test

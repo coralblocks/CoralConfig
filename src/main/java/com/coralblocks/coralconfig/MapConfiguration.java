@@ -273,7 +273,7 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public List<ConfigKey<?>> allConfigKeys() {
-		return Collections.unmodifiableList(allConfigKeys);
+		return allConfigKeys;
 	}
 	
 	@Override
@@ -309,7 +309,7 @@ public class MapConfiguration implements Configuration {
 	
 	@Override
 	public Set<ConfigKey<?>> keysWithOverwrittenDefault() {
-		return Collections.unmodifiableSet(overwrittenDefaults.keySet());
+		return Collections.unmodifiableSet(new HashSet<ConfigKey<?>>(overwrittenDefaults.keySet()));
 	}
 	
 	private <T> void checkDeprecated(ConfigKey<T> configKey) {
@@ -585,6 +585,6 @@ public class MapConfiguration implements Configuration {
 
 	@Override
 	public Set<ConfigKey<?>> keys() {
-		return new HashSet<ConfigKey<?>>(values.keySet());
+		return Collections.unmodifiableSet(new HashSet<ConfigKey<?>>(values.keySet()));
 	}
 }
