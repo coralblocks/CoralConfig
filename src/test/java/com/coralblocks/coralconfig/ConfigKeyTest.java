@@ -141,6 +141,29 @@ public class ConfigKeyTest {
 	}
 
 	@Test
+	public void testRelationshipListsAreNeverNullOrMutable() {
+
+		class Holder {
+
+			public static final ConfigKey<Integer> PRIMARY = ConfigKey.intKey();
+			public static final ConfigKey<Integer> ALIAS = ConfigKey.intKey().alias(PRIMARY);
+			public static final ConfigKey<Integer> DEPRECATED = ConfigKey.intKey().deprecated(PRIMARY);
+		}
+
+		Assert.assertTrue(Holder.ALIAS.getAliases().isEmpty());
+		Assert.assertTrue(Holder.ALIAS.getDeprecated().isEmpty());
+		Assert.assertThrows(UnsupportedOperationException.class,
+				() -> Holder.PRIMARY.getAliases().add(Holder.ALIAS));
+
+		ConfigContainer.of(Holder.class);
+
+		Assert.assertEquals(1, Holder.PRIMARY.getAliases().size());
+		Assert.assertEquals(1, Holder.PRIMARY.getDeprecated().size());
+		Assert.assertThrows(UnsupportedOperationException.class,
+				() -> Holder.PRIMARY.getDeprecated().clear());
+	}
+
+	@Test
 	public void testIncompatibleDeprecationAfterPrimaryHolderIsScanned() {
 
 		class Holder {

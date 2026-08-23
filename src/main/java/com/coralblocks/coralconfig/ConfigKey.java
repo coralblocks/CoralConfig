@@ -16,6 +16,7 @@
 package com.coralblocks.coralconfig;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -531,21 +532,23 @@ public final class ConfigKey<T> {
     }
     
     /**
-     * Returns all the aliases (in the right order) that this primary key has.
+     * Returns an unmodifiable list of all aliases (in the right order) that this primary key has.
+     * Non-primary keys always return an empty list.
      * 
-     * @return all the aliases or null if the <code>ConfigKey</code> is not primary
+     * @return all the aliases, or an empty list if the <code>ConfigKey</code> is not primary
      */
     public List<ConfigKey<?>> getAliases() {
-    	return kind == Kind.PRIMARY ? aliases : null;
+	return kind == Kind.PRIMARY ? Collections.unmodifiableList(aliases) : Collections.emptyList();
     }
     
     /**
-     * Returns all deprecated <code>ConfigKey</code>s (in the right order) that this primary key has.
+     * Returns an unmodifiable list of all deprecated <code>ConfigKey</code>s (in the right order) that this primary key has.
+     * Non-primary keys always return an empty list.
      * 
-     * @return all the deprecated <code>ConfigKey</code>s or null if the <code>ConfigKey</code> is not primary
+     * @return all the deprecated <code>ConfigKey</code>s, or an empty list if the <code>ConfigKey</code> is not primary
      */
     public List<ConfigKey<?>> getDeprecated() {
-    	return kind == Kind.PRIMARY ? deprecated : null;
+	return kind == Kind.PRIMARY ? Collections.unmodifiableList(deprecated) : Collections.emptyList();
     }
     
 	@Override

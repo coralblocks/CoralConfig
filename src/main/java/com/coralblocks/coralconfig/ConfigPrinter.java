@@ -143,34 +143,26 @@ public class ConfigPrinter {
         	} else {
         		line += ", " + key.getPrimary().getFieldName();
         	}
-        	if (key.getKind() != Kind.PRIMARY) {
-        		line += ", ";
-        	} else {
-        		StringBuilder sb = new StringBuilder();
-        		for(ConfigKey<?> ck : key.getAliases()) {
-        			if (sb.length() > 0) sb.append(';');
-        			sb.append(ck.getFieldName());
-        		}
-        		if (sb.length() == 0) {
-        			line += ", ";
-        		} else {
-        			line += ", " + sb.toString();
-        		}
-        	}
-        	if (key.getKind() != Kind.PRIMARY) {
-        		line += ", ";
-        	} else {
-        		StringBuilder sb = new StringBuilder();
-        		for(ConfigKey<?> ck : key.getDeprecated()) {
-        			if (sb.length() > 0) sb.append(';');
-        			sb.append(ck.getFieldName());
-        		}
-        		if (sb.length() == 0) {
-        			line += ", ";
-        		} else {
-        			line += ", " + sb.toString();
-        		}
-        	}
+		StringBuilder aliases = new StringBuilder();
+		for(ConfigKey<?> ck : key.getAliases()) {
+			if (aliases.length() > 0) aliases.append(';');
+			aliases.append(ck.getFieldName());
+		}
+		if (aliases.length() == 0) {
+			line += ", ";
+		} else {
+			line += ", " + aliases.toString();
+		}
+		StringBuilder deprecated = new StringBuilder();
+		for(ConfigKey<?> ck : key.getDeprecated()) {
+			if (deprecated.length() > 0) deprecated.append(';');
+			deprecated.append(ck.getFieldName());
+		}
+		if (deprecated.length() == 0) {
+			line += ", ";
+		} else {
+			line += ", " + deprecated.toString();
+		}
         	if (key.getDescription() != null) {
         		line += ", " + key.getDescription();
         	} else {
