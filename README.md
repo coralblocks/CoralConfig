@@ -54,8 +54,7 @@ public class TcpClient extends Client {
 ```
 Simply pass a list of _holder_ classes:
 ```java
-MapConfiguration mc = new MapConfiguration("heartbeat=2 username=rpaiva",
-												Client.class, TcpClient.class);
+MapConfiguration mc = new MapConfiguration("heartbeat=2 username=rpaiva", Client.class, TcpClient.class);
 ```
 
 ### _Strongly typed_ configuration types
