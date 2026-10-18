@@ -36,8 +36,7 @@ int maxRetries = mc.get(MAX_RETRIES); // => 2 (configured)
 ```
 To create a configuration with some values, you can pass a list of params to the constructor:
 ```java
-MapConfiguration mc = new MapConfiguration("maxRetries=1 username=saoj heartbeat=30",
-													Basics.class);
+MapConfiguration mc = new MapConfiguration("maxRetries=1 username=saoj heartbeat=30", Basics.class);
 
 int maxRetries = mc.get(MAX_RETRIES); // => 1 (configured)
 ```
